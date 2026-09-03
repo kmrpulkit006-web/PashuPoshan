@@ -1,0 +1,22 @@
+{
+  "name": "PashuPoshan AI - Rapid Feed & Silage Testing",
+  "short_name": "PashuPoshan",
+  "description": "Smart AI-Enabled Rapid Feed and Silage Quality Testing System for Dairy Farmers (SIH 26111 - DAHD)",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#022c22",
+  "theme_color": "#064e3b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ]
+}
