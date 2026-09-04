@@ -16,7 +16,7 @@ import {
   Award,
   PhoneCall,
   RotateCcw,
-  ExternalLink
+  AlertTriangle
 } from 'lucide-react';
 
 interface ScorecardScreenProps {
@@ -36,21 +36,20 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
   const isTierC = sample.overallGrade.includes('Tier C');
 
   const handleShare = async () => {
-    const shareText = `*PashuPoshan Feed Testing Certificate*%0ASample: ${sample.name}%0ABatch: ${sample.batchNumber}%0AGrade: ${sample.overallGrade}%0ACrude Protein: ${sample.metrics.crudeProtein}%%0AUrea: ${sample.adulteration.ureaAdulterationDetected ? 'DETECTED (' + sample.adulteration.ureaPercentage + '%)' : 'None'}%0ABIS Compliance: ${sample.bisCompliant ? 'PASS' : 'FAIL'}%0ANote: ${sample.regulatoryCitation.standardCode}`;
+    const shareText = `*PashuPoshan Field Screening Report (SIH Prototype)*%0ASample: ${sample.name}%0ABatch: ${sample.batchNumber}%0AGrade: ${sample.overallGrade}%0AEstimated Crude Protein: ${sample.metrics.crudeProtein}%%0AUrea Screening: ${sample.adulteration.ureaAdulterationDetected ? 'ADULTERATION SUSPECTED (' + sample.adulteration.ureaPercentage + '%)' : 'Negative'}%0ABIS Reference: ${sample.bisCompliant ? 'Met Reference Threshold' : 'Threshold Breach Detected'}%0ADisclaimer: Prototype heuristic estimate only. Laboratory confirmation required.`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Feed Quality Certificate: ${sample.name}`,
-          text: `PashuPoshan AI Testing Certificate: ${sample.name} - Grade: ${sample.overallGrade}. BIS Status: ${sample.bisCompliant ? 'COMPLIANT' : 'NON-COMPLIANT'}.`,
+          title: `Field Screening: ${sample.name}`,
+          text: `PashuPoshan Field Screening Report: ${sample.name} - Grade: ${sample.overallGrade}. Note: Prototype heuristic estimate only; laboratory confirmation required.`,
         });
         return;
       } catch (e) {
-        // User cancelled or fallback
+        // Fallback
       }
     }
 
-    // WhatsApp Fallback
     window.open(`https://api.whatsapp.com/send?text=${shareText}`, '_blank');
   };
 
@@ -60,11 +59,30 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
 
   return (
     <>
-      {/* Printable laboratory certificate (active only during @media print) */}
       <PrintableReport sample={sample} locale={locale} />
 
-      {/* Screen View */}
       <div className="p-4 space-y-4 pb-28 print:hidden">
+        {/* Prominent Heuristic / Demo Mode Limitation Badge */}
+        {sample.isPrototypeHeuristic || !sample.isSimulated ? (
+          <div className="bg-amber-950/90 border border-amber-500/50 rounded-xl p-3 flex items-start space-x-2 text-amber-200 shadow-sm" role="alert">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <div className="text-xs font-bold text-amber-300">Prototype Heuristic — No Laboratory Measurement</div>
+              <p className="text-[10px] text-amber-200/90 mt-0.5 leading-relaxed">
+                Observed values are estimated optical proxies derived from smartphone camera pixels and user-selected test strip reactions. They do not constitute certified analytical chemical testing.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-slate-900/90 border border-emerald-500/40 rounded-xl p-2.5 flex items-center justify-between text-xs">
+            <div className="flex items-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[11px] font-bold text-emerald-300">SIH Evaluator Demo Control (Simulated Dataset)</span>
+            </div>
+            <span className="text-[9px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Known Reference</span>
+          </div>
+        )}
+
         {/* Certificate Header Banner */}
         <div className={`rounded-2xl p-4 border shadow-xl relative overflow-hidden ${
           isTierA 
@@ -88,14 +106,13 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
               </span>
             </div>
 
-            {/* Color-independent BIS Badge */}
             <div className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase border flex items-center space-x-1 ${
               sample.bisCompliant
                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400'
                 : 'bg-rose-500/20 text-rose-300 border-rose-400 animate-pulse'
             }`}>
               {sample.bisCompliant ? <ShieldCheck className="w-3 h-3 text-emerald-400" /> : <ShieldAlert className="w-3 h-3 text-rose-400" />}
-              <span>{sample.bisCompliant ? t('score.bisCompliant', locale) : t('score.bisViolated', locale)}</span>
+              <span>{sample.bisCompliant ? 'Met Reference Threshold' : 'Threshold Breach'}</span>
             </div>
           </div>
 
@@ -106,7 +123,6 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
             {t('score.source', locale)} <span className="font-semibold text-white">{sample.sourceOrBrand}</span>
           </p>
 
-          {/* Big Grade Ribbon */}
           <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between">
             <div>
               <div className="text-[10px] uppercase font-bold text-slate-400">{t('score.classification', locale)}</div>
@@ -118,13 +134,12 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
             </div>
 
             <div className="text-right">
-              <div className="text-[10px] uppercase font-bold text-slate-400">{t('score.standardCode', locale)}</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400">Reference Benchmark</div>
               <div className="text-[11px] font-bold text-slate-200">{sample.regulatoryCitation.standardCode}</div>
             </div>
           </div>
         </div>
 
-        {/* Vernacular Audio Guidance */}
         <AudioGuidance textToSpeak={sample.actionableSummary || (sample.veterinaryAdvisory + '. ' + sample.correctiveActions.join('. '))} locale={locale} />
 
         {/* Adulteration & Contamination Warning Alert Box */}
@@ -146,7 +161,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
             <div className="bg-black/30 rounded-lg p-2">
               <div className="text-[10px] text-slate-400">{t('score.ureaLevel', locale)}</div>
               <div className={`font-bold ${sample.adulteration.ureaAdulterationDetected ? 'text-rose-400' : 'text-emerald-300'}`}>
-                {sample.adulteration.ureaPercentage}% {sample.adulteration.ureaAdulterationDetected ? '(Illegally Spiked)' : '(Safe)'}
+                {sample.adulteration.ureaPercentage}% {sample.adulteration.ureaAdulterationDetected ? '(Adulteration Suspected)' : '(Safe)'}
               </div>
             </div>
 
@@ -167,7 +182,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
             <div className="bg-black/30 rounded-lg p-2">
               <div className="text-[10px] text-slate-400">{t('score.foreignFillers', locale)}</div>
               <div className="font-bold text-slate-200">
-                {sample.adulteration.foreignStarchOrTallow ? 'Detected' : 'None Detected'}
+                {sample.adulteration.foreignStarchOrTallow ? 'Suspected' : 'None Detected'}
               </div>
             </div>
           </div>
@@ -204,9 +219,12 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
 
         {/* Detailed Nutritional Gauges */}
         <div className="space-y-2">
-          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider px-1">
-            Nutritional Metrics (Dry Matter Basis)
-          </h3>
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+              Nutritional Proxy Estimates (DM Basis)
+            </h3>
+            <span className="text-[9px] text-amber-400 font-semibold">*Optical Approximation</span>
+          </div>
 
           <QualityGauge
             label={t('score.crudeProtein', locale)}

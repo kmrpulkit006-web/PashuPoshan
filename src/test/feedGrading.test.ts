@@ -26,4 +26,26 @@ describe('BIS IS:2052 Cattle Feed Compliance & Grading', () => {
     expect(maizeSilage.bisCompliant).toBe(true);
     expect(maizeSilage.silageMetrics?.fliegGrade).toBe('Excellent');
   });
+
+  it('flags live canvas-analyzed scans with isPrototypeHeuristic and explicit heuristic disclaimer', () => {
+    const mockData = new Uint8ClampedArray(120 * 120 * 4);
+    for (let i = 0; i < mockData.length; i += 4) {
+      mockData[i] = 160;
+      mockData[i + 1] = 140;
+      mockData[i + 2] = 80;
+      mockData[i + 3] = 255;
+    }
+    const mockImageData = {
+      data: mockData,
+      width: 120,
+      height: 120,
+    } as any;
+
+    const liveResult = analyzeCanvasImageData('concentrate', mockImageData, false);
+    expect(liveResult.isPrototypeHeuristic).toBe(true);
+    expect(liveResult.isSimulated).toBe(false);
+    expect(liveResult.heuristicDisclaimer).toBeDefined();
+    expect(liveResult.heuristicDisclaimer).toContain('Prototype heuristic estimation');
+    expect(liveResult.confidenceScore).toBeUndefined();
+  });
 });

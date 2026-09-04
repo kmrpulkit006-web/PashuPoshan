@@ -60,7 +60,9 @@ export interface FeedSample {
   imageUrl: string;
   testedMethod: 'Live Mobile Sensor Analysis' | 'Rapid Colorimetric Strip' | 'SIH Evaluator Simulation Preset';
   isSimulated: boolean;
-  confidenceScore: number;       // e.g. 88%
+  isPrototypeHeuristic?: boolean;
+  heuristicDisclaimer?: string;
+  confidenceScore?: number;       // e.g. 88%
   metrics: NutritionMetrics;
   silageMetrics?: SilageMetrics;
   adulteration: AdulterationCheck;

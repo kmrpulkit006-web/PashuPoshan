@@ -1,11 +1,38 @@
 import { CowProfile, FeedSample, SilageBunker, SilagePitLog, CommunityFeedAlert, OfflineSyncItem } from './types';
 import { PRESET_FEED_SCENARIOS } from './feedAnalysisEngine';
+import { storeImageInIndexedDb } from './imageStorage';
 
 const COWS_KEY = 'pashuposhan_cows_v1';
 const SCANS_KEY = 'pashuposhan_scans_v1';
 const PITS_KEY = 'pashuposhan_pits_v1';
 const ALERTS_KEY = 'pashuposhan_alerts_v1';
 const SYNC_QUEUE_KEY = 'pashuposhan_sync_queue_v1';
+
+function safeSetItem(key: string, value: string): boolean {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e: any) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      console.warn('LocalStorage quota exceeded. Evicting old scans cache...');
+      try {
+        // Evict oldest scans to preserve app state
+        const scansRaw = localStorage.getItem(SCANS_KEY);
+        if (scansRaw) {
+          const scans: FeedSample[] = JSON.parse(scansRaw);
+          if (scans.length > 3) {
+            localStorage.setItem(SCANS_KEY, JSON.stringify(scans.slice(0, 3)));
+            localStorage.setItem(key, value);
+            return true;
+          }
+        }
+      } catch (innerError) {
+        console.error('Failed to write even after eviction', innerError);
+      }
+    }
+    return false;
+  }
+}
 
 const INITIAL_COWS: CowProfile[] = [
   {
@@ -52,7 +79,7 @@ const INITIAL_PITS: SilageBunker[] = [
     coreTemperature: 32.5,
     status: 'Ready to Feed',
     logs: [
-      { id: 'log_1', date: '2026-08-30', temperatureC: 32.0, compactionRating: 'Optimum (>650 kg/m3)', pH: 3.9, notes: 'Golden color, fruity aroma' }
+      { id: 'log_1', date: '2026-08-30', temperatureC: 32.0, compactionRating: 'Optimum (>650 kg/m3)', pH: 3.9, notes: 'Golden color, pleasant lactic smell' }
     ]
   },
   {
@@ -118,7 +145,7 @@ export function getLocalCows(): CowProfile[] {
   try {
     const raw = localStorage.getItem(COWS_KEY);
     if (!raw) {
-      localStorage.setItem(COWS_KEY, JSON.stringify(INITIAL_COWS));
+      safeSetItem(COWS_KEY, JSON.stringify(INITIAL_COWS));
       return INITIAL_COWS;
     }
     return JSON.parse(raw);
@@ -137,14 +164,14 @@ export function saveLocalCow(cow: CowProfile): CowProfile[] {
   } else {
     updated = [cow, ...current];
   }
-  localStorage.setItem(COWS_KEY, JSON.stringify(updated));
+  safeSetItem(COWS_KEY, JSON.stringify(updated));
   queueOfflineAction('cow', existingIdx >= 0 ? 'update' : 'create', cow);
   return updated;
 }
 
 export function deleteLocalCow(id: string): CowProfile[] {
   const current = getLocalCows().filter(c => c.id !== id);
-  localStorage.setItem(COWS_KEY, JSON.stringify(current));
+  safeSetItem(COWS_KEY, JSON.stringify(current));
   queueOfflineAction('cow', 'delete', { id });
   return current;
 }
@@ -154,7 +181,7 @@ export function getLocalScans(): FeedSample[] {
   try {
     const raw = localStorage.getItem(SCANS_KEY);
     if (!raw) {
-      localStorage.setItem(SCANS_KEY, JSON.stringify(PRESET_FEED_SCENARIOS));
+      safeSetItem(SCANS_KEY, JSON.stringify(PRESET_FEED_SCENARIOS));
       return PRESET_FEED_SCENARIOS;
     }
     return JSON.parse(raw);
@@ -165,9 +192,17 @@ export function getLocalScans(): FeedSample[] {
 
 export function saveLocalScan(sample: FeedSample): FeedSample[] {
   const current = getLocalScans();
+  
+  // If sample has an image, also store in IndexedDB to preserve high quality without bloating LocalStorage
+  if (sample.imageUrl && sample.imageUrl.startsWith('data:')) {
+    storeImageInIndexedDb(sample.id, sample.imageUrl).catch(err => {
+      console.warn('Failed to cache image in IndexedDB', err);
+    });
+  }
+
   const updated = [sample, ...current.filter(s => s.id !== sample.id)];
-  localStorage.setItem(SCANS_KEY, JSON.stringify(updated));
-  queueOfflineAction('scan', 'create', sample);
+  safeSetItem(SCANS_KEY, JSON.stringify(updated));
+  queueOfflineAction('scan', 'create', { ...sample, imageUrl: '' }); // Queue lightweight metadata
   return updated;
 }
 
@@ -176,7 +211,7 @@ export function getLocalPits(): SilageBunker[] {
   try {
     const raw = localStorage.getItem(PITS_KEY);
     if (!raw) {
-      localStorage.setItem(PITS_KEY, JSON.stringify(INITIAL_PITS));
+      safeSetItem(PITS_KEY, JSON.stringify(INITIAL_PITS));
       return INITIAL_PITS;
     }
     return JSON.parse(raw);
@@ -195,7 +230,7 @@ export function saveLocalPit(pit: SilageBunker): SilageBunker[] {
   } else {
     updated = [pit, ...current];
   }
-  localStorage.setItem(PITS_KEY, JSON.stringify(updated));
+  safeSetItem(PITS_KEY, JSON.stringify(updated));
   queueOfflineAction('silage_pit', existingIdx >= 0 ? 'update' : 'create', pit);
   return updated;
 }
@@ -214,7 +249,7 @@ export function addPitLogEntry(pitId: string, log: SilagePitLog): SilageBunker[]
     }
     return pit;
   });
-  localStorage.setItem(PITS_KEY, JSON.stringify(pits));
+  safeSetItem(PITS_KEY, JSON.stringify(pits));
   queueOfflineAction('silage_pit', 'update', { pitId, log });
   return pits;
 }
@@ -224,7 +259,7 @@ export function getLocalAlerts(): CommunityFeedAlert[] {
   try {
     const raw = localStorage.getItem(ALERTS_KEY);
     if (!raw) {
-      localStorage.setItem(ALERTS_KEY, JSON.stringify(INITIAL_ALERTS));
+      safeSetItem(ALERTS_KEY, JSON.stringify(INITIAL_ALERTS));
       return INITIAL_ALERTS;
     }
     return JSON.parse(raw);
@@ -236,7 +271,7 @@ export function getLocalAlerts(): CommunityFeedAlert[] {
 export function saveLocalAlert(alert: CommunityFeedAlert): CommunityFeedAlert[] {
   const current = getLocalAlerts();
   const updated = [alert, ...current];
-  localStorage.setItem(ALERTS_KEY, JSON.stringify(updated));
+  safeSetItem(ALERTS_KEY, JSON.stringify(updated));
   queueOfflineAction('community_alert', 'create', alert);
   return updated;
 }
@@ -261,15 +296,30 @@ export function queueOfflineAction(entityType: OfflineSyncItem['entityType'], ac
     timestamp: new Date().toISOString(),
     synced: false
   };
-  localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify([...queue, newItem]));
+  safeSetItem(SYNC_QUEUE_KEY, JSON.stringify([...queue, newItem]));
 }
 
-export function processSyncQueue(): number {
+/**
+ * Honest Sync Inspection:
+ * Does NOT delete queued items pretending they are uploaded to a remote server.
+ * Returns the count of preserved items.
+ */
+export function getSyncStatus(): { pendingCount: number; statusMessage: string } {
   const queue = getPendingSyncQueue();
-  if (queue.length === 0) return 0;
-  
-  // Mark all pending as synced for demo simulation
-  const syncedCount = queue.length;
-  localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify([]));
-  return syncedCount;
+  return {
+    pendingCount: queue.length,
+    statusMessage: queue.length > 0 
+      ? `${queue.length} record(s) queued locally. Items will remain preserved until an authenticated API endpoint is configured.`
+      : 'Local queue is empty. All new logs will be queued here.'
+  };
+}
+
+/**
+ * Explicit user action to reset or purge the local demo queue.
+ */
+export function clearDemoQueue(): number {
+  const queue = getPendingSyncQueue();
+  const count = queue.length;
+  safeSetItem(SYNC_QUEUE_KEY, JSON.stringify([]));
+  return count;
 }

@@ -8,6 +8,19 @@ interface SilageScreenProps {
   locale: Locale;
 }
 
+const CROP_OPTIONS: SilageBunker['cropType'][] = [
+  'Maize',
+  'Sorghum',
+  'Pearl Millet (Bajra)',
+  'Oats'
+];
+
+const COMPACTION_OPTIONS: SilageBunker['compactionRating'][] = [
+  'Optimum (>650 kg/m3)',
+  'Moderate',
+  'Loose/Air-Pockets'
+];
+
 export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
   const [pits, setPits] = useState<SilageBunker[]>([]);
   const [showAddPitModal, setShowAddPitModal] = useState(false);
@@ -97,7 +110,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
 
         <button
           onClick={() => setShowAddPitModal(true)}
-          className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-xl shadow active:scale-98 transition-all flex items-center space-x-1 shrink-0"
+          className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-xl shadow active:scale-98 transition-all flex items-center space-x-1 shrink-0 min-h-[36px]"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>{t('silage.addPit', locale)}</span>
@@ -134,7 +147,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   </span>
                   <button
                     onClick={() => { setShowLogModal(pit.id); setLogTemp(pit.coreTemperature); }}
-                    className="px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-[10px] font-bold rounded-lg border border-slate-600"
+                    className="px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-[10px] font-bold rounded-lg border border-slate-600 min-h-[30px]"
                   >
                     + Log
                   </button>
@@ -248,7 +261,12 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                 <label className="text-slate-300 font-semibold block mb-1">Crop Type:</label>
                 <select
                   value={newCropType}
-                  onChange={(e) => setNewCropType(e.target.value as any)}
+                  onChange={(e) => {
+                    const sel = e.target.value;
+                    if (CROP_OPTIONS.includes(sel as SilageBunker['cropType'])) {
+                      setNewCropType(sel as SilageBunker['cropType']);
+                    }
+                  }}
                   className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white"
                 >
                   <option value="Maize">Hybrid Maize</option>
@@ -273,13 +291,13 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                 <button
                   type="button"
                   onClick={() => setShowAddPitModal(false)}
-                  className="flex-1 py-2 bg-slate-800 text-slate-300 font-bold rounded-lg"
+                  className="flex-1 py-2 bg-slate-800 text-slate-300 font-bold rounded-lg min-h-[44px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2 bg-amber-600 text-white font-bold rounded-lg shadow"
+                  className="flex-1 py-2 bg-amber-600 text-white font-bold rounded-lg shadow min-h-[44px]"
                 >
                   Create Pit
                 </button>
@@ -317,7 +335,12 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                 <label className="text-slate-300 font-semibold block mb-1">Compaction / Plastic Seal:</label>
                 <select
                   value={logCompaction}
-                  onChange={(e) => setLogCompaction(e.target.value as any)}
+                  onChange={(e) => {
+                    const sel = e.target.value;
+                    if (COMPACTION_OPTIONS.includes(sel as SilageBunker['compactionRating'])) {
+                      setLogCompaction(sel as SilageBunker['compactionRating']);
+                    }
+                  }}
                   className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white"
                 >
                   <option value="Optimum (>650 kg/m3)">Optimum - Sealed Tight</option>
@@ -341,13 +364,13 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                 <button
                   type="button"
                   onClick={() => setShowLogModal(null)}
-                  className="flex-1 py-2 bg-slate-800 text-slate-300 font-bold rounded-lg"
+                  className="flex-1 py-2 bg-slate-800 text-slate-300 font-bold rounded-lg min-h-[44px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2 bg-emerald-600 text-white font-bold rounded-lg shadow"
+                  className="flex-1 py-2 bg-emerald-600 text-white font-bold rounded-lg shadow min-h-[44px]"
                 >
                   Save Log
                 </button>

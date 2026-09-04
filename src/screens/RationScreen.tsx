@@ -10,6 +10,15 @@ interface RationScreenProps {
   locale: Locale;
 }
 
+const BREED_OPTIONS: CowProfile['breed'][] = [
+  'Gir',
+  'Sahiwal',
+  'Red Sindhi',
+  'HF Crossbred',
+  'Jersey Cross',
+  'Murrah Buffalo'
+];
+
 export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale }) => {
   const [cows, setCows] = useState<CowProfile[]>([]);
   const [selectedCowId, setSelectedCowId] = useState<string>('');
@@ -116,7 +125,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-lg shadow active:scale-98 transition-all flex items-center space-x-1"
+            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-lg shadow active:scale-98 transition-all flex items-center space-x-1 min-h-[36px]"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>{t('ration.addCow', locale)}</span>
@@ -142,37 +151,41 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
         )}
       </div>
 
-      {/* Herd Cattle Selector */}
+      {/* Herd Cattle Selector with Accessible Buttons */}
       <div className="bg-slate-800/90 border border-slate-700 rounded-2xl p-3.5 space-y-3">
         <label className="text-xs font-bold text-slate-300 block">
           {t('ration.selectCow', locale)}
         </label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2" role="group" aria-label="Herd Cattle Selection">
           {cows.map((cow) => (
-            <div
+            <button
               key={cow.id}
+              type="button"
               onClick={() => {
                 setSelectedCowId(cow.id);
                 setDailyYield(cow.dailyMilkYieldLiters);
                 setCowWeight(cow.weightKg);
               }}
-              className={`relative p-2 rounded-xl border text-center transition-all cursor-pointer ${
+              aria-pressed={selectedCowId === cow.id}
+              className={`relative p-2 rounded-xl border text-center transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400 min-h-[64px] ${
                 selectedCowId === cow.id
                   ? 'bg-emerald-950 border-emerald-400 text-white shadow-inner'
                   : 'bg-slate-900 border-slate-700 text-slate-400 hover:text-white'
               }`}
             >
               <button
+                type="button"
                 onClick={(e) => handleDeleteCow(cow.id, e)}
-                className="absolute top-1 right-1 text-slate-500 hover:text-rose-400"
+                className="absolute top-1 right-1 text-slate-500 hover:text-rose-400 p-0.5"
                 title="Remove cattle"
+                aria-label={`Remove ${cow.name}`}
               >
                 <Trash2 className="w-3 h-3" />
               </button>
-              <div className="text-base mb-0.5">🐄</div>
+              <div className="text-base mb-0.5" aria-hidden="true">🐄</div>
               <div className="text-[11px] font-bold truncate">{cow.name.split(' ')[0]}</div>
               <div className="text-[9px] text-slate-400 truncate">{cow.breed}</div>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -309,7 +322,12 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                 <label className="text-slate-300 font-semibold block mb-1">Breed:</label>
                 <select
                   value={newCowBreed}
-                  onChange={(e) => setNewCowBreed(e.target.value as any)}
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    if (BREED_OPTIONS.includes(selected as CowProfile['breed'])) {
+                      setNewCowBreed(selected as CowProfile['breed']);
+                    }
+                  }}
                   className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="Gir">Gir (Indigenous Cow)</option>
@@ -350,13 +368,13 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-2 bg-slate-800 text-slate-300 font-bold rounded-lg"
+                  className="flex-1 py-2 bg-slate-800 text-slate-300 font-bold rounded-lg min-h-[44px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2 bg-emerald-600 text-white font-bold rounded-lg shadow"
+                  className="flex-1 py-2 bg-emerald-600 text-white font-bold rounded-lg shadow min-h-[44px]"
                 >
                   Save Animal
                 </button>

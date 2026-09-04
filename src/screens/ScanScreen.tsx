@@ -3,6 +3,7 @@ import { FeedSample, Locale, FeedCategory } from '../lib/types';
 import { t } from '../lib/i18n';
 import { PRESET_FEED_SCENARIOS, analyzeCanvasImageData } from '../lib/feedAnalysisEngine';
 import { saveLocalScan } from '../lib/storage';
+import { compressImage } from '../lib/imageStorage';
 import {
   Camera,
   Upload,
@@ -48,16 +49,28 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale }
     }, 900);
   };
 
-  // Real Canvas-based image pixel analysis
+  // Real Canvas-based image pixel analysis with compression and robust error handling
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = () => {
-      const imgUri = reader.result as string;
-      setSelectedImage(imgUri);
-      processLiveImageWithCanvas(imgUri);
+    reader.onload = async () => {
+      const rawUri = reader.result as string;
+      try {
+        // Compress image first to prevent storage quota exhaustion
+        const compressedUri = await compressImage(rawUri, 400, 300, 0.65);
+        setSelectedImage(compressedUri);
+        processLiveImageWithCanvas(compressedUri);
+      } catch (err) {
+        console.error('Image compression failure:', err);
+        setSelectedImage(rawUri);
+        processLiveImageWithCanvas(rawUri);
+      }
+    };
+    reader.onerror = () => {
+      setIsProcessing(false);
+      alert('Unable to read selected file. Please select a valid JPEG or PNG file.');
     };
     reader.readAsDataURL(file);
   };
@@ -68,14 +81,20 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale }
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.src = imgUri;
+
+    img.onerror = () => {
+      setIsProcessing(false);
+      alert('Failed to decode image data. Please ensure the file is not corrupt.');
+    };
+
     img.onload = () => {
-      // Draw to offscreen canvas for pixel extraction
       const canvas = document.createElement('canvas');
       canvas.width = 120;
       canvas.height = 120;
       const ctx = canvas.getContext('2d');
       if (!ctx) {
         setIsProcessing(false);
+        alert('Canvas context unavailable on this device.');
         return;
       }
 
@@ -106,7 +125,7 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale }
   const handleSimulateQrScan = () => {
     setShowQrScanner(true);
     setTimeout(() => {
-      setQrVerifiedData('LIC-BIS-MH-2026-8819: Anand Super Cattle Feed (Type II 20% CP) • Expiry: 12/2026 • Certified Batch');
+      setQrVerifiedData('DEMO SIMULATION: Sample BIS License Verified (BIS/CM/L-8819202). In production, this queries the official BIS Manakonline database.');
     }, 1200);
   };
 
@@ -125,8 +144,8 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale }
           </div>
           <button
             onClick={handleSimulateQrScan}
-            className="flex items-center space-x-1 text-[11px] font-semibold text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-2 py-1 rounded-lg hover:bg-emerald-900 transition-all"
-            aria-label="Scan Feed Bag QR"
+            className="flex items-center space-x-1 text-[11px] font-semibold text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-2 py-1 rounded-lg hover:bg-emerald-900 transition-all min-h-[36px]"
+            aria-label="Scan Feed Bag QR (Demo)"
           >
             <QrCode className="w-3.5 h-3.5" />
             <span>{t('scan.qrScan', locale)}</span>
@@ -218,7 +237,6 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale }
           </div>
         )}
 
-        {/* Card alignment guides */}
         <div className="absolute inset-4 border border-emerald-500/30 rounded-xl pointer-events-none flex items-center justify-center">
           <div className="w-32 h-16 border border-emerald-400/50 border-dashed rounded-lg flex items-center justify-center">
             <span className="text-[9px] text-emerald-400 font-mono tracking-wider uppercase">Sample ROI</span>
@@ -366,14 +384,14 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale }
         </div>
       </div>
 
-      {/* QR Code Scanner Dialog */}
+      {/* Simulated QR Code Scanner Dialog with Explicit Prototype Label */}
       {showQrScanner && (
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-700 rounded-2xl p-4 w-full max-w-sm space-y-3 shadow-2xl">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold text-white flex items-center space-x-1.5">
                 <QrCode className="w-4 h-4 text-emerald-400" />
-                <span>BIS Feed Bag QR Authenticator</span>
+                <span>Simulated Feed Bag QR Verification (Prototype Demo)</span>
               </h3>
               <button
                 onClick={() => { setShowQrScanner(false); setQrVerifiedData(null); }}
@@ -387,20 +405,20 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale }
               {qrVerifiedData ? (
                 <div className="text-emerald-300 space-y-1">
                   <ShieldCheck className="w-8 h-8 mx-auto text-emerald-400 animate-bounce" />
-                  <div className="text-xs font-bold">Manufacturer Verified</div>
+                  <div className="text-xs font-bold text-emerald-300">Simulated License Response</div>
                   <div className="text-[10px] text-slate-300 leading-tight">{qrVerifiedData}</div>
                 </div>
               ) : (
                 <div className="space-y-2">
                   <RefreshCw className="w-6 h-6 text-emerald-400 animate-spin mx-auto" />
-                  <p className="text-[11px] text-slate-400">Scanning Barcode / QR Code...</p>
+                  <p className="text-[11px] text-slate-400">Simulating Barcode / QR Code Scanner...</p>
                 </div>
               )}
             </div>
 
             <button
               onClick={() => { setShowQrScanner(false); setQrVerifiedData(null); }}
-              className="w-full py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow"
+              className="w-full py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow min-h-[44px]"
             >
               Done
             </button>

@@ -340,7 +340,8 @@ export function analyzeCanvasImageData(
     imageUrl: '', // Will be assigned the uploaded image preview
     testedMethod: isStripMode ? 'Rapid Colorimetric Strip' : 'Live Mobile Sensor Analysis',
     isSimulated: false,
-    confidenceScore: 88,
+    isPrototypeHeuristic: true,
+    heuristicDisclaimer: 'Prototype heuristic estimation — no laboratory analytical measurement performed. Requires accredited lab verification.',
     metrics: {
       crudeProtein: estimatedCp,
       moisture,

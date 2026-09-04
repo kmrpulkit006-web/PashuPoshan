@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Locale } from '../lib/types';
 import { t } from '../lib/i18n';
-import { Sparkles, Globe, Wifi, WifiOff, DownloadCloud, RefreshCw } from 'lucide-react';
-import { getPendingSyncQueue, processSyncQueue } from '../lib/storage';
+import { Sparkles, Globe, Wifi, WifiOff, DownloadCloud, RefreshCw, Layers } from 'lucide-react';
+import { getPendingSyncQueue, getSyncStatus, clearDemoQueue } from '../lib/storage';
 
 interface MobileHeaderProps {
   locale: Locale;
@@ -16,15 +16,13 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ locale, setLocale, i
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
-    // Check pending sync queue
     const checkQueue = () => {
       const queue = getPendingSyncQueue();
       setPendingCount(queue.length);
     };
     checkQueue();
-    const interval = setInterval(checkQueue, 4000);
+    const interval = setInterval(checkQueue, 3000);
 
-    // Capture PWA install prompt
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e);
@@ -39,7 +37,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ locale, setLocale, i
 
   const handleInstallClick = async () => {
     if (!installPrompt) {
-      alert('PashuPoshan AI can be installed by tapping "Add to Home Screen" in your mobile browser menu.');
+      alert('PashuPoshan AI can be installed directly by tapping "Add to Home Screen" in your mobile browser settings.');
       return;
     }
     installPrompt.prompt();
@@ -49,18 +47,23 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ locale, setLocale, i
     }
   };
 
-  const handleManualSync = () => {
-    if (!isOnline) {
-      alert('Cannot sync while offline. Connect to Internet to upload pending logs.');
+  const handleQueueStatusClick = () => {
+    const status = getSyncStatus();
+    if (status.pendingCount === 0) {
+      alert('Local sync queue is empty. All new offline scans, herd edits, and alerts will be queued locally.');
       return;
     }
-    setIsSyncing(true);
-    setTimeout(() => {
-      const count = processSyncQueue();
+
+    const clearConfirm = window.confirm(
+      `Local Demo Queue (${status.pendingCount} pending records):\n\n` +
+      `Items are safely preserved in browser storage. In production, an authenticated API endpoint will ingest these records.\n\n` +
+      `Would you like to clear this demo queue now?`
+    );
+
+    if (clearConfirm) {
+      clearDemoQueue();
       setPendingCount(0);
-      setIsSyncing(false);
-      alert(`Synchronized ${count} pending record(s) with Central Dairy Cooperative Server.`);
-    }, 1000);
+    }
   };
 
   return (
@@ -92,38 +95,34 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ locale, setLocale, i
           <button
             onClick={handleInstallClick}
             title={t('app.installPwa', locale)}
-            className="flex items-center space-x-1 px-2 py-1 rounded-lg bg-emerald-800/60 hover:bg-emerald-700/80 border border-emerald-500/30 text-[10px] font-bold text-emerald-200 transition-all"
+            className="flex items-center space-x-1 px-2 py-1 rounded-lg bg-emerald-800/60 hover:bg-emerald-700/80 border border-emerald-500/30 text-[10px] font-bold text-emerald-200 transition-all min-h-[36px]"
             aria-label="Install App"
           >
             <DownloadCloud className="w-3.5 h-3.5 text-emerald-400" />
             <span className="hidden xs:inline">App</span>
           </button>
 
-          {/* Sync Status Button */}
+          {/* Honest Demo Queue Status Button */}
           <button
-            onClick={handleManualSync}
-            title={isOnline ? `${pendingCount} pending uploads` : 'Offline Mode'}
-            className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] font-semibold border transition-all ${
+            onClick={handleQueueStatusClick}
+            title={isOnline ? `${pendingCount} records in local demo queue` : 'Offline Mode (Local Storage)'}
+            className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] font-semibold border transition-all min-h-[36px] ${
               isOnline
                 ? (pendingCount > 0 
                     ? 'bg-amber-950/80 border-amber-500/50 text-amber-300' 
                     : 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300')
                 : 'bg-slate-900/80 border-slate-700 text-slate-400'
             }`}
-            aria-label="Sync status"
+            aria-label="Demo queue status"
           >
-            {isSyncing ? (
-              <RefreshCw className="w-3 h-3 animate-spin text-emerald-400" />
-            ) : (
-              isOnline ? <Wifi className="w-3 h-3 text-emerald-400" /> : <WifiOff className="w-3 h-3 text-amber-400" />
-            )}
+            {isOnline ? <Wifi className="w-3 h-3 text-emerald-400" /> : <WifiOff className="w-3 h-3 text-amber-400" />}
             <span className="text-[10px]">
-              {pendingCount > 0 ? `${pendingCount}` : (isOnline ? '✓' : 'Off')}
+              {pendingCount > 0 ? `Queue: ${pendingCount}` : (isOnline ? 'Local' : 'Offline')}
             </span>
           </button>
 
           {/* Language Switcher */}
-          <div className="relative flex items-center bg-slate-900/80 border border-emerald-500/40 rounded-lg px-2 py-1">
+          <div className="relative flex items-center bg-slate-900/80 border border-emerald-500/40 rounded-lg px-2 py-1 min-h-[36px]">
             <Globe className="w-3.5 h-3.5 text-emerald-300 mr-1" aria-hidden="true" />
             <select
               value={locale}
