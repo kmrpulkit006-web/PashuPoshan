@@ -59,6 +59,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       style={{
         backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(243, 238, 225, 0.95)',
         borderColor: isDark ? '#1e293b' : '#DCD3BF',
+        paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
       }}
     >
       <div className="grid grid-cols-5 gap-1.5">

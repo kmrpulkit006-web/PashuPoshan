@@ -77,7 +77,10 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-[#1F5D3B] dark:bg-slate-900 text-white px-3 py-2 shadow-md border-b border-[#194a30] dark:border-slate-800 print:hidden transition-colors">
+      <header
+        className="sticky top-0 z-40 bg-[#1F5D3B] dark:bg-slate-900 text-white px-3 py-2 shadow-md border-b border-[#194a30] dark:border-slate-800 print:hidden transition-colors"
+        style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}
+      >
         <div className="flex items-center justify-between gap-2 max-w-full">
           {/* Left: App Logo & Name with Simple Connectivity Dot */}
           <div className="flex items-center space-x-2 min-w-0 flex-1">
@@ -166,7 +169,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
       {/* Secondary Info & Offline Status Modal (Keeps Header Clean) */}
       {showInfoModal && (
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white">
+          <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-800 pb-3">
               <div className="flex items-center space-x-2">
                 <span className="text-xl">🌾</span>

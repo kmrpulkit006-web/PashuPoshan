@@ -265,7 +265,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
       {/* Report Modal */}
       {showReportModal && (
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
-          <div className="bg-field-surface dark:bg-slate-900 border border-field-border dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl">
+          <div className="bg-field-surface dark:bg-slate-900 border border-field-border dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-field-text dark:text-white">Report Suspicious Feed Batch</h3>
               <button

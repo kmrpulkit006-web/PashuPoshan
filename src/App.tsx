@@ -134,7 +134,7 @@ export const App: React.FC = () => {
 
             {/* Dynamic Screen Content */}
             <main
-              className="flex-1 overflow-y-auto overscroll-contain transition-colors"
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain transition-colors"
               style={{
                 backgroundColor: isDark ? '#0f172a' : '#FBF8F1',
                 color: isDark ? '#ffffff' : '#1A1A1A',

@@ -16,7 +16,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
-      <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white">
+      <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-800 pb-2.5">
           <h3 className="text-sm font-black flex items-center space-x-2">
             <QrCode className="w-5 h-5 text-[#1F5D3B] dark:text-emerald-400" />
