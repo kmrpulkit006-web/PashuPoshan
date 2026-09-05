@@ -111,12 +111,12 @@ export const App: React.FC = () => {
     <ErrorBoundary>
       <div className={`${isDark ? 'dark' : ''}`}>
         <div
-          className="min-h-screen flex items-center justify-center p-0 sm:p-4 transition-colors"
+          className="min-h-dvh flex items-center justify-center p-0 sm:p-4 transition-colors"
           style={{ backgroundColor: isDark ? '#020617' : '#EDE8DC' }}
         >
           {/* Mobile Shell Frame */}
           <div
-            className="w-full sm:max-w-md min-h-screen sm:min-h-[844px] sm:max-h-[92vh] sm:rounded-[36px] sm:border-[8px] shadow-2xl flex flex-col relative overflow-hidden transition-colors"
+            className="w-full sm:max-w-md h-dvh min-h-dvh max-h-dvh sm:h-auto sm:min-h-[844px] sm:max-h-[92vh] sm:rounded-[36px] sm:border-[8px] shadow-2xl flex flex-col relative overflow-hidden transition-colors"
             style={{
               backgroundColor: isDark ? '#0f172a' : '#FBF8F1',
               color: isDark ? '#ffffff' : '#1A1A1A',
