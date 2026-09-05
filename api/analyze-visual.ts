@@ -20,11 +20,15 @@ declare const process: {
 };
 
 export interface VisualAnalysisResult {
+  isFeedSample: boolean;
+  feedTypeIdentified?: string;
+  rejectionReason?: 'none' | 'not_feed_or_fodder' | 'blurry_unreadable' | 'poor_lighting';
+  rejectionMessage?: string;
   moldCoverageEstimate: 'none' | 'trace' | 'moderate' | 'heavy';
   colorDescription: string;
   foreignMatterVisible: boolean;
   foreignMatterDescription: string;
-  overallVisualCondition: 'good' | 'fair' | 'poor';
+  overallVisualCondition: 'good' | 'fair' | 'poor' | 'invalid';
   providerNotes?: string;
 }
 
@@ -142,32 +146,48 @@ export class GeminiFlashVisionProvider implements VisionProvider {
   }
 
   async analyzeImage(base64Jpeg: string, category: string = 'feed'): Promise<VisualAnalysisResult> {
-    const prompt = `You are a veterinary feed inspector assistant performing an on-farm visual triage of livestock feed/fodder (${category}) from a smartphone camera photo.
+    const prompt = `You are an expert veterinary agricultural inspector assistant performing on-farm visual triage of cattle feed/fodder (${category}) from smartphone camera photos.
 
-CRITICAL PROTOCOL & MANDATORY SAFETY RULES:
-1. THIS IS AN INITIAL VISUAL SCREENING TRIAGE ONLY, NOT A CERTIFIED LABORATORY REPORT.
-2. DO NOT estimate, predict, or include any chemical, nutritional, or laboratory numbers (such as pH, urea percentage, crude protein %, crude fiber %, ash %, or aflatoxin ppb). Those require certified laboratory wet chemistry.
-3. Observe and evaluate ONLY physical visual characteristics visible in the photograph:
-   - moldCoverageEstimate: "none" | "trace" | "moderate" | "heavy"
-     * "none": clean appearance, no fungal mycelia or discolored mold patches.
-     * "trace": isolated speckles (<5% surface).
-     * "moderate": visible patchy clumps (5% to 20% surface).
-     * "heavy": widespread gray/green/black fungal mats (>20% surface).
-   - colorDescription: concise factual visual description (e.g. "uniform golden-amber with normal leaf texture" or "damp blackened discoloration with white mycelial growth").
-   - foreignMatterVisible: boolean (true if non-feed items like stones, sand clumps, plastic, twine, metal wires, or dead insects are visible).
-   - foreignMatterDescription: concise description of foreign matter, or "" if none visible.
-   - overallVisualCondition: "good" | "fair" | "poor"
-     * "good": fresh, normal color, no mold, no foreign matter.
-     * "fair": slight weathering or trace discoloration, but mostly sound.
-     * "poor": significant mold, rancid blackened spoilage, or heavy foreign matter.
+MANDATORY INSPECTION PROTOCOL:
+STEP 1: SUBJECT MATTER VERIFICATION (CRITICAL SAFETY FILTER):
+Inspect whether the photograph actually shows livestock feed, fodder, silage, straw/bhusa, grains, or feed pellets.
+- If the photo is a document, certificate, text, paperwork, human being, face, clothing, indoor room, machine, electronics, pet, screen screenshot, or completely blurred/black/unintelligible:
+  * "isFeedSample": false
+  * "feedTypeIdentified": "non_feed_or_unrelated"
+  * "rejectionReason": "not_feed_or_fodder" (or "blurry_unreadable" if blurred)
+  * "rejectionMessage": "The uploaded photo appears to be a document or certificate, not cattle feed, silage, or fodder. Please capture a clear, close-up photo of livestock feed. / अपलोड की गई तस्वीर पशु चारा या साइलेज नहीं है। कृपया स्पष्ट चारे की तस्वीर अपलोड करें।"
+  * "moldCoverageEstimate": "none"
+  * "colorDescription": "Non-feed subject (document, object, or unrelated scene)."
+  * "foreignMatterVisible": false
+  * "foreignMatterDescription": ""
+  * "overallVisualCondition": "invalid"
+
+- ONLY if the photo genuinely depicts livestock feed, silage, green fodder, dry straw/bhusa, or feed pellets:
+  * "isFeedSample": true
+  * "feedTypeIdentified": e.g. "silage", "green_fodder", "dry_fodder", "concentrate_pellets"
+  * "rejectionReason": "none"
+  * "rejectionMessage": ""
+  * "moldCoverageEstimate": "none" | "trace" | "moderate" | "heavy"
+  * "colorDescription": factual concise visual description (e.g. "uniform golden-amber with normal leaf texture")
+  * "foreignMatterVisible": boolean (stones, plastic, wires, dirt clumps)
+  * "foreignMatterDescription": description or ""
+  * "overallVisualCondition": "good" | "fair" | "poor"
+
+CRITICAL SAFETY:
+- DO NOT guess or fabricate chemical lab numbers (such as pH, urea %, protein %, or aflatoxin).
+- Under NO circumstances mark a document, certificate, or non-feed image as a valid feed sample!
 
 Return ONLY a JSON object strictly matching this schema:
 {
+  "isFeedSample": boolean,
+  "feedTypeIdentified": string,
+  "rejectionReason": "none" | "not_feed_or_fodder" | "blurry_unreadable" | "poor_lighting",
+  "rejectionMessage": string,
   "moldCoverageEstimate": "none" | "trace" | "moderate" | "heavy",
-  "colorDescription": "string",
+  "colorDescription": string,
   "foreignMatterVisible": boolean,
-  "foreignMatterDescription": "string",
-  "overallVisualCondition": "good" | "fair" | "poor"
+  "foreignMatterDescription": string,
+  "overallVisualCondition": "good" | "fair" | "poor" | "invalid"
 }`;
 
     const data = await this.callGenerateContent(base64Jpeg, prompt);
@@ -187,21 +207,29 @@ Return ONLY a JSON object strictly matching this schema:
 
     // Sanitize and validate fields strictly against the specified schema
     const validMolds = ['none', 'trace', 'moderate', 'heavy'] as const;
-    const validConditions = ['good', 'fair', 'poor'] as const;
+    const validConditions = ['good', 'fair', 'poor', 'invalid'] as const;
+    const validReasons = ['none', 'not_feed_or_fodder', 'blurry_unreadable', 'poor_lighting'] as const;
+
+    const isFeedSample = Boolean(parsed.isFeedSample);
+    const rejectionReason = validReasons.includes(parsed.rejectionReason)
+      ? parsed.rejectionReason
+      : isFeedSample ? 'none' : 'not_feed_or_fodder';
+
+    const overallVisualCondition = validConditions.includes(parsed.overallVisualCondition)
+      ? parsed.overallVisualCondition
+      : isFeedSample ? 'good' : 'invalid';
 
     const moldCoverageEstimate = validMolds.includes(parsed.moldCoverageEstimate)
       ? parsed.moldCoverageEstimate
       : 'none';
 
-    const overallVisualCondition = validConditions.includes(parsed.overallVisualCondition)
-      ? parsed.overallVisualCondition
-      : moldCoverageEstimate === 'heavy'
-      ? 'poor'
-      : 'good';
-
     return {
+      isFeedSample,
+      feedTypeIdentified: typeof parsed.feedTypeIdentified === 'string' ? parsed.feedTypeIdentified : (isFeedSample ? category : 'non_feed'),
+      rejectionReason,
+      rejectionMessage: typeof parsed.rejectionMessage === 'string' && parsed.rejectionMessage ? parsed.rejectionMessage : (isFeedSample ? '' : 'The uploaded photo does not appear to be cattle feed, silage, or fodder. Please capture a clear photo of livestock feed.'),
       moldCoverageEstimate,
-      colorDescription: typeof parsed.colorDescription === 'string' ? parsed.colorDescription : 'Color consistent with standard feed sample.',
+      colorDescription: typeof parsed.colorDescription === 'string' ? parsed.colorDescription : (isFeedSample ? 'Standard feed coloration.' : 'Non-feed subject.'),
       foreignMatterVisible: Boolean(parsed.foreignMatterVisible),
       foreignMatterDescription: typeof parsed.foreignMatterDescription === 'string' ? parsed.foreignMatterDescription : '',
       overallVisualCondition,

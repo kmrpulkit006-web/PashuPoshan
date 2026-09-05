@@ -510,6 +510,56 @@ export function createFeedSampleFromVisualAnalysis(
   visualResult: VisualAnalysisResult,
   imageUrl: string
 ): FeedSample {
+  const isInvalid = !visualResult.isFeedSample || visualResult.overallVisualCondition === 'invalid';
+
+  if (isInvalid) {
+    const rejectionMsg =
+      visualResult.rejectionMessage ||
+      'The uploaded image does not appear to be cattle feed, silage, or fodder. Cannot evaluate nutritional safety. Please capture a clear, well-lit photo of animal feed.';
+
+    return {
+      id: `invalid_scan_${Date.now()}`,
+      name: 'Unrecognized Sample (अमान्य नमूना)',
+      category,
+      batchNumber: `INVALID-${Math.floor(1000 + Math.random() * 9000)}`,
+      sourceOrBrand: 'Non-Feed Image Rejection',
+      timestamp: new Date().toLocaleString('en-IN'),
+      imageUrl,
+      testedMethod: 'AI Vision Triage',
+      isSimulated: false,
+      isPrototypeHeuristic: true,
+      isNonFeedSample: true,
+      overallGrade: 'Tier C: Hazardous/Reject',
+      bisCompliant: false,
+      heuristicDisclaimer: rejectionMsg,
+      visualAnalysis: visualResult,
+      metrics: {
+        requiresLabTest: true,
+      },
+      adulteration: {
+        ureaAdulterationDetected: false,
+        ureaPercentage: 0,
+        aflatoxinRisk: 'Requires Certified Lab Test',
+        sandSilicaRisk: 'Requires Certified Lab Test',
+        foreignStarchOrTallow: true,
+        labVerifiedOnly: true,
+      },
+      regulatoryCitation: {
+        standardCode: 'Non-Feed Image Rejection',
+        authority: 'PashuPoshan AI Vision Filter',
+        clause: 'Subject Matter Verification',
+        prescribedLimits: 'Uploaded photo must clearly depict livestock feed, silage, or fodder',
+      },
+      disclaimer: LEGAL_DISCLAIMER,
+      veterinaryAdvisory: rejectionMsg,
+      correctiveActions: [
+        'Take a clear, close-up photograph of your actual livestock feed, silage, or fodder.',
+        'Avoid photographing certificates, documents, humans, or indoor objects.',
+        'Ensure camera lens is clean and focused directly on the feed sample.',
+      ],
+    };
+  }
+
   const isSilage = category === 'silage';
   const isMoldy = visualResult.moldCoverageEstimate === 'heavy' || visualResult.overallVisualCondition === 'poor';
   const isFair = visualResult.moldCoverageEstimate === 'moderate' || visualResult.overallVisualCondition === 'fair';

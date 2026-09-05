@@ -14,11 +14,15 @@ export type QualityGrade =
 export type FliegGrade = 'Excellent' | 'Good' | 'Medium' | 'Poor' | 'Very Bad';
 
 export interface VisualAnalysisResult {
+  isFeedSample: boolean;
+  feedTypeIdentified?: string;
+  rejectionReason?: 'none' | 'not_feed_or_fodder' | 'blurry_unreadable' | 'poor_lighting';
+  rejectionMessage?: string;
   moldCoverageEstimate: 'none' | 'trace' | 'moderate' | 'heavy';
   colorDescription: string;
   foreignMatterVisible: boolean;
   foreignMatterDescription: string;
-  overallVisualCondition: 'good' | 'fair' | 'poor';
+  overallVisualCondition: 'good' | 'fair' | 'poor' | 'invalid';
   providerNotes?: string;
 }
 
@@ -73,6 +77,7 @@ export interface FeedSample {
   isSimulated: boolean;
   isPrototypeHeuristic?: boolean;
   heuristicDisclaimer?: string;
+  isNonFeedSample?: boolean;
   confidenceScore?: number;       // e.g. 88%
   visualAnalysis?: VisualAnalysisResult;
   stripReading?: {

@@ -41,6 +41,28 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
 
   const texts = plainVerdicts[locale] || plainVerdicts.en;
 
+  if (sample.isNonFeedSample) {
+    return (
+      <div className="rounded-3xl p-5 bg-[#B3261E] text-white shadow-2xl border-4 border-amber-400 space-y-2 text-center animate-pulse-slow">
+        <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto shadow-inner">
+          <AlertOctagon className="w-11 h-11 text-white" />
+        </div>
+        <div>
+          <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/40 text-amber-200">
+            Unrecognized Photo • अमान्य तस्वीर
+          </span>
+          <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white uppercase tracking-tight">
+            {locale === 'hi' ? 'चारा नहीं पहचाना गया — पुनः फोटो लें' : 'Not Livestock Feed — Photo Rejected'}
+          </h2>
+          <p className="text-xs text-rose-100 font-bold mt-1 max-w-sm mx-auto leading-relaxed">
+            {sample.visualAnalysis?.rejectionMessage ||
+              'The uploaded photo does not appear to be cattle feed, silage, or fodder. Cannot evaluate nutrition or safety.'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (isTierA) {
     return (
       <div className="rounded-3xl p-5 bg-[#1F5D3B] text-white shadow-xl border-2 border-emerald-400/40 space-y-2 text-center">

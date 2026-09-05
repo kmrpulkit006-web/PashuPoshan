@@ -249,6 +249,7 @@ describe('feedAnalysisEngine - analyzeCanvasImageData & Safety Logic', () => {
   describe('createFeedSampleFromVisualAnalysis factory', () => {
     it('creates FeedSample with honest lab boundaries and visual assessment flags', () => {
       const visualResult = {
+        isFeedSample: true,
         moldCoverageEstimate: 'moderate' as const,
         colorDescription: 'Dark brownish with white patchy mold',
         foreignMatterVisible: true,
@@ -274,6 +275,7 @@ describe('feedAnalysisEngine - analyzeCanvasImageData & Safety Logic', () => {
 
     it('creates high-grade sample when visual analysis is good', () => {
       const visualResult = {
+        isFeedSample: true,
         moldCoverageEstimate: 'none' as const,
         colorDescription: 'Golden olive-green, clean chop',
         foreignMatterVisible: false,
@@ -287,6 +289,29 @@ describe('feedAnalysisEngine - analyzeCanvasImageData & Safety Logic', () => {
       expect(sample.silageMetrics?.pH).toBe(4.0);
       expect(sample.silageMetrics?.moldContaminationPct).toBe(0);
       expect(sample.metrics.requiresLabTest).toBe(true);
+      expect(sample.isNonFeedSample).toBeUndefined();
+    });
+
+    it('rejects certificates, documents, and non-feed images as invalid samples', () => {
+      const nonFeedResult = {
+        isFeedSample: false,
+        feedTypeIdentified: 'non_feed_or_unrelated',
+        rejectionReason: 'not_feed_or_fodder' as const,
+        rejectionMessage: 'The uploaded photo appears to be a document or certificate, not cattle feed.',
+        moldCoverageEstimate: 'none' as const,
+        colorDescription: 'Document or certificate.',
+        foreignMatterVisible: false,
+        foreignMatterDescription: '',
+        overallVisualCondition: 'invalid' as const,
+      };
+      const sample = createFeedSampleFromVisualAnalysis('silage', nonFeedResult, 'data:image/jpeg;base64,mock');
+
+      expect(sample.isNonFeedSample).toBe(true);
+      expect(sample.name).toContain('Unrecognized Sample');
+      expect(sample.bisCompliant).toBe(false);
+      expect(sample.overallGrade).toBe('Tier C: Hazardous/Reject');
+      expect(sample.veterinaryAdvisory).toContain('document or certificate');
+      expect(sample.correctiveActions[0]).toContain('actual livestock feed');
     });
   });
 });

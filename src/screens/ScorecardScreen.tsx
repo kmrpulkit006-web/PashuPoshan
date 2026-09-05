@@ -66,6 +66,18 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
         {/* 1. Full-Width Colored Verdict Band (Plain Language First) */}
         <VerdictBand sample={sample} locale={locale} />
 
+        {/* Action button if image was rejected as non-feed */}
+        {sample.isNonFeedSample && (
+          <button
+            type="button"
+            onClick={onRetest}
+            className="w-full py-4 px-5 rounded-2xl bg-[#1F5D3B] hover:bg-[#184a2f] text-white font-black text-base flex items-center justify-center space-x-2 shadow-lg min-h-[56px] transition-all transform active:scale-98"
+          >
+            <RotateCcw className="w-5 h-5 text-white" />
+            <span>{locale === 'hi' ? 'चारे की नई तस्वीर लें (पुनः स्कैन)' : 'Retake / Scan Feed Photo'}</span>
+          </button>
+        )}
+
         {/* 2. Large, High-Contrast Audio Advisory Button Directly Under Verdict */}
         <AudioGuidance
           textToSpeak={
