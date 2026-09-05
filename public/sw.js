@@ -3,8 +3,8 @@
  * Features dynamic runtime caching for Vite assets, ensuring true offline availability.
  */
 
-const STATIC_CACHE_NAME = 'pashuposhan-static-v4';
-const RUNTIME_CACHE_NAME = 'pashuposhan-runtime-v4';
+const STATIC_CACHE_NAME = 'pashuposhan-static-v5';
+const RUNTIME_CACHE_NAME = 'pashuposhan-runtime-v5';
 
 const PRECACHE_URLS = [
   '/',
@@ -78,6 +78,9 @@ self.addEventListener('fetch', (event) => {
           caches.open(STATIC_CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
+        }
+        if (!networkResponse || !networkResponse.ok) {
+          return caches.match('/index.html').then((cached) => cached || networkResponse);
         }
         return networkResponse;
       }).catch(() => {
