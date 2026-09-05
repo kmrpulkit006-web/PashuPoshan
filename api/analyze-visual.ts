@@ -42,6 +42,105 @@ export class GeminiFlashVisionProvider implements VisionProvider {
     this.apiKey = apiKey;
   }
 
+  private async callGenerateContent(base64Jpeg: string, prompt: string): Promise<any> {
+    const payload = {
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            { text: prompt },
+            {
+              inlineData: {
+                mimeType: 'image/jpeg',
+                data: base64Jpeg,
+              },
+            },
+          ],
+        },
+      ],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        temperature: 0.1,
+      },
+    };
+
+    // 1. Try candidate endpoints across v1 and v1beta
+    const candidateEndpoints = [
+      'v1beta/models/gemini-1.5-flash',
+      'v1/models/gemini-1.5-flash',
+      'v1beta/models/gemini-2.0-flash',
+      'v1/models/gemini-2.0-flash',
+      'v1beta/models/gemini-1.5-flash-latest',
+      'v1/models/gemini-1.5-flash-latest',
+      'v1beta/models/gemini-1.5-pro',
+      'v1/models/gemini-1.5-pro',
+    ];
+
+    let lastError = '';
+
+    for (const candidate of candidateEndpoints) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/${candidate}:generateContent?key=${this.apiKey}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+          return await response.json();
+        }
+
+        const errorText = await response.text();
+        let parsedError = errorText;
+        try {
+          const errorJson = JSON.parse(errorText);
+          parsedError = errorJson.error?.message || errorText;
+        } catch {}
+
+        lastError = `${candidate} (${response.status}): ${parsedError}`;
+
+        // If it's a client syntax error (400) or auth forbidden (403), throw immediately
+        if (response.status === 400 || response.status === 403) {
+          throw new Error(`Gemini Vision API error (${response.status}): ${parsedError}`);
+        }
+      } catch (err: any) {
+        if (err.message && !err.message.includes('404')) {
+          throw err;
+        }
+      }
+    }
+
+    // 2. Dynamic discovery fallback: query ListModels on account
+    for (const ver of ['v1beta', 'v1']) {
+      try {
+        const listUrl = `https://generativelanguage.googleapis.com/${ver}/models?key=${this.apiKey}`;
+        const listRes = await fetch(listUrl);
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          const availableModels = (listData.models || [])
+            .filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
+            .map((m: any) => m.name.replace(/^models\//, ''));
+
+          for (const model of availableModels) {
+            const url = `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${this.apiKey}`;
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+              return await response.json();
+            }
+          }
+        }
+      } catch {}
+    }
+
+    throw new Error(`All Gemini vision models failed. Last error: ${lastError}`);
+  }
+
   async analyzeImage(base64Jpeg: string, category: string = 'feed'): Promise<VisualAnalysisResult> {
     const prompt = `You are a veterinary feed inspector assistant performing an on-farm visual triage of livestock feed/fodder (${category}) from a smartphone camera photo.
 
@@ -71,48 +170,7 @@ Return ONLY a JSON object strictly matching this schema:
   "overallVisualCondition": "good" | "fair" | "poor"
 }`;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`;
-
-    const payload = {
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                mimeType: 'image/jpeg',
-                data: base64Jpeg,
-              },
-            },
-          ],
-        },
-      ],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.1,
-      },
-    };
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      let parsedError = errorText;
-      try {
-        const errorJson = JSON.parse(errorText);
-        parsedError = errorJson.error?.message || errorText;
-      } catch (e) {}
-      throw new Error(`Gemini Vision API error (${response.status}): ${parsedError}`);
-    }
-
-    const data = await response.json();
+    const data = await this.callGenerateContent(base64Jpeg, prompt);
     const rawContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!rawContent) {
       throw new Error('Empty response received from Gemini Vision model.');
@@ -120,7 +178,9 @@ Return ONLY a JSON object strictly matching this schema:
 
     let parsed: any;
     try {
-      parsed = JSON.parse(rawContent);
+      // Strip markdown code fences if model enclosed JSON in ```json ... ```
+      const cleanJson = rawContent.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+      parsed = JSON.parse(cleanJson);
     } catch (err) {
       throw new Error(`Failed to parse vision model response as JSON: ${rawContent}`);
     }
@@ -145,7 +205,7 @@ Return ONLY a JSON object strictly matching this schema:
       foreignMatterVisible: Boolean(parsed.foreignMatterVisible),
       foreignMatterDescription: typeof parsed.foreignMatterDescription === 'string' ? parsed.foreignMatterDescription : '',
       overallVisualCondition,
-      providerNotes: 'Analyzed via Google Gemini 1.5 Flash Vision Triage Pipeline',
+      providerNotes: 'Analyzed via Google Gemini Vision Triage Pipeline',
     };
   }
 }
