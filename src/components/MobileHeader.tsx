@@ -78,7 +78,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   return (
     <>
       <header
-        className="sticky top-0 z-40 bg-[#1F5D3B] dark:bg-slate-900 text-white px-3 py-2 shadow-md border-b border-[#194a30] dark:border-slate-800 print:hidden transition-colors"
+        className="sticky top-0 z-40 bg-[#1F5D3B] dark:bg-slate-900 text-white px-3 py-2 shadow-md border-b border-[#194a30] dark:border-slate-800 print:hidden transition-colors select-none"
         style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}
       >
         <div className="flex items-center justify-between gap-2 max-w-full">

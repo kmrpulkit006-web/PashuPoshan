@@ -134,10 +134,12 @@ export const App: React.FC = () => {
 
             {/* Dynamic Screen Content */}
             <main
-              className="flex-1 min-h-0 overflow-y-auto overscroll-contain transition-colors"
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain transition-colors touch-pan-y"
               style={{
                 backgroundColor: isDark ? '#0f172a' : '#FBF8F1',
                 color: isDark ? '#ffffff' : '#1A1A1A',
+                paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
+                touchAction: 'pan-y',
               }}
             >
               {activeTab === 'scan' && (

@@ -55,7 +55,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 backdrop-blur-md border-t px-2 py-2 shadow-2xl transition-colors"
+      className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 backdrop-blur-md border-t px-2 py-2 shadow-2xl transition-colors select-none"
       style={{
         backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(243, 238, 225, 0.95)',
         borderColor: isDark ? '#1e293b' : '#DCD3BF',
