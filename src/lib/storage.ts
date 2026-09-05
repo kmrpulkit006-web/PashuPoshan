@@ -309,8 +309,8 @@ export function getSyncStatus(): { pendingCount: number; statusMessage: string }
   return {
     pendingCount: queue.length,
     statusMessage: queue.length > 0 
-      ? `${queue.length} record(s) queued locally. Items will remain preserved until an authenticated API endpoint is configured.`
-      : 'Local queue is empty. All new logs will be queued here.'
+      ? `${queue.length} record(s) queued locally. In this prototype, records remain safely preserved in browser storage awaiting production cloud API integration.`
+      : 'Local queue is empty. All new offline scans, herd records, and alerts will be preserved locally.'
   };
 }
 

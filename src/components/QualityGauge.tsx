@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, AlertTriangle, AlertOctagon } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, AlertOctagon } from 'lucide-react';
 
 interface QualityGaugeProps {
   label: string;
@@ -22,7 +22,7 @@ export const QualityGauge: React.FC<QualityGaugeProps> = ({
   safeMin,
   safeMax,
   bisBenchmark,
-  isSilagePh = false
+  isSilagePh = false,
 }) => {
   let status: 'safe' | 'warning' | 'danger' = 'safe';
 
@@ -39,24 +39,24 @@ export const QualityGauge: React.FC<QualityGaugeProps> = ({
 
   const statusConfig = {
     safe: {
-      bar: 'bg-emerald-500',
-      badge: 'bg-emerald-950 text-emerald-300 border-emerald-500/40',
-      text: 'text-emerald-400',
-      icon: <CheckCircle className="w-3 h-3 text-emerald-400" />,
+      bar: 'bg-[#1F5D3B]',
+      badge: 'bg-[#edf7f0] text-[#1F5D3B] border-[#b0dec0] dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-600',
+      text: 'text-[#1F5D3B] dark:text-emerald-400',
+      icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#1F5D3B] dark:text-emerald-400" />,
       label: 'Optimal',
     },
     warning: {
-      bar: 'bg-amber-500',
-      badge: 'bg-amber-950 text-amber-300 border-amber-500/40',
-      text: 'text-amber-400',
-      icon: <AlertTriangle className="w-3 h-3 text-amber-400" />,
+      bar: 'bg-[#C2703D]',
+      badge: 'bg-[#fdf8f4] text-[#C2703D] border-[#f3d6c4] dark:bg-amber-950 dark:text-amber-300 dark:border-amber-600',
+      text: 'text-[#C2703D] dark:text-amber-400',
+      icon: <AlertTriangle className="w-3.5 h-3.5 text-[#C2703D] dark:text-amber-400" />,
       label: 'Sub-Optimal',
     },
     danger: {
-      bar: 'bg-rose-500',
-      badge: 'bg-rose-950 text-rose-300 border-rose-500/40',
-      text: 'text-rose-400',
-      icon: <AlertOctagon className="w-3 h-3 text-rose-400" />,
+      bar: 'bg-[#B3261E]',
+      badge: 'bg-[#FDECEA] text-[#B3261E] border-red-300 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-600',
+      text: 'text-[#B3261E] dark:text-rose-400',
+      icon: <AlertOctagon className="w-3.5 h-3.5 text-[#B3261E] dark:text-rose-400" />,
       label: 'Critical Alert',
     },
   };
@@ -64,15 +64,21 @@ export const QualityGauge: React.FC<QualityGaugeProps> = ({
   const current = statusConfig[status];
 
   return (
-    <div className="bg-slate-800/90 border border-slate-700/80 rounded-xl p-3 shadow-sm" role="region" aria-label={label}>
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-xs font-semibold text-slate-300">{label}</span>
-        <div className="flex items-center space-x-1.5">
-          <span className={`text-sm font-extrabold ${current.text}`}>
+    <div
+      className="bg-[#F3EEE1] dark:bg-slate-800/90 border border-[#DCD3BF] dark:border-slate-700/80 rounded-2xl p-3.5 shadow-sm text-[#1A1A1A] dark:text-white"
+      role="region"
+      aria-label={label}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-black text-[#1A1A1A] dark:text-slate-200">{label}</span>
+        <div className="flex items-center space-x-2">
+          <span className={`text-base font-black ${current.text}`}>
             {value} {unit}
           </span>
           {/* Accessible, color-independent status tag */}
-          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase flex items-center space-x-1 ${current.badge}`}>
+          <span
+            className={`text-[10px] font-black px-2 py-0.5 rounded-full border uppercase flex items-center space-x-1 ${current.badge}`}
+          >
             {current.icon}
             <span>{current.label}</span>
           </span>
@@ -81,7 +87,7 @@ export const QualityGauge: React.FC<QualityGaugeProps> = ({
 
       {/* Progress Bar with ARIA attributes */}
       <div
-        className="w-full bg-slate-700 rounded-full h-2 overflow-hidden relative"
+        className="w-full bg-[#DCD3BF] dark:bg-slate-700 rounded-full h-2.5 overflow-hidden relative"
         role="progressbar"
         aria-valuenow={value}
         aria-valuemin={min}
@@ -95,9 +101,9 @@ export const QualityGauge: React.FC<QualityGaugeProps> = ({
       </div>
 
       {bisBenchmark && (
-        <div className="mt-1 flex items-center justify-between text-[10px] text-slate-400">
+        <div className="mt-1.5 flex items-center justify-between text-[11px] text-[#5A5243] dark:text-slate-400 font-semibold">
           <span>Standard Reference:</span>
-          <span className="font-medium text-slate-300">{bisBenchmark}</span>
+          <span className="font-bold text-[#1A1A1A] dark:text-slate-300">{bisBenchmark}</span>
         </div>
       )}
     </div>

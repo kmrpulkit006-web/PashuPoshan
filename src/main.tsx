@@ -6,10 +6,11 @@ import './index.css';
 // Register Service Worker for true PWA Offline-First experience
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(
-      (reg) => console.log('PashuPoshan PWA ServiceWorker registered:', reg.scope),
-      (err) => console.log('ServiceWorker registration failed:', err)
-    );
+    navigator.serviceWorker.register('/sw.js').then((reg) => {
+      reg.update().catch(() => {});
+    }).catch(() => {
+      // Offline service worker registration fallback
+    });
   });
 }
 

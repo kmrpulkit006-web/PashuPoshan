@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Locale } from '../lib/types';
 import { t } from '../lib/i18n';
-import { Sparkles, Globe, Wifi, WifiOff, DownloadCloud, RefreshCw, Layers } from 'lucide-react';
+import { Globe, Sun, Moon, Info, X, DownloadCloud, Wifi, WifiOff, Layers, Trash2 } from 'lucide-react';
 import { getPendingSyncQueue, getSyncStatus, clearDemoQueue } from '../lib/storage';
 
 interface MobileHeaderProps {
   locale: Locale;
   setLocale: (l: Locale) => void;
   isOnline: boolean;
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
 }
 
-export const MobileHeader: React.FC<MobileHeaderProps> = ({ locale, setLocale, isOnline }) => {
+export const MobileHeader: React.FC<MobileHeaderProps> = ({
+  locale,
+  setLocale,
+  isOnline,
+  theme,
+  setTheme,
+}) => {
+  const [showInfoModal, setShowInfoModal] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     const checkQueue = () => {
@@ -37,7 +45,9 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ locale, setLocale, i
 
   const handleInstallClick = async () => {
     if (!installPrompt) {
-      alert('PashuPoshan AI can be installed directly by tapping "Add to Home Screen" in your mobile browser settings.');
+      alert(
+        'PashuPoshan AI can be installed directly by tapping "Add to Home Screen" in your mobile browser settings.'
+      );
       return;
     }
     installPrompt.prompt();
@@ -47,98 +57,232 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ locale, setLocale, i
     }
   };
 
-  const handleQueueStatusClick = () => {
-    const status = getSyncStatus();
-    if (status.pendingCount === 0) {
-      alert('Local sync queue is empty. All new offline scans, herd edits, and alerts will be queued locally.');
-      return;
-    }
-
-    const clearConfirm = window.confirm(
-      `Local Demo Queue (${status.pendingCount} pending records):\n\n` +
-      `Items are safely preserved in browser storage. In production, an authenticated API endpoint will ingest these records.\n\n` +
-      `Would you like to clear this demo queue now?`
+  const handleClearQueue = () => {
+    const confirmClear = window.confirm(
+      'Are you sure you want to clear the local test queue of pending offline records?'
     );
-
-    if (clearConfirm) {
+    if (confirmClear) {
       clearDemoQueue();
       setPendingCount(0);
     }
   };
 
+  const toggleTheme = () => {
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
+    localStorage.setItem('pashuposhan_theme', nextTheme);
+    document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+    document.body.classList.toggle('dark', nextTheme === 'dark');
+  };
+
   return (
-    <header className="sticky top-0 z-40 bg-gradient-to-r from-emerald-950 via-emerald-900 to-teal-950 text-white px-4 py-2.5 shadow-lg border-b border-emerald-800/40 print:hidden">
-      <div className="flex items-center justify-between">
-        {/* Left: Brand & Problem Statement */}
-        <div className="flex items-center space-x-2.5">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shadow-inner text-xl" aria-hidden="true">
-            🌾
-          </div>
-          <div>
-            <div className="flex items-center space-x-1.5">
-              <h1 className="text-sm font-extrabold tracking-tight text-white leading-tight">
-                {t('app.name', locale)}
-              </h1>
-              <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-800 text-emerald-200 border border-emerald-500/40">
-                SIH 26111
-              </span>
-            </div>
-            <p className="text-[10px] text-emerald-300/80 line-clamp-1">
-              {t('app.subtitle', locale)}
-            </p>
-          </div>
-        </div>
-
-        {/* Right: Actions (Install, Sync, Language) */}
-        <div className="flex items-center space-x-1.5">
-          {/* PWA Install Button */}
-          <button
-            onClick={handleInstallClick}
-            title={t('app.installPwa', locale)}
-            className="flex items-center space-x-1 px-2 py-1 rounded-lg bg-emerald-800/60 hover:bg-emerald-700/80 border border-emerald-500/30 text-[10px] font-bold text-emerald-200 transition-all min-h-[36px]"
-            aria-label="Install App"
-          >
-            <DownloadCloud className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="hidden xs:inline">App</span>
-          </button>
-
-          {/* Honest Demo Queue Status Button */}
-          <button
-            onClick={handleQueueStatusClick}
-            title={isOnline ? `${pendingCount} records in local demo queue` : 'Offline Mode (Local Storage)'}
-            className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] font-semibold border transition-all min-h-[36px] ${
-              isOnline
-                ? (pendingCount > 0 
-                    ? 'bg-amber-950/80 border-amber-500/50 text-amber-300' 
-                    : 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300')
-                : 'bg-slate-900/80 border-slate-700 text-slate-400'
-            }`}
-            aria-label="Demo queue status"
-          >
-            {isOnline ? <Wifi className="w-3 h-3 text-emerald-400" /> : <WifiOff className="w-3 h-3 text-amber-400" />}
-            <span className="text-[10px]">
-              {pendingCount > 0 ? `Queue: ${pendingCount}` : (isOnline ? 'Local' : 'Offline')}
-            </span>
-          </button>
-
-          {/* Language Switcher */}
-          <div className="relative flex items-center bg-slate-900/80 border border-emerald-500/40 rounded-lg px-2 py-1 min-h-[36px]">
-            <Globe className="w-3.5 h-3.5 text-emerald-300 mr-1" aria-hidden="true" />
-            <select
-              value={locale}
-              onChange={(e) => setLocale(e.target.value as Locale)}
-              className="bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer pr-1"
-              aria-label="Select Application Language"
+    <>
+      <header className="sticky top-0 z-40 bg-[#1F5D3B] dark:bg-slate-900 text-white px-3 py-2 shadow-md border-b border-[#194a30] dark:border-slate-800 print:hidden transition-colors">
+        <div className="flex items-center justify-between gap-2 max-w-full">
+          {/* Left: App Logo & Name with Simple Connectivity Dot */}
+          <div className="flex items-center space-x-2 min-w-0 flex-1">
+            <div
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg sm:text-xl shrink-0 shadow-inner"
+              aria-hidden="true"
             >
-              <option value="hi" className="text-slate-900">HI (हिंदी)</option>
-              <option value="en" className="text-slate-900">EN (Eng)</option>
-              <option value="mr" className="text-slate-900">MR (मराठी)</option>
-              <option value="gu" className="text-slate-900">GU (ગુજરાતી)</option>
-              <option value="pa" className="text-slate-900">PA (ਪੰਜਾਬੀ)</option>
-            </select>
+              🌾
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center space-x-1.5">
+                <h1 className="text-sm sm:text-base font-black tracking-tight text-white truncate leading-none">
+                  {t('app.name', locale)}
+                </h1>
+                {/* Minimal connectivity dot with accessible tooltip */}
+                <div
+                  className="flex items-center shrink-0"
+                  title={isOnline ? 'Online - Internet Connected' : 'Offline Mode (Local Storage)'}
+                  aria-label={isOnline ? 'Online' : 'Offline'}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      isOnline ? 'bg-emerald-300 shadow-[0_0_6px_#6ee7b7]' : 'bg-amber-400'
+                    }`}
+                  />
+                </div>
+              </div>
+              <p className="text-[10px] text-emerald-100/80 font-medium truncate leading-tight hidden xs:block mt-0.5">
+                {t('app.subtitle', locale)}
+              </p>
+            </div>
+          </div>
+
+          {/* Right: Language Switcher, Theme Toggle & Info Modal Trigger */}
+          <div className="flex items-center space-x-1.5 shrink-0">
+            {/* Prominent Fixed-Width Language Switcher (Clean badge, never truncates to En...) */}
+            <div className="relative flex items-center justify-between bg-black/25 dark:bg-slate-800/90 border border-white/25 dark:border-slate-700 rounded-xl px-2.5 py-1 min-h-[38px] w-[72px] sm:w-[76px] shrink-0">
+              <div className="flex items-center space-x-1 pointer-events-none">
+                <Globe className="w-3.5 h-3.5 text-emerald-200 shrink-0" aria-hidden="true" />
+                <span className="text-xs font-black text-white uppercase tracking-wider">
+                  {locale}
+                </span>
+              </div>
+              <span className="text-[10px] text-white/70 pointer-events-none ml-1">▾</span>
+              <select
+                value={locale}
+                onChange={(e) => setLocale(e.target.value as Locale)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-slate-900"
+                aria-label="Select Application Language"
+              >
+                <option value="hi" className="text-slate-900 bg-white">हिंदी (HI)</option>
+                <option value="en" className="text-slate-900 bg-white">English (EN)</option>
+                <option value="mr" className="text-slate-900 bg-white">मराठी (MR)</option>
+                <option value="gu" className="text-slate-900 bg-white">ગુજરાતી (GU)</option>
+                <option value="pa" className="text-slate-900 bg-white">ਪੰਜਾਬੀ (PA)</option>
+              </select>
+            </div>
+
+            {/* Manual Light/Dark Theme Toggle Icon Button */}
+            <button
+              onClick={toggleTheme}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-black/20 hover:bg-black/30 dark:bg-slate-800 border border-white/20 dark:border-slate-700 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
+              title={theme === 'light' ? 'Switch to Dark Mode (Night)' : 'Switch to Field Mode (Day)'}
+              aria-label="Toggle display theme"
+            >
+              {theme === 'light' ? (
+                <Moon className="w-4 h-4 text-amber-200" />
+              ) : (
+                <Sun className="w-4 h-4 text-amber-300" />
+              )}
+            </button>
+
+            {/* Secondary Info / Status Icon Button */}
+            <button
+              onClick={() => setShowInfoModal(true)}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-black/20 hover:bg-black/30 dark:bg-slate-800 border border-white/20 dark:border-slate-700 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
+              title="System Information & Offline Sync"
+              aria-label="App info and sync status"
+            >
+              <Info className="w-4 h-4 text-emerald-200" />
+            </button>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Secondary Info & Offline Status Modal (Keeps Header Clean) */}
+      {showInfoModal && (
+        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
+          <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-800 pb-3">
+              <div className="flex items-center space-x-2">
+                <span className="text-xl">🌾</span>
+                <h3 className="text-base font-black">System Info & Sync</h3>
+              </div>
+              <button
+                onClick={() => setShowInfoModal(false)}
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center space-x-1"
+                aria-label="Close dialog"
+              >
+                <X className="w-5 h-5" />
+                <span className="text-xs font-bold">Close</span>
+              </button>
+            </div>
+
+            {/* Theme Switcher inside Modal */}
+            <div className="bg-[#F3EEE1] dark:bg-slate-800 border border-[#DCD3BF] dark:border-slate-700 rounded-2xl p-3 space-y-2 text-xs">
+              <div className="font-bold flex items-center justify-between">
+                <span>Display Theme</span>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-black/10 dark:bg-white/10">
+                  {theme === 'light' ? '☀️ Field (Day)' : '🌙 Night (Dark)'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTheme('light');
+                    localStorage.setItem('pashuposhan_theme', 'light');
+                    document.documentElement.classList.remove('dark');
+                    document.body.classList.remove('dark');
+                  }}
+                  className={`py-2 px-3 rounded-xl font-bold flex items-center justify-center space-x-1.5 transition-all min-h-[44px] ${
+                    theme === 'light'
+                      ? 'bg-[#1F5D3B] text-white shadow-md'
+                      : 'bg-white dark:bg-slate-700 border border-[#DCD3BF] dark:border-slate-600 text-[#1A1A1A] dark:text-white'
+                  }`}
+                >
+                  <Sun className="w-4 h-4 text-amber-300" />
+                  <span>Field (Day)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTheme('dark');
+                    localStorage.setItem('pashuposhan_theme', 'dark');
+                    document.documentElement.classList.add('dark');
+                    document.body.classList.add('dark');
+                  }}
+                  className={`py-2 px-3 rounded-xl font-bold flex items-center justify-center space-x-1.5 transition-all min-h-[44px] ${
+                    theme === 'dark'
+                      ? 'bg-[#1F5D3B] text-white shadow-md'
+                      : 'bg-white dark:bg-slate-700 border border-[#DCD3BF] dark:border-slate-600 text-[#1A1A1A] dark:text-white'
+                  }`}
+                >
+                  <Moon className="w-4 h-4 text-amber-200" />
+                  <span>Night (Dark)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Hackathon Badge */}
+            <div className="bg-[#F3EEE1] dark:bg-slate-800 border border-[#DCD3BF] dark:border-slate-700 rounded-2xl p-3 space-y-1 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-[#1F5D3B] dark:text-emerald-400 uppercase tracking-wide text-[10px]">
+                  Smart India Hackathon 2026
+                </span>
+                <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-[#1F5D3B] text-white">
+                  PS 26111
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
+                Ministry of Fisheries, Animal Husbandry & Dairying (DAHD). AI Rapid Silage & Feed Quality System.
+              </p>
+            </div>
+
+            {/* Offline Local Queue Status */}
+            <div className="bg-[#F3EEE1] dark:bg-slate-800 border border-[#DCD3BF] dark:border-slate-700 rounded-2xl p-3 space-y-2 text-xs">
+              <div className="flex items-center justify-between font-bold">
+                <span className="flex items-center space-x-1.5">
+                  <Layers className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400" />
+                  <span>Offline Storage Queue</span>
+                </span>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                    pendingCount > 0 ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'
+                  }`}
+                >
+                  {pendingCount} records
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                All scans, animal ration records, and alerts are safely saved on this device. When cloud API integration is active, they sync automatically.
+              </p>
+              {pendingCount > 0 && (
+                <button
+                  onClick={handleClearQueue}
+                  className="w-full mt-1 py-2 px-3 bg-rose-100 hover:bg-rose-200 dark:bg-rose-950 dark:hover:bg-rose-900 text-[#B3261E] dark:text-rose-200 text-xs font-bold rounded-xl border border-rose-300 dark:border-rose-800 flex items-center justify-center space-x-1.5 transition-all min-h-[44px]"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Clear Local Queue</span>
+                </button>
+              )}
+            </div>
+
+            {/* PWA Install Button */}
+            <button
+              onClick={handleInstallClick}
+              className="w-full py-3.5 px-4 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-extrabold text-sm rounded-2xl shadow-lg flex items-center justify-center space-x-2 transition-all min-h-[52px]"
+            >
+              <DownloadCloud className="w-5 h-5 text-emerald-200" />
+              <span>Install App to Home Screen</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

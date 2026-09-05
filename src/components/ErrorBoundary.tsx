@@ -31,19 +31,19 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center mb-4">
-            <AlertOctagon className="w-8 h-8" />
+        <div className="min-h-screen bg-field-base text-field-text dark:bg-slate-950 dark:text-white flex flex-col items-center justify-center p-6 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-danger-500/15 border border-danger-500/30 text-danger-700 dark:text-rose-400 flex items-center justify-center mb-4">
+            <AlertOctagon className="w-9 h-9" />
           </div>
-          <h2 className="text-base font-bold text-white mb-2">Something went wrong</h2>
-          <p className="text-xs text-slate-400 max-w-xs mb-6">
+          <h2 className="text-lg font-bold mb-2">Something went wrong</h2>
+          <p className="text-sm text-field-text/70 dark:text-slate-400 max-w-xs mb-6">
             The application encountered an unexpected issue. Your locally saved test records and herd data remain safe.
           </p>
           <button
             onClick={this.handleReset}
-            className="flex items-center space-x-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg transition-all"
+            className="flex items-center space-x-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-2xl shadow-md transition-all min-h-[56px]"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-5 h-5" />
             <span>Reload Application</span>
           </button>
         </div>

@@ -1,4 +1,4 @@
-﻿# PashuPoshan AI (पशु-पोषण AI)
+# PashuPoshan AI (पशु-पोषण AI)
 ### Smart AI-Enabled Rapid Feed and Silage Quality Testing System for Dairy Farmers
 
 > **Smart India Hackathon (SIH 2026) — Problem Statement 26111**  
@@ -52,9 +52,24 @@ The application will launch on `http://localhost:5174/` (or network IP for testi
 
 ---
 
+## 🔬 AI & Sensor Architecture: Prototype vs Production Roadmap
+
+> **Important Evaluation Notice**: In this SIH prototype demonstration, feed safety screening is performed client-side using **HTML5 Canvas optical heuristics & colorimetric strip delta-E mapping**. This delivers immediate on-farm triage without requiring continuous cloud connectivity or specialized hardware.
+
+| Capability | Current Prototype Phase | Production Deployment Phase |
+| :--- | :--- | :--- |
+| **Colorimetric Strip Analysis** | RGB color distance mapping for $p$-DMAB urea detection & pH | Calibrated reflectance spectrometry with standardized reference card |
+| **Mold & Spoilage Detection** | Pixel luminance clustering & dark ratio heuristic | Edge-quantized MobileNetV3 / YOLOv8-Nano running in WebAssembly / TFLite |
+| **Nutritional Profiling (CP, DM)** | BIS IS:2052 benchmark lookup & proxy estimation | Handheld Bluetooth Micro-NIR (Near-Infrared) sensor integration |
+| **Data Synchronization** | Offline-first IndexedDB / LocalStorage queue | End-to-end sync with DAHD / NDDB National Dairy Portal API |
+
+---
+
 ## 🛠️ Tech Stack
 - **Framework**: React 18 + TypeScript + Vite
 - **Styling**: Tailwind CSS (Mobile-responsive UI shell)
 - **Icons**: Lucide React
-- **Audio Guidance**: Web Speech Synthesis API (Multilingual)
+- **Audio Guidance**: Web Speech Synthesis API (Multilingual: HI, EN, MR, GU, PA)
 - **Animation**: Canvas-Confetti
+- **Testing**: Vitest (Comprehensive safety & compliance suites)
+- **CI/CD**: GitHub Actions Automated Build & Test Pipeline

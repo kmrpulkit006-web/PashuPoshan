@@ -12,13 +12,13 @@ const CROP_OPTIONS: SilageBunker['cropType'][] = [
   'Maize',
   'Sorghum',
   'Pearl Millet (Bajra)',
-  'Oats'
+  'Oats',
 ];
 
 const COMPACTION_OPTIONS: SilageBunker['compactionRating'][] = [
   'Optimum (>650 kg/m3)',
   'Moderate',
-  'Loose/Air-Pockets'
+  'Loose/Air-Pockets',
 ];
 
 export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
@@ -61,9 +61,9 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
           date: new Date().toLocaleDateString('en-IN'),
           temperatureC: Number(newTemp),
           compactionRating: newCompaction,
-          notes: 'Pit initiated and sealed'
-        }
-      ]
+          notes: 'Pit initiated and sealed',
+        },
+      ],
     };
 
     const updated = saveLocalPit(newPit);
@@ -81,7 +81,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
       date: new Date().toLocaleDateString('en-IN'),
       temperatureC: Number(logTemp),
       compactionRating: logCompaction,
-      notes: logNotes || 'Routine inspection'
+      notes: logNotes || 'Routine inspection',
     };
 
     const updated = addPitLogEntry(showLogModal, newLog);
@@ -91,113 +91,225 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
   };
 
   return (
-    <div className="p-4 space-y-4 pb-28 print:hidden">
+    <div className="p-4 space-y-4 pb-28 print:hidden text-[#1A1A1A] dark:text-white">
       {/* Title */}
-      <div className="bg-slate-800/90 border border-slate-700 rounded-2xl p-3.5 shadow-md flex items-center justify-between">
+      <div className="bg-[#F3EEE1] dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-4 shadow-sm flex items-center justify-between">
         <div>
           <div className="flex items-center space-x-2 mb-1">
-            <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
-              <Layers className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-2xl bg-[#C2703D]/15 text-[#C2703D] dark:text-amber-400 flex items-center justify-center">
+              <Layers className="w-5 h-5" />
             </div>
-            <h2 className="text-sm font-bold text-white">
+            <h2 className="text-base font-black text-[#1A1A1A] dark:text-white">
               {t('silage.title', locale)}
             </h2>
           </div>
-          <p className="text-[11px] text-slate-300">
+          <p className="text-xs text-[#5A5243] dark:text-slate-300 font-semibold">
             {t('silage.subtitle', locale)}
           </p>
         </div>
 
         <button
           onClick={() => setShowAddPitModal(true)}
-          className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-xl shadow active:scale-98 transition-all flex items-center space-x-1 shrink-0 min-h-[36px]"
+          className="px-4 py-3 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs sm:text-sm rounded-2xl shadow-lg active:scale-98 transition-all flex items-center space-x-2 shrink-0 min-h-[56px]"
+          aria-label={t('silage.addPit', locale)}
         >
-          <Plus className="w-3.5 h-3.5" />
+          <Plus className="w-5 h-5" />
           <span>{t('silage.addPit', locale)}</span>
         </button>
       </div>
 
       {/* Pits List */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {pits.map((pit) => {
-          const isSafe = pit.status === 'Ready to Feed' || pit.status === 'Fermenting';
+          // Plain-Language Status Derivation
+          const isDanger =
+            pit.coreTemperature > 40 ||
+            pit.status === 'Aerobic Heating Risk' ||
+            pit.status === 'Spoiled Pit' ||
+            pit.compactionRating === 'Loose/Air-Pockets';
+
+          const isWarning =
+            !isDanger &&
+            (pit.coreTemperature >= 37 || pit.compactionRating === 'Moderate');
+
+          const statusLevel = isDanger ? 'danger' : isWarning ? 'warning' : 'safe';
+
+          const statusConfig = {
+            danger: {
+              badge: locale === 'hi' ? 'तुरंत सुधारें - खराब होने का खतरा' : 'Fix Now - Risk of Spoilage',
+              subtext: locale === 'hi'
+                ? 'साइलेज अधिक गर्म हो रहा है या हवा जा रही है। प्लास्टिक सील व वज़न तुरंत जांचें।'
+                : 'Silo is overheating or leaking air. Inspect plastic seal and weights immediately.',
+              badgeBg: 'bg-[#B3261E] text-white border-red-400',
+              containerBg: 'bg-[#FDECEA] dark:bg-rose-950/40 border-[#B3261E]/80 dark:border-rose-500/50',
+              textColor: 'text-[#B3261E] dark:text-rose-200',
+              icon: <AlertTriangle className="w-5 h-5 text-[#B3261E] dark:text-rose-400 shrink-0" />,
+            },
+            warning: {
+              badge: locale === 'hi' ? 'जल्द जांचें - ध्यान दें' : 'Check Soon',
+              subtext: locale === 'hi'
+                ? 'हल्की गर्मी या मध्यम दबाव। अगले 24 घंटों में पुनः तापमान मापें।'
+                : 'Moderate packing or rising warmth. Re-check core temperature in 24 hours.',
+              badgeBg: 'bg-[#C2703D] text-white border-amber-400',
+              containerBg: 'bg-[#fdf8f4] dark:bg-amber-950/40 border-[#C2703D]/80 dark:border-amber-500/50',
+              textColor: 'text-[#C2703D] dark:text-amber-200',
+              icon: <AlertTriangle className="w-5 h-5 text-[#C2703D] dark:text-amber-400 shrink-0" />,
+            },
+            safe: {
+              badge: locale === 'hi' ? 'सुरक्षित - उत्तम गुणवत्ता' : 'Safe',
+              subtext: locale === 'hi'
+                ? 'तापमान सामान्य (<38°C) व सील पूर्णतः वायुरोधी है। साइलेज सुरक्षित है।'
+                : 'Normal temperature (<38°C) and airtight seal. High quality fermentation.',
+              badgeBg: 'bg-[#1F5D3B] text-white border-emerald-400',
+              containerBg: 'bg-[#edf7f0] dark:bg-emerald-950/40 border-[#1F5D3B]/80 dark:border-emerald-500/50',
+              textColor: 'text-[#1F5D3B] dark:text-emerald-200',
+              icon: <CheckCircle2 className="w-5 h-5 text-[#1F5D3B] dark:text-emerald-400 shrink-0" />,
+            },
+          }[statusLevel];
+
           return (
             <div
               key={pit.id}
-              className={`rounded-2xl p-4 border shadow-lg ${
-                isSafe
-                  ? 'bg-slate-800/90 border-emerald-500/40'
-                  : 'bg-slate-800/90 border-rose-500/50'
-              }`}
+              className="bg-white dark:bg-slate-800 rounded-3xl p-4 sm:p-5 border-2 border-[#DCD3BF] dark:border-slate-700 shadow-sm space-y-3.5"
             >
-              <div className="flex items-center justify-between mb-2">
+              {/* Pit Header */}
+              <div className="flex items-start justify-between gap-2">
                 <div>
-                  <span className="text-xs font-extrabold text-white">{pit.pitName}</span>
-                  <span className="text-[10px] text-slate-400 ml-2">Crop: {pit.cropType}</span>
+                  <h3 className="text-base sm:text-lg font-black text-[#1A1A1A] dark:text-white leading-tight">
+                    {pit.pitName}
+                  </h3>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <span className="text-[11px] font-bold text-[#5A5243] dark:text-slate-300 bg-[#F3EEE1] dark:bg-slate-700/80 px-2.5 py-0.5 rounded-lg border border-[#DCD3BF] dark:border-slate-600">
+                      Crop: {pit.cropType}
+                    </span>
+                    <span className="text-[11px] text-[#5A5243] dark:text-slate-400 font-medium">
+                      Ensiled: {pit.ensilingDate}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                      isSafe
-                        ? 'bg-emerald-950 text-emerald-300 border-emerald-400'
-                        : 'bg-rose-950 text-rose-300 border-rose-400 animate-pulse'
+
+                <button
+                  onClick={() => {
+                    setShowLogModal(pit.id);
+                    setLogTemp(pit.coreTemperature);
+                  }}
+                  className="px-3.5 py-2.5 bg-[#F3EEE1] hover:bg-[#EAE3D2] dark:bg-slate-700 hover:dark:bg-slate-600 text-[#1A1A1A] dark:text-white text-xs font-black rounded-xl border-2 border-[#DCD3BF] dark:border-slate-600 min-h-[48px] flex items-center space-x-1.5 shrink-0 shadow-xs active:scale-95 transition-all"
+                  title="Log new temperature and inspection observation"
+                >
+                  <Thermometer className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400" />
+                  <span>+ Log Reading</span>
+                </button>
+              </div>
+
+              {/* 1. PLAIN-LANGUAGE STATUS STRIP (THE FIRST THING SHOWN BEFORE TECHNICAL METRICS) */}
+              <div
+                className={`rounded-2xl p-3 sm:p-3.5 border-2 ${statusConfig.containerBg} flex items-start space-x-3 shadow-xs`}
+              >
+                {statusConfig.icon}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <span
+                      className={`text-xs font-black uppercase px-2.5 py-0.5 rounded-full border tracking-wide shadow-xs ${statusConfig.badgeBg}`}
+                    >
+                      {statusConfig.badge}
+                    </span>
+                    <span className="text-[10px] font-bold opacity-75 capitalize">
+                      {pit.status}
+                    </span>
+                  </div>
+                  <p className="text-xs font-bold leading-snug mt-1 opacity-95">
+                    {statusConfig.subtext}
+                  </p>
+                </div>
+              </div>
+
+              {/* 2. SECONDARY TECHNICAL METRICS (SUBORDINATE TO THE PLAIN-LANGUAGE STRIP) */}
+              <div className="grid grid-cols-3 gap-2 text-center pt-0.5">
+                {/* Days Fermenting */}
+                <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-2.5 border border-[#DCD3BF] dark:border-slate-700">
+                  <div className="text-[10px] font-bold text-[#5A5243] dark:text-slate-400">
+                    {t('silage.daysEnsiled', locale)}
+                  </div>
+                  <div className="text-lg sm:text-xl font-black text-[#1A1A1A] dark:text-white mt-0.5">
+                    {pit.daysFermented} Days
+                  </div>
+                  <div className="text-[9px] text-[#1F5D3B] dark:text-emerald-400 font-bold mt-0.5">
+                    Fermenting
+                  </div>
+                </div>
+
+                {/* Core Temperature */}
+                <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-2.5 border border-[#DCD3BF] dark:border-slate-700">
+                  <div className="text-[10px] font-bold text-[#5A5243] dark:text-slate-400">
+                    {t('silage.coreTemp', locale)}
+                  </div>
+                  <div
+                    className={`text-lg sm:text-xl font-black mt-0.5 ${
+                      pit.coreTemperature > 40
+                        ? 'text-[#B3261E] dark:text-rose-400'
+                        : pit.coreTemperature >= 37
+                        ? 'text-[#C2703D] dark:text-amber-400'
+                        : 'text-[#1F5D3B] dark:text-emerald-400'
                     }`}
                   >
-                    {pit.status}
-                  </span>
-                  <button
-                    onClick={() => { setShowLogModal(pit.id); setLogTemp(pit.coreTemperature); }}
-                    className="px-2 py-0.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-[10px] font-bold rounded-lg border border-slate-600 min-h-[30px]"
-                  >
-                    + Log
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 text-center my-3">
-                <div className="bg-slate-900/80 rounded-xl p-2 border border-slate-700/60">
-                  <div className="text-[9px] text-slate-400">{t('silage.daysEnsiled', locale)}</div>
-                  <div className="text-base font-extrabold text-white">{pit.daysFermented}d</div>
-                  <div className="text-[8px] text-emerald-400">Anaerobic</div>
-                </div>
-
-                <div className="bg-slate-900/80 rounded-xl p-2 border border-slate-700/60">
-                  <div className="text-[9px] text-slate-400">{t('silage.coreTemp', locale)}</div>
-                  <div className={`text-base font-extrabold ${pit.coreTemperature > 40 ? 'text-rose-400' : 'text-emerald-400'}`}>
                     {pit.coreTemperature}°C
                   </div>
-                  <div className="text-[8px] text-slate-400">&lt; 38°C Target</div>
+                  <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-bold mt-0.5">
+                    &lt; 38°C Target
+                  </div>
                 </div>
 
-                <div className="bg-slate-900/80 rounded-xl p-2 border border-slate-700/60">
-                  <div className="text-[9px] text-slate-400">{t('silage.compaction', locale)}</div>
-                  <div className="text-xs font-bold text-slate-200 truncate mt-1">
+                {/* Compaction Rating */}
+                <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-2.5 border border-[#DCD3BF] dark:border-slate-700">
+                  <div className="text-[10px] font-bold text-[#5A5243] dark:text-slate-400">
+                    {t('silage.compaction', locale)}
+                  </div>
+                  <div className="text-xs sm:text-sm font-black text-[#1A1A1A] dark:text-slate-200 truncate mt-1">
+                    {pit.compactionRating === 'Optimum (>650 kg/m3)'
+                      ? 'Tight Seal'
+                      : pit.compactionRating === 'Moderate'
+                      ? 'Moderate'
+                      : 'Air Leaks'}
+                  </div>
+                  <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-bold mt-0.5 truncate">
                     {pit.compactionRating.split(' ')[0]}
                   </div>
-                  <div className="text-[8px] text-slate-400">Packing</div>
                 </div>
               </div>
 
-              {!isSafe && (
-                <div className="bg-rose-950/80 border border-rose-500/40 rounded-xl p-2.5 text-xs text-rose-200 flex items-start space-x-2">
-                  <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              {/* Actionable Spoilage Notice if Hazardous */}
+              {isDanger && (
+                <div className="bg-[#FDECEA] dark:bg-rose-950/60 border-2 border-[#B3261E] dark:border-rose-500/50 rounded-2xl p-3 text-xs text-[#B3261E] dark:text-rose-200 flex items-start space-x-2.5">
+                  <AlertTriangle className="w-5 h-5 text-[#B3261E] shrink-0 mt-0.5" />
                   <div>
-                    <div className="font-bold">{t('silage.heatingWarning', locale)}</div>
-                    <p className="text-[10px] text-slate-300">
-                      Internal temperature ({pit.coreTemperature}°C) exceeds safe 38°C ceiling. Check for air holes or loose cover to prevent clostridial rotting.
+                    <div className="font-black text-xs uppercase tracking-wide">
+                      {t('silage.heatingWarning', locale)}
+                    </div>
+                    <p className="text-[11px] text-[#1A1A1A] dark:text-slate-300 font-semibold mt-0.5">
+                      Temperature ({pit.coreTemperature}°C) exceeds safe 38°C limit. Inspect for puncture tears or loose cover sheets to prevent fungal spoilage.
                     </p>
                   </div>
                 </div>
               )}
 
-              {/* Log History Accordion */}
+              {/* 3. Inspection History Logs (Functionality Kept Intact) */}
               {pit.logs && pit.logs.length > 0 && (
-                <div className="mt-2.5 pt-2 border-t border-slate-700/60 text-[10px] space-y-1">
-                  <div className="font-semibold text-slate-400">Inspection History:</div>
+                <div className="pt-3 border-t border-[#DCD3BF] dark:border-slate-700 text-xs space-y-1.5">
+                  <div className="font-black text-[#5A5243] dark:text-slate-400 flex items-center justify-between">
+                    <span>Recent Inspection History:</span>
+                    <span className="text-[10px] font-medium">{pit.logs.length} logged</span>
+                  </div>
                   {pit.logs.slice(0, 2).map((lg) => (
-                    <div key={lg.id} className="flex items-center justify-between text-slate-300">
-                      <span>• {lg.date}: {lg.temperatureC}°C ({lg.compactionRating.split(' ')[0]})</span>
-                      <span className="text-slate-400 italic truncate max-w-[120px]">{lg.notes}</span>
+                    <div
+                      key={lg.id}
+                      className="flex items-center justify-between text-[#1A1A1A] dark:text-slate-300 font-medium text-[11px] bg-[#FBF8F1] dark:bg-slate-900/50 p-2 rounded-xl border border-[#DCD3BF]/60 dark:border-slate-700"
+                    >
+                      <span>
+                        • {lg.date}: <strong>{lg.temperatureC}°C</strong> ({lg.compactionRating.split(' ')[0]})
+                      </span>
+                      <span className="text-[#5A5243] dark:text-slate-400 italic truncate max-w-[120px]">
+                        {lg.notes}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -208,26 +320,26 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
       </div>
 
       {/* Scientific Silage SOP */}
-      <div className="bg-slate-800/90 border border-slate-700 rounded-2xl p-4 space-y-2">
-        <h3 className="text-xs font-bold text-white flex items-center space-x-1.5">
-          <Sparkles className="w-4 h-4 text-emerald-400" />
+      <div className="bg-[#F3EEE1] dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-4 space-y-2.5">
+        <h3 className="text-xs font-black text-[#1A1A1A] dark:text-white flex items-center space-x-2">
+          <Sparkles className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400" />
           <span>{t('silage.sopTitle', locale)}</span>
         </h3>
-        <ul className="text-xs text-slate-300 space-y-1.5 pl-1">
+        <ul className="text-xs text-[#1A1A1A] dark:text-slate-300 space-y-2 font-medium">
           <li className="flex items-start space-x-2">
-            <span className="text-emerald-400 font-bold">1.</span>
+            <span className="text-[#1F5D3B] dark:text-emerald-400 font-black">1.</span>
             <span>Harvest maize when grain milk line is at 1/2 to 2/3 stage (32-35% Dry Matter).</span>
           </li>
           <li className="flex items-start space-x-2">
-            <span className="text-emerald-400 font-bold">2.</span>
+            <span className="text-[#1F5D3B] dark:text-emerald-400 font-black">2.</span>
             <span>Chop fodder into 1.5 cm to 2.0 cm particles for maximum packing density.</span>
           </li>
           <li className="flex items-start space-x-2">
-            <span className="text-emerald-400 font-bold">3.</span>
+            <span className="text-[#1F5D3B] dark:text-emerald-400 font-black">3.</span>
             <span>Tractor compact in 15cm progressive layers to expel all oxygen.</span>
           </li>
           <li className="flex items-start space-x-2">
-            <span className="text-emerald-400 font-bold">4.</span>
+            <span className="text-[#1F5D3B] dark:text-emerald-400 font-black">4.</span>
             <span>Seal with 200-micron UV-stabilized LDPE plastic sheet under tire weights.</span>
           </li>
         </ul>
@@ -236,29 +348,36 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
       {/* Add Pit Modal */}
       {showAddPitModal && (
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-4 w-full max-w-sm space-y-3 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white">Create New Silage Pit</h3>
-              <button onClick={() => setShowAddPitModal(false)} className="text-slate-400 hover:text-white">
-                <X className="w-4 h-4" />
+          <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-800 pb-2.5">
+              <h3 className="text-base font-black">Create New Silage Pit</h3>
+              <button
+                onClick={() => setShowAddPitModal(false)}
+                className="text-slate-500 hover:text-slate-900 dark:hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreatePit} className="space-y-2.5 text-xs">
+            <form onSubmit={handleCreatePit} className="space-y-3.5 text-xs">
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Bunker/Pit Name:</label>
+                <label className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
+                  Bunker/Pit Name:
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. South Bunker #2"
                   value={newPitName}
                   onChange={(e) => setNewPitName(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-3 bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl text-[#1A1A1A] dark:text-white font-bold text-sm focus:outline-none focus:border-[#1F5D3B]"
                 />
               </div>
 
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Crop Type:</label>
+                <label className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
+                  Crop Type:
+                </label>
                 <select
                   value={newCropType}
                   onChange={(e) => {
@@ -267,7 +386,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                       setNewCropType(sel as SilageBunker['cropType']);
                     }
                   }}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white"
+                  className="w-full px-3.5 py-3 bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl text-[#1A1A1A] dark:text-white font-bold text-sm focus:outline-none focus:border-[#1F5D3B] cursor-pointer"
                 >
                   <option value="Maize">Hybrid Maize</option>
                   <option value="Sorghum">Sweet Sorghum</option>
@@ -277,27 +396,29 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               </div>
 
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Initial Core Temp (°C):</label>
+                <label className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
+                  Initial Core Temp (°C):
+                </label>
                 <input
                   type="number"
                   step="0.5"
                   value={newTemp}
                   onChange={(e) => setNewTemp(Number(e.target.value))}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white"
+                  className="w-full px-3.5 py-3 bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl text-[#1A1A1A] dark:text-white font-black text-base focus:outline-none focus:border-[#1F5D3B]"
                 />
               </div>
 
-              <div className="flex space-x-2 pt-2">
+              <div className="flex items-center space-x-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowAddPitModal(false)}
-                  className="flex-1 py-2 bg-slate-800 text-slate-300 font-bold rounded-lg min-h-[44px]"
+                  className="w-1/2 py-3.5 bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 font-black rounded-2xl border-2 border-[#DCD3BF] dark:border-slate-700 min-h-[56px] active:scale-98 transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2 bg-amber-600 text-white font-bold rounded-lg shadow min-h-[44px]"
+                  className="w-1/2 py-3.5 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black rounded-2xl shadow-lg min-h-[56px] active:scale-98 transition-all"
                 >
                   Create Pit
                 </button>
@@ -310,29 +431,36 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
       {/* Log Reading Modal */}
       {showLogModal && (
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-4 w-full max-w-sm space-y-3 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white">Log Temperature Reading</h3>
-              <button onClick={() => setShowLogModal(null)} className="text-slate-400 hover:text-white">
-                <X className="w-4 h-4" />
+          <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-800 pb-2.5">
+              <h3 className="text-base font-black">Log Temperature Reading</h3>
+              <button
+                onClick={() => setShowLogModal(null)}
+                className="text-slate-500 hover:text-slate-900 dark:hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleAddLog} className="space-y-2.5 text-xs">
+            <form onSubmit={handleAddLog} className="space-y-3.5 text-xs">
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Measured Core Temperature (°C):</label>
+                <label className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
+                  Measured Core Temperature (°C):
+                </label>
                 <input
                   type="number"
                   step="0.5"
                   required
                   value={logTemp}
                   onChange={(e) => setLogTemp(Number(e.target.value))}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white"
+                  className="w-full px-3.5 py-3 bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl text-[#1A1A1A] dark:text-white font-black text-base focus:outline-none focus:border-[#1F5D3B]"
                 />
               </div>
 
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Compaction / Plastic Seal:</label>
+                <label className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
+                  Compaction / Seal:
+                </label>
                 <select
                   value={logCompaction}
                   onChange={(e) => {
@@ -341,7 +469,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                       setLogCompaction(sel as SilageBunker['compactionRating']);
                     }
                   }}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white"
+                  className="w-full px-3.5 py-3 bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl text-[#1A1A1A] dark:text-white font-bold text-sm focus:outline-none focus:border-[#1F5D3B] cursor-pointer"
                 >
                   <option value="Optimum (>650 kg/m3)">Optimum - Sealed Tight</option>
                   <option value="Moderate">Moderate - Small Leaks Fixed</option>
@@ -350,27 +478,29 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               </div>
 
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Inspection Observations:</label>
+                <label className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
+                  Inspection Observations:
+                </label>
                 <input
                   type="text"
-                  placeholder="e.g. Clean lactic smell, no mold on face"
+                  placeholder="e.g. Clean lactic aroma, no surface mold"
                   value={logNotes}
                   onChange={(e) => setLogNotes(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white"
+                  className="w-full px-3.5 py-3 bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl text-[#1A1A1A] dark:text-white font-bold text-sm focus:outline-none focus:border-[#1F5D3B]"
                 />
               </div>
 
-              <div className="flex space-x-2 pt-2">
+              <div className="flex items-center space-x-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowLogModal(null)}
-                  className="flex-1 py-2 bg-slate-800 text-slate-300 font-bold rounded-lg min-h-[44px]"
+                  className="w-1/2 py-3.5 bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 font-black rounded-2xl border-2 border-[#DCD3BF] dark:border-slate-700 min-h-[56px] active:scale-98 transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2 bg-emerald-600 text-white font-bold rounded-lg shadow min-h-[44px]"
+                  className="w-1/2 py-3.5 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black rounded-2xl shadow-lg min-h-[56px] active:scale-98 transition-all"
                 >
                   Save Log
                 </button>

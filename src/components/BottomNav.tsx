@@ -11,6 +11,7 @@ interface BottomNavProps {
   locale: Locale;
   hasScanResult: boolean;
   activeGrade?: string;
+  theme?: 'light' | 'dark';
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({
@@ -18,8 +19,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   setActiveTab,
   locale,
   hasScanResult,
-  activeGrade
+  activeGrade,
+  theme = 'light',
 }) => {
+  const isDark = theme === 'dark';
   const tabs: { id: ActiveTab; labelKey: string; icon: React.ReactNode; badge?: string }[] = [
     {
       id: 'scan',
@@ -30,7 +33,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       id: 'scorecard',
       labelKey: 'nav.scorecard',
       icon: <Award className="w-5 h-5" />,
-      badge: activeGrade ? (activeGrade.includes('Tier A') ? 'Tier A' : 'Alert') : undefined
+      badge: activeGrade ? (activeGrade.includes('Tier A') ? 'Tier A' : 'Alert') : undefined,
     },
     {
       id: 'ration',
@@ -51,33 +54,44 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-2 py-1.5 shadow-2xl">
-      <div className="grid grid-cols-5 gap-1">
+    <nav
+      className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 backdrop-blur-md border-t px-2 py-2 shadow-2xl transition-colors"
+      style={{
+        backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(243, 238, 225, 0.95)',
+        borderColor: isDark ? '#1e293b' : '#DCD3BF',
+      }}
+    >
+      <div className="grid grid-cols-5 gap-1.5">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative flex flex-col items-center justify-center py-1 rounded-xl transition-all ${
-                isActive
-                  ? 'text-emerald-400 font-bold bg-emerald-950/60 shadow-inner'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              className="relative flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl transition-all min-h-[56px] border"
+              style={{
+                backgroundColor: isActive ? (isDark ? '#022c22' : '#edf7f0') : 'transparent',
+                borderColor: isActive ? (isDark ? '#34d399' : '#b0dec0') : 'transparent',
+                color: isActive ? (isDark ? '#34d399' : '#1F5D3B') : (isDark ? '#94a3b8' : '#5A5243'),
+              }}
             >
               <div className="relative">
                 {tab.icon}
                 {tab.badge && (
-                  <span className={`absolute -top-1.5 -right-3 text-[9px] font-extrabold px-1 rounded-full text-white shadow ${
-                    tab.badge === 'Tier A' 
-                      ? 'bg-emerald-600' 
-                      : (tab.badge === 'Alert' ? 'bg-rose-600 animate-pulse' : 'bg-amber-600')
-                  }`}>
+                  <span
+                    className={`absolute -top-1.5 -right-2 text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-full text-white shadow ${
+                      tab.badge === 'Tier A'
+                        ? 'bg-[#1F5D3B]'
+                        : tab.badge === 'Alert'
+                        ? 'bg-[#B3261E] animate-pulse'
+                        : 'bg-[#C2703D]'
+                    }`}
+                  >
                     {tab.badge}
                   </span>
                 )}
               </div>
-              <span className="text-[10px] mt-0.5 tracking-tight leading-none text-center">
+              <span className="text-[10px] mt-1 tracking-tight font-bold leading-tight text-center w-full truncate px-0.5">
                 {t(tab.labelKey, locale)}
               </span>
             </button>
