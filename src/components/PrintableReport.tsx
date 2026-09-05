@@ -65,26 +65,44 @@ export const PrintableReport: React.FC<PrintableReportProps> = ({ sample, locale
         <tbody>
           <tr>
             <td className="border border-slate-300 p-2 font-semibold">Crude Protein (CP % DM basis)</td>
-            <td className="border border-slate-300 p-2 text-center font-bold">{sample.metrics.crudeProtein}%</td>
+            <td className="border border-slate-300 p-2 text-center font-bold">
+              {sample.metrics.crudeProtein !== undefined ? `${sample.metrics.crudeProtein}%` : 'Requires Lab Test'}
+            </td>
             <td className="border border-slate-300 p-2 text-center">{sample.category === 'silage' ? 'Min 8.0%' : 'Min 20.0% (BIS Type II)'}</td>
             <td className="border border-slate-300 p-2 text-center">
-              {sample.metrics.crudeProtein >= (sample.category === 'silage' ? 8.0 : 20.0) ? '✓ Meets Reference' : '✗ Below Reference'}
+              {sample.metrics.crudeProtein !== undefined
+                ? sample.metrics.crudeProtein >= (sample.category === 'silage' ? 8.0 : 20.0)
+                  ? '✓ Meets Reference'
+                  : '✗ Below Reference'
+                : 'Pending Wet Chemistry'}
             </td>
           </tr>
           <tr>
             <td className="border border-slate-300 p-2 font-semibold">Moisture Content (%)</td>
-            <td className="border border-slate-300 p-2 text-center font-bold">{sample.metrics.moisture}%</td>
+            <td className="border border-slate-300 p-2 text-center font-bold">
+              {sample.metrics.moisture !== undefined ? `${sample.metrics.moisture}%` : 'N/A'}
+            </td>
             <td className="border border-slate-300 p-2 text-center">{sample.category === 'silage' ? 'Max 70.0%' : 'Max 11.0% (BIS)'}</td>
             <td className="border border-slate-300 p-2 text-center">
-              {sample.metrics.moisture <= (sample.category === 'silage' ? 70.0 : 11.0) ? '✓ Within Limit' : '✗ High Moisture'}
+              {sample.metrics.moisture !== undefined
+                ? sample.metrics.moisture <= (sample.category === 'silage' ? 70.0 : 11.0)
+                  ? '✓ Within Limit'
+                  : '✗ High Moisture'
+                : 'N/A'}
             </td>
           </tr>
           <tr>
             <td className="border border-slate-300 p-2 font-semibold">Acid Insoluble Ash / Sand (%)</td>
-            <td className="border border-slate-300 p-2 text-center font-bold">{sample.metrics.acidInsolubleAsh}%</td>
+            <td className="border border-slate-300 p-2 text-center font-bold">
+              {sample.metrics.acidInsolubleAsh !== undefined ? `${sample.metrics.acidInsolubleAsh}%` : 'Requires Lab Test'}
+            </td>
             <td className="border border-slate-300 p-2 text-center">Max 3.5% (BIS IS:2052)</td>
             <td className="border border-slate-300 p-2 text-center">
-              {sample.metrics.acidInsolubleAsh <= 3.5 ? '✓ Within Limit' : '✗ Excess Sand'}
+              {sample.metrics.acidInsolubleAsh !== undefined
+                ? sample.metrics.acidInsolubleAsh <= 3.5
+                  ? '✓ Within Limit'
+                  : '✗ Excess Sand'
+                : 'Pending Muffle Furnace'}
             </td>
           </tr>
           {sample.silageMetrics && (

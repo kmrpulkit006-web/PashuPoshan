@@ -81,17 +81,18 @@ export function calculatePrecisionRation(
     isCustomOrTested: false,
   };
 
-  // If active sample is silage or green fodder, use its real tested metrics!
+  // If active sample is silage or green fodder, use its real tested metrics (or standard library fallback if pending lab)!
   if (active && (active.category === 'silage' || active.category === 'green_fodder')) {
+    const defaultGreen = active.category === 'silage' ? DEFAULT_FEED_LIBRARY.maize_silage : DEFAULT_FEED_LIBRARY.green_berseem;
     greenItem = {
       slot: 'green_fodder',
       feedName: active.name,
       feedCategory: active.category,
       freshKg: greenFreshKg,
-      dryMatterPct: active.metrics.dryMatter,
-      crudeProteinPct: active.metrics.crudeProtein,
-      tdnPct: active.metrics.totalDigestibleNutrients,
-      isCustomOrTested: true,
+      dryMatterPct: active.metrics.dryMatter ?? defaultGreen.dmPct,
+      crudeProteinPct: active.metrics.crudeProtein ?? defaultGreen.cpPct,
+      tdnPct: active.metrics.totalDigestibleNutrients ?? defaultGreen.tdnPct,
+      isCustomOrTested: !active.metrics.requiresLabTest,
     };
   }
 
@@ -112,10 +113,10 @@ export function calculatePrecisionRation(
       feedName: active.name,
       feedCategory: 'dry_fodder',
       freshKg: dryFreshKg,
-      dryMatterPct: active.metrics.dryMatter,
-      crudeProteinPct: active.metrics.crudeProtein,
-      tdnPct: active.metrics.totalDigestibleNutrients,
-      isCustomOrTested: true,
+      dryMatterPct: active.metrics.dryMatter ?? DEFAULT_FEED_LIBRARY.wheat_bhusa.dmPct,
+      crudeProteinPct: active.metrics.crudeProtein ?? DEFAULT_FEED_LIBRARY.wheat_bhusa.cpPct,
+      tdnPct: active.metrics.totalDigestibleNutrients ?? DEFAULT_FEED_LIBRARY.wheat_bhusa.tdnPct,
+      isCustomOrTested: !active.metrics.requiresLabTest,
     };
   }
 
@@ -136,10 +137,10 @@ export function calculatePrecisionRation(
       feedName: active.name,
       feedCategory: 'concentrate',
       freshKg: concFreshKg,
-      dryMatterPct: active.metrics.dryMatter,
-      crudeProteinPct: active.metrics.crudeProtein,
-      tdnPct: active.metrics.totalDigestibleNutrients,
-      isCustomOrTested: true,
+      dryMatterPct: active.metrics.dryMatter ?? DEFAULT_FEED_LIBRARY.standard_pellets.dmPct,
+      crudeProteinPct: active.metrics.crudeProtein ?? DEFAULT_FEED_LIBRARY.standard_pellets.cpPct,
+      tdnPct: active.metrics.totalDigestibleNutrients ?? DEFAULT_FEED_LIBRARY.standard_pellets.tdnPct,
+      isCustomOrTested: !active.metrics.requiresLabTest,
     };
   }
 

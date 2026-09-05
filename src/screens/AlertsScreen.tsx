@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Locale, CommunityFeedAlert } from '../lib/types';
 import { t } from '../lib/i18n';
-import { getLocalAlerts, saveLocalAlert } from '../lib/storage';
-import { AlertTriangle, ShieldCheck, MapPin, Send, QrCode, CheckCircle2, Clock, Plus, X } from 'lucide-react';
+import { getLocalAlerts, saveLocalAlert, getPendingOfflineScans, syncPendingScans, PendingOfflineScan } from '../lib/storage';
+import { AlertTriangle, ShieldCheck, MapPin, Send, QrCode, CheckCircle2, Clock, Plus, X, RefreshCw, Cloud, Layers } from 'lucide-react';
 
 interface AlertsScreenProps {
   locale: Locale;
@@ -15,10 +15,51 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
   const [brand, setBrand] = useState('');
   const [issue, setIssue] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [pendingScans, setPendingScans] = useState<PendingOfflineScan[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatusMsg, setSyncStatusMsg] = useState<string>('');
+
+  const refreshPending = () => {
+    setPendingScans(getPendingOfflineScans());
+  };
 
   useEffect(() => {
     setAlerts(getLocalAlerts());
+    refreshPending();
+
+    const handleSyncChange = () => refreshPending();
+    window.addEventListener('pashuposhan_pending_sync_changed', handleSyncChange);
+    return () => {
+      window.removeEventListener('pashuposhan_pending_sync_changed', handleSyncChange);
+    };
   }, []);
+
+  const handleManualSync = async () => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      alert('You are currently offline. Please connect to Wi-Fi or mobile cellular data to sync pending scans.');
+      return;
+    }
+
+    setIsSyncing(true);
+    setSyncStatusMsg('Connecting to AI Vision Triage service...');
+
+    try {
+      const { successful, failed } = await syncPendingScans((current, total) => {
+        setSyncStatusMsg(`Syncing scan ${current} of ${total}...`);
+      });
+
+      refreshPending();
+      setIsSyncing(false);
+      if (successful > 0) {
+        alert(`Sync Complete (सिंक संपन्न): Successfully processed ${successful} offline scan(s).`);
+      } else if (failed > 0) {
+        alert(`Sync notice: ${failed} scan(s) could not be synchronized. Please check network connection.`);
+      }
+    } catch (err: any) {
+      setIsSyncing(false);
+      alert('Sync failed: ' + (err.message || 'Network error'));
+    }
+  };
 
   const handleSubmitReport = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +105,66 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
 
   return (
     <div className="p-4 space-y-4 pb-28 print:hidden">
+      {/* Offline Pending Scans Sync Manager Card */}
+      {pendingScans.length > 0 && (
+        <div className="bg-[#fdf8f4] dark:bg-amber-950/70 border-2 border-[#C2703D] dark:border-amber-500 rounded-2xl p-4 shadow-md space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-xl bg-amber-200 dark:bg-amber-500/20 text-[#C2703D] dark:text-amber-400 flex items-center justify-center font-black">
+                <Cloud className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-black text-[#1A1A1A] dark:text-white">
+                  Offline Scans Pending Sync ({pendingScans.length})
+                </h3>
+                <span className="text-[10px] text-[#5A5243] dark:text-amber-200 block">
+                  ऑफ़लाइन स्कैन अपलोड कतार
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#C2703D] text-white animate-pulse">
+              Waiting for network
+            </span>
+          </div>
+
+          <div className="space-y-1.5 max-h-36 overflow-y-auto">
+            {pendingScans.map((scan) => (
+              <div
+                key={scan.id}
+                className="flex items-center justify-between p-2 rounded-xl bg-white/80 dark:bg-slate-900 border border-[#DCD3BF] dark:border-slate-800 text-xs"
+              >
+                <div className="flex items-center space-x-2 min-w-0">
+                  <span className="text-base shrink-0">
+                    {scan.category === 'silage' ? '🌾' : '🌽'}
+                  </span>
+                  <div className="min-w-0">
+                    <span className="font-bold capitalize truncate block text-[#1A1A1A] dark:text-white">
+                      {scan.category.replace('_', ' ')}
+                    </span>
+                    <span className="text-[9px] text-[#5A5243] dark:text-slate-400">
+                      {new Date(scan.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold text-[#C2703D] dark:text-amber-400">
+                  Ready to sync
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            disabled={isSyncing}
+            onClick={handleManualSync}
+            className="w-full py-3 px-4 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs sm:text-sm rounded-xl shadow-md active:scale-98 transition-all flex items-center justify-center space-x-2 min-h-[56px] disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span>{isSyncing ? syncStatusMsg : 'Sync Now (अभी सिंक करें)'}</span>
+          </button>
+        </div>
+      )}
+
       {/* Title */}
       <div className="bg-field-surface dark:bg-slate-900 border border-field-border dark:border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
         <div className="flex items-start justify-between gap-3">

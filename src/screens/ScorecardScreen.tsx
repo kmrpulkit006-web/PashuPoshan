@@ -154,7 +154,37 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
           )}
         </div>
 
-        {/* 5. Share, Print & Retest Buttons (Min 56px Touch Target) */}
+        {/* 5. Accredited Lab Testing & Verification Referral */}
+        <div className="bg-[#edf7f0] dark:bg-emerald-950/40 border-2 border-[#1F5D3B]/40 dark:border-emerald-500/30 rounded-2xl p-4 space-y-2.5 shadow-sm text-[#1A1A1A] dark:text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <FlaskConical className="w-5 h-5 text-[#1F5D3B] dark:text-emerald-400" />
+              <span className="text-xs font-black text-[#1F5D3B] dark:text-emerald-300 uppercase tracking-wide">
+                Accredited Lab Referral (प्रमाणित प्रयोगशाला)
+              </span>
+            </div>
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#1F5D3B] text-white">
+              BIS / NDDB / DAHD
+            </span>
+          </div>
+          <p className="text-xs text-[#5A5243] dark:text-slate-300 leading-relaxed font-semibold">
+            Aflatoxin, crude protein, and fiber require certified wet-chemistry testing (ELISA / NIRS). Not determinable from photo triage. Confirmatory testing by an accredited district lab is advised.
+          </p>
+          <div className="pt-1 flex items-center justify-between">
+            <span className="text-xs font-bold text-[#1A1A1A] dark:text-slate-200">
+              National Dairy Helpline: <strong>1962</strong>
+            </span>
+            <a
+              href="tel:1962"
+              className="px-3 py-2 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs rounded-xl shadow min-h-[44px] flex items-center space-x-1.5"
+            >
+              <PhoneCall className="w-3.5 h-3.5" />
+              <span>Call Helpline 1962</span>
+            </a>
+          </div>
+        </div>
+
+        {/* 6. Share, Print & Retest Buttons (Min 56px Touch Target) */}
         <div className="grid grid-cols-3 gap-2.5 pt-1">
           <button
             onClick={handleShare}

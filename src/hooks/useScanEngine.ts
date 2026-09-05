@@ -1,7 +1,16 @@
 import { useState, useRef } from 'react';
-import { FeedSample, FeedCategory } from '../lib/types';
-import { PRESET_FEED_SCENARIOS, analyzeCanvasImageData } from '../lib/feedAnalysisEngine';
-import { saveLocalScan } from '../lib/storage';
+import { FeedSample, FeedCategory, VisualAnalysisResult } from '../lib/types';
+import {
+  PRESET_FEED_SCENARIOS,
+  analyzeCanvasImageData,
+  createFeedSampleFromVisualAnalysis,
+  KNOWN_REFERENCE_WHITE,
+} from '../lib/feedAnalysisEngine';
+import {
+  saveLocalScan,
+  queuePendingOfflineScan,
+  createOfflinePlaceholderSample,
+} from '../lib/storage';
 import { compressImage } from '../lib/imageStorage';
 import confetti from 'canvas-confetti';
 
@@ -13,6 +22,7 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
   const [scanMode, setScanMode] = useState<'vision' | 'strip'>('vision');
   const [category, setCategory] = useState<FeedCategory>('silage');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingMessage, setProcessingMessage] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [stripColor, setStripColor] = useState<'yellow' | 'magenta' | 'green'>('yellow');
   const [showQrScanner, setShowQrScanner] = useState(false);
@@ -21,6 +31,7 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
 
   const handleSelectPreset = (scenario: FeedSample) => {
     setIsProcessing(true);
+    setProcessingMessage('Loading reference lab control dataset...');
     setTimeout(() => {
       setIsProcessing(false);
       saveLocalScan(scenario);
@@ -28,54 +39,119 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
         confetti({ particleCount: 60, spread: 60, origin: { y: 0.8 } });
       }
       onScanComplete(scenario);
-    }, 900);
+    }, 800);
   };
 
-  const processLiveImageWithCanvas = (imgUri: string) => {
+  /**
+   * Process a captured image:
+   * 1. If in vision mode: POST to /api/analyze-visual (Google Gemini 1.5 Flash Vision triage).
+   *    If offline or network fails, queue to local offline storage queue with pending status.
+   * 2. If in strip mode: Calibrated colorimetric strip reading using reference card & CIEDE2000.
+   */
+  const processLiveImage = async (imgUri: string) => {
     setIsProcessing(true);
 
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = imgUri;
+    if (scanMode === 'vision') {
+      setProcessingMessage('Analyzing image with AI (AI द्वारा छवि का विश्लेषण हो रहा है)...');
 
-    img.onerror = () => {
-      setIsProcessing(false);
-      alert('Failed to decode image data. Please ensure the file is not corrupt.');
-    };
+      try {
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+          throw new Error('Device is currently offline');
+        }
 
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 120;
-      canvas.height = 120;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        setIsProcessing(false);
-        alert('Canvas context unavailable on this device.');
-        return;
-      }
+        const res = await fetch('/api/analyze-visual', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageBase64: imgUri,
+            category,
+          }),
+        });
 
-      ctx.drawImage(img, 0, 0, 120, 120);
-      const imageData = ctx.getImageData(0, 0, 120, 120);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ error: 'AI visual triage service unavailable' }));
+          throw new Error(errData.error || `Server responded with ${res.status}`);
+        }
 
-      let colorRgb = undefined;
-      if (scanMode === 'strip') {
-        if (stripColor === 'magenta') colorRgb = { r: 190, g: 30, b: 130 }; // Adulterated Urea
-        else if (stripColor === 'green') colorRgb = { r: 40, g: 180, b: 160 }; // High pH
-        else colorRgb = { r: 240, g: 210, b: 50 }; // Pure Yellow
-      }
+        const visualResult: VisualAnalysisResult = await res.json();
+        const sample = createFeedSampleFromVisualAnalysis(category, visualResult, imgUri);
+        saveLocalScan(sample);
 
-      setTimeout(() => {
-        setIsProcessing(false);
-        const analyzed = analyzeCanvasImageData(category, imageData, scanMode === 'strip', colorRgb);
-        analyzed.imageUrl = imgUri;
-        saveLocalScan(analyzed);
-
-        if (analyzed.overallGrade.includes('Tier A')) {
+        if (sample.overallGrade.includes('Tier A')) {
           confetti({ particleCount: 50, spread: 70, origin: { y: 0.7 } });
         }
-        onScanComplete(analyzed);
-      }, 1500);
-    };
+        setIsProcessing(false);
+        onScanComplete(sample);
+      } catch (err: any) {
+        console.warn('Online AI analysis unavailable or offline. Falling back to offline sync queue:', err);
+
+        // Save photo to pending sync queue
+        const pending = queuePendingOfflineScan({
+          category,
+          photoBase64: imgUri,
+          timestamp: new Date().toISOString(),
+          scanMode: 'vision',
+        });
+
+        const fallbackSample = createOfflinePlaceholderSample(category, imgUri, pending.id);
+        saveLocalScan(fallbackSample);
+
+        setIsProcessing(false);
+        alert(
+          'Notice (सूचना): You are currently offline or the AI server is unavailable. Your scan photo has been securely saved to the Offline Sync Queue and will analyze automatically when online.'
+        );
+        onScanComplete(fallbackSample);
+      }
+    } else {
+      // Strip Mode: Calibrated Colorimetric Reading
+      setProcessingMessage('Calibrating strip with reference card (CIEDE2000)...');
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = imgUri;
+
+      img.onerror = () => {
+        setIsProcessing(false);
+        alert('Failed to decode image data. Please ensure the file is not corrupt.');
+      };
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 120;
+        canvas.height = 120;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          setIsProcessing(false);
+          alert('Canvas context unavailable on this device.');
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, 120, 120);
+        const imageData = ctx.getImageData(0, 0, 120, 120);
+
+        let colorRgb = { r: 240, g: 210, b: 50 }; // Default Yellow
+        if (stripColor === 'magenta') colorRgb = { r: 190, g: 30, b: 130 }; // Adulterated Urea
+        else if (stripColor === 'green') colorRgb = { r: 50, g: 170, b: 150 }; // High pH
+
+        setTimeout(() => {
+          setIsProcessing(false);
+          const analyzed = analyzeCanvasImageData(
+            category,
+            imageData,
+            true,
+            colorRgb,
+            KNOWN_REFERENCE_WHITE
+          );
+          analyzed.imageUrl = imgUri;
+          saveLocalScan(analyzed);
+
+          if (analyzed.overallGrade.includes('Tier A')) {
+            confetti({ particleCount: 50, spread: 70, origin: { y: 0.7 } });
+          }
+          onScanComplete(analyzed);
+        }, 1200);
+      };
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,13 +162,13 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
     reader.onload = async () => {
       const rawUri = reader.result as string;
       try {
-        const compressedUri = await compressImage(rawUri, 400, 300, 0.65);
+        const compressedUri = await compressImage(rawUri, 500, 375, 0.7);
         setSelectedImage(compressedUri);
-        processLiveImageWithCanvas(compressedUri);
+        processLiveImage(compressedUri);
       } catch (err) {
         console.error('Image compression failure:', err);
         setSelectedImage(rawUri);
-        processLiveImageWithCanvas(rawUri);
+        processLiveImage(rawUri);
       }
     };
     reader.onerror = () => {
@@ -122,6 +198,7 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
     category,
     setCategory,
     isProcessing,
+    processingMessage,
     selectedImage,
     stripColor,
     setStripColor,
@@ -134,3 +211,4 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
     closeQrScanner,
   };
 }
+

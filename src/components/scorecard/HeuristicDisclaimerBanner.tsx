@@ -10,21 +10,43 @@ export const HeuristicDisclaimerBanner: React.FC<HeuristicDisclaimerBannerProps>
   if (sample.isPrototypeHeuristic || !sample.isSimulated) {
     return (
       <div
-        className="bg-[#fdf8f4] dark:bg-amber-950 border-2 border-[#C2703D] dark:border-amber-500/70 rounded-2xl p-3.5 flex items-start space-x-3 text-[#1A1A1A] dark:text-amber-100 shadow-sm"
+        className="bg-[#fdf8f4] dark:bg-amber-950/50 border-2 border-[#C2703D] dark:border-amber-500/70 rounded-2xl p-4 space-y-2 text-[#1A1A1A] dark:text-amber-100 shadow-sm"
         role="alert"
       >
-        <div className="w-8 h-8 rounded-xl bg-[#f3d6c4] dark:bg-amber-500/20 border border-[#C2703D] dark:border-amber-400/40 flex items-center justify-center shrink-0 mt-0.5">
-          <AlertTriangle className="w-5 h-5 text-[#C2703D] dark:text-amber-400" />
-        </div>
-        <div className="space-y-1">
-          <div className="text-xs font-black uppercase tracking-wider text-[#C2703D] dark:text-amber-300">
-            On-Farm Rapid Screening Notice
+        <div className="flex items-center space-x-2.5">
+          <div className="w-7 h-7 rounded-xl bg-[#f3d6c4] dark:bg-amber-500/20 border border-[#C2703D] dark:border-amber-400/40 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-4 h-4 text-[#C2703D] dark:text-amber-400" />
           </div>
-          <p className="text-[11px] text-[#5A5243] dark:text-amber-200/90 leading-relaxed font-semibold">
-            Values are optical screening estimates from smartphone camera pixels and test strips. They do not substitute official certified laboratory wet-chemistry or veterinary diagnosis.
-          </p>
-          <div className="text-[10px] text-[#C2703D] dark:text-amber-300/80 font-bold">
-            Roadmap: Quantized MobileNetV3 + Portable Bluetooth NIR Spectrometry.
+          <div className="text-xs font-black uppercase tracking-wider text-[#C2703D] dark:text-amber-300">
+            Field Triage Transparency Notice (जांच पारदर्शिता)
+          </div>
+        </div>
+
+        <p className="text-xs text-[#5A5243] dark:text-amber-200/90 leading-relaxed font-semibold">
+          This system provides rapid initial screening for farm-gate decision support. It does not replace official statutory laboratory wet-chemistry.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
+          <div className="bg-white/80 dark:bg-slate-900/80 p-2.5 rounded-xl border border-emerald-300 dark:border-emerald-800">
+            <span className="font-black text-[#1F5D3B] dark:text-emerald-300 block mb-0.5">
+              ✓ Determinable from Phone Triage:
+            </span>
+            <ul className="text-[#5A5243] dark:text-slate-300 space-y-0.5 list-disc pl-3 font-medium">
+              <li>Visible surface mold & discoloration</li>
+              <li>Foreign matter clumps (stones, plastic)</li>
+              <li>Calibrated test strip pH & Urea spike</li>
+            </ul>
+          </div>
+
+          <div className="bg-white/80 dark:bg-slate-900/80 p-2.5 rounded-xl border border-amber-300 dark:border-amber-800">
+            <span className="font-black text-[#C2703D] dark:text-amber-300 block mb-0.5">
+              ✗ Requires Certified Wet Chemistry:
+            </span>
+            <ul className="text-[#5A5243] dark:text-slate-300 space-y-0.5 list-disc pl-3 font-medium">
+              <li>Aflatoxin ppb (ELISA / HPLC)</li>
+              <li>Crude Protein % (Kjeldahl digestion)</li>
+              <li>Acid Insoluble Ash % (Incineration)</li>
+            </ul>
           </div>
         </div>
       </div>

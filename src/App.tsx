@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Locale, FeedSample } from './lib/types';
-import { getLocalScans } from './lib/storage';
+import { getLocalScans, getPendingOfflineScans, syncPendingScans } from './lib/storage';
 import { MobileHeader } from './components/MobileHeader';
 import { BottomNav, ActiveTab } from './components/BottomNav';
 import { ScanScreen } from './screens/ScanScreen';
@@ -46,6 +46,9 @@ export const App: React.FC = () => {
     return loaded[0];
   });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [pendingScansCount, setPendingScansCount] = useState<number>(() => {
+    return typeof window !== 'undefined' ? getPendingOfflineScans().length : 0;
+  });
 
   useEffect(() => {
     const isDark = theme === 'dark';
@@ -67,11 +70,29 @@ export const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
+    const handleOnline = () => {
+      setIsOnline(true);
+      // Auto-retry pending offline scans when connectivity returns
+      syncPendingScans().then(result => {
+        if (result.successful > 0) {
+          const freshScans = getLocalScans();
+          if (freshScans.length > 0) {
+            setActiveSample(freshScans[0]);
+          }
+        }
+      }).catch(err => console.warn('Background auto sync notice:', err));
+    };
+
     const handleOffline = () => setIsOnline(false);
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
+    // Track changes to offline sync queue
+    const handleSyncChanged = (e: any) => {
+      setPendingScansCount(e.detail?.count ?? getPendingOfflineScans().length);
+    };
+    window.addEventListener('pashuposhan_pending_sync_changed', handleSyncChanged);
 
     // Browser History (Back/Forward) & Hash Routing support
     const handlePopState = (e: PopStateEvent) => {
@@ -95,6 +116,7 @@ export const App: React.FC = () => {
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('pashuposhan_pending_sync_changed', handleSyncChanged);
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('hashchange', handleHashChange);
     };
@@ -130,6 +152,7 @@ export const App: React.FC = () => {
               isOnline={isOnline}
               theme={theme}
               setTheme={setTheme}
+              pendingScansCount={pendingScansCount}
             />
 
             {/* Dynamic Screen Content */}
@@ -176,6 +199,7 @@ export const App: React.FC = () => {
               hasScanResult={Boolean(activeSample)}
               activeGrade={activeSample?.overallGrade}
               theme={theme}
+              pendingScansCount={pendingScansCount}
             />
           </div>
         </div>

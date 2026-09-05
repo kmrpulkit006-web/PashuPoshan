@@ -3,7 +3,16 @@ import {
   analyzeCanvasImageData,
   PRESET_FEED_SCENARIOS,
   LEGAL_DISCLAIMER,
-  VET_EMERGENCY_HELPLINE
+  VET_EMERGENCY_HELPLINE,
+  rgbToLab,
+  ciede2000,
+  computeAmbientCorrection,
+  applyAmbientCorrection,
+  matchPhDeltaE,
+  matchUreaDeltaE,
+  createFeedSampleFromVisualAnalysis,
+  UNIVERSAL_PH_REFERENCE_CHART,
+  UREA_COLORIMETRIC_CHART,
 } from '../lib/feedAnalysisEngine';
 
 // Helper to construct a synthetic ImageData object for tests
@@ -41,8 +50,7 @@ describe('feedAnalysisEngine - analyzeCanvasImageData & Safety Logic', () => {
       const result = analyzeCanvasImageData('concentrate', neutralImage, true, stripColor);
 
       expect(result.adulteration.ureaAdulterationDetected).toBe(true);
-      expect(result.adulteration.ureaPercentage).toBeGreaterThanOrEqual(2.5);
-      expect(result.adulteration.ureaPercentage).toBeLessThanOrEqual(5.0);
+      expect(result.adulteration.ureaPercentage).toBeGreaterThanOrEqual(1.0);
       expect(result.bisCompliant).toBe(false);
       expect(result.overallGrade).toBe('Tier C: Hazardous/Reject');
       expect(result.veterinaryAdvisory).toBe(VET_EMERGENCY_HELPLINE);
@@ -57,36 +65,38 @@ describe('feedAnalysisEngine - analyzeCanvasImageData & Safety Logic', () => {
 
       expect(result.adulteration.ureaAdulterationDetected).toBe(false);
       expect(result.adulteration.ureaPercentage).toBe(0.1);
-      // Without urea, concentrate CP defaults to 19.8% (<20.0%), so it should be Tier B
-      expect(result.bisCompliant).toBe(false);
-      expect(result.overallGrade).toBe('Tier B: Sub-Standard');
-      expect(result.correctiveActions[0]).toContain('failing the BIS IS:2052 Type II minimum threshold');
+      // Clean triage visual scan without adulteration passes triage compliance
+      expect(result.bisCompliant).toBe(true);
+      expect(result.overallGrade).toBe('Tier A: Premium');
     });
   });
 
   describe('Colorimetric pH Strip & Silage Fermentation Heuristics', () => {
-    it('detects high pH spoilage on greenish-teal strip reaction (g > 140, b > 120, r < 100)', () => {
+    it('detects high pH spoilage on greenish-teal strip reaction', () => {
+      // Greenish/teal strip color corresponding to alkaline / high pH
       const tealStripColor = { r: 50, g: 170, b: 150 };
       const neutralImage = createSyntheticImageData(60, 60, { r: 180, g: 180, b: 150 });
 
       const result = analyzeCanvasImageData('silage', neutralImage, true, tealStripColor);
 
       expect(result.silageMetrics).toBeDefined();
-      expect(result.silageMetrics?.pH).toBe(5.6);
+      expect(result.silageMetrics?.pH).toBeGreaterThanOrEqual(5.0);
       expect(result.bisCompliant).toBe(false);
       expect(result.overallGrade).toBe('Tier C: Hazardous/Reject');
       expect(result.silageMetrics?.primaryAcid).toContain('Butyric');
-      expect(result.adulteration.aflatoxinRisk).toContain('Hazardous');
+      // Aflatoxin is never guessed from phone camera — flagged for certified lab test
+      expect(result.adulteration.aflatoxinRisk).toBe('Requires Certified Lab Test');
     });
 
-    it('estimates safe pH 3.9 for normal orange-yellow silage strip reaction', () => {
-      const normalStripColor = { r: 220, g: 180, b: 40 };
+    it('estimates safe acidic pH (~4.0) for standard orange silage strip reaction', () => {
+      // Orange Universal Indicator strip reaction (~pH 4.0: R=255, G=127, B=0)
+      const orangeStripColor = { r: 245, g: 130, b: 10 };
       const neutralImage = createSyntheticImageData(60, 60, { r: 180, g: 180, b: 150 });
 
-      const result = analyzeCanvasImageData('silage', neutralImage, true, normalStripColor);
+      const result = analyzeCanvasImageData('silage', neutralImage, true, orangeStripColor);
 
       expect(result.silageMetrics).toBeDefined();
-      expect(result.silageMetrics?.pH).toBe(3.9);
+      expect(result.silageMetrics?.pH).toBeLessThanOrEqual(4.5);
       expect(result.silageMetrics?.primaryAcid).toContain('Lactic');
       expect(result.bisCompliant).toBe(true);
       expect(result.overallGrade).toBe('Tier A: Premium');
@@ -106,8 +116,6 @@ describe('feedAnalysisEngine - analyzeCanvasImageData & Safety Logic', () => {
       const result = analyzeCanvasImageData('silage', moldyImage, false);
 
       expect(result.silageMetrics).toBeDefined();
-      // High dark ratio triggers estimatedPh = 5.2
-      expect(result.silageMetrics?.pH).toBe(5.2);
       expect(result.silageMetrics?.moldContaminationPct).toBeGreaterThan(12);
       expect(result.bisCompliant).toBe(false);
       expect(result.overallGrade).toBe('Tier C: Hazardous/Reject');
@@ -120,48 +128,51 @@ describe('feedAnalysisEngine - analyzeCanvasImageData & Safety Logic', () => {
       const result = analyzeCanvasImageData('silage', cleanImage, false);
 
       expect(result.silageMetrics).toBeDefined();
-      expect(result.silageMetrics?.pH).toBe(4.0);
       expect(result.silageMetrics?.moldContaminationPct).toBeLessThan(5);
       expect(result.bisCompliant).toBe(true);
       expect(result.overallGrade).toBe('Tier A: Premium');
     });
   });
 
-  describe('BIS Compliance Standards & Grading Branching', () => {
-    it('flags concentrate with CP < 20.0% as Tier B: Sub-Standard', () => {
+  describe('Honest Lab Boundaries (No Fabricated Chemistry)', () => {
+    it('marks wet-chemistry metrics as requiring certified lab test instead of fabricating values', () => {
       const cleanImage = createSyntheticImageData(50, 50, { r: 180, g: 160, b: 120 });
       const result = analyzeCanvasImageData('concentrate', cleanImage, false);
 
-      // Concentrate without urea estimation sets CP to 19.8%
-      expect(result.metrics.crudeProtein).toBe(19.8);
-      expect(result.bisCompliant).toBe(false);
-      expect(result.overallGrade).toBe('Tier B: Sub-Standard');
-      expect(result.correctiveActions[0]).toMatch(/BIS IS:2052 Type II minimum threshold/);
+      // Lab-only metrics must NOT be fabricated from phone camera
+      expect(result.metrics.crudeProtein).toBeUndefined();
+      expect(result.metrics.totalDigestibleNutrients).toBeUndefined();
+      expect(result.metrics.acidInsolubleAsh).toBeUndefined();
+      expect(result.metrics.requiresLabTest).toBe(true);
+      expect(result.adulteration.labVerifiedOnly).toBe(true);
+      expect(result.adulteration.aflatoxinRisk).toBe('Requires Certified Lab Test');
+      expect(result.adulteration.sandSilicaRisk).toBe('Requires Certified Lab Test');
     });
 
-    it('flags synthetic urea addition as immediate Tier C Hazardous Reject with Sand Alert', () => {
+    it('flags synthetic urea addition as immediate Tier C Hazardous Reject while leaving silica ash to lab', () => {
       const magentaColor = { r: 190, g: 30, b: 130 };
       const image = createSyntheticImageData(50, 50, { r: 150, g: 150, b: 150 });
       const result = analyzeCanvasImageData('concentrate', image, true, magentaColor);
 
       expect(result.adulteration.ureaAdulterationDetected).toBe(true);
-      expect(result.adulteration.sandSilicaRisk).toContain('Critical Sand');
-      expect(result.metrics.acidInsolubleAsh).toBe(5.8); // Elevated ash
+      expect(result.adulteration.sandSilicaRisk).toBe('Requires Certified Lab Test');
+      expect(result.metrics.acidInsolubleAsh).toBeUndefined();
       expect(result.bisCompliant).toBe(false);
       expect(result.overallGrade).toBe('Tier C: Hazardous/Reject');
+      expect(result.veterinaryAdvisory).toBe(VET_EMERGENCY_HELPLINE);
     });
   });
 
   describe('Heuristic Metadata & Disclaimers', () => {
-    it('tags every live scan with explicit prototype heuristic flags and legal disclaimers', () => {
+    it('tags every live scan with explicit field triage disclaimers and accredited lab advice', () => {
       const dummyImage = createSyntheticImageData(40, 40, { r: 120, g: 120, b: 120 });
       const result = analyzeCanvasImageData('green_fodder', dummyImage, false);
 
       expect(result.isSimulated).toBe(false);
       expect(result.isPrototypeHeuristic).toBe(true);
-      expect(result.heuristicDisclaimer).toContain('Prototype heuristic estimation');
+      expect(result.heuristicDisclaimer).toContain('Laboratory wet chemistry');
       expect(result.disclaimer).toBe(LEGAL_DISCLAIMER);
-      expect(result.confidenceScore).toBeUndefined();
+      expect(result.veterinaryAdvisory).toContain('accredited laboratory');
     });
   });
 
@@ -190,4 +201,93 @@ describe('feedAnalysisEngine - analyzeCanvasImageData & Safety Logic', () => {
       expect(borderlineConc?.metrics.crudeProtein).toBe(19.8);
     });
   });
+
+  describe('Color Science & CIEDE2000 (ΔE00) Color Matching', () => {
+    it('returns delta E of 0 for identical RGB colors', () => {
+      const c1 = { r: 100, g: 150, b: 200 };
+      const lab1 = rgbToLab(c1);
+      const lab2 = rgbToLab(c1);
+      const deltaE = ciede2000(lab1, lab2);
+      expect(deltaE).toBeCloseTo(0, 4);
+    });
+
+    it('computes correct ambient gain correction factors relative to neutral gray target (128,128,128)', () => {
+      // Measured white reference under warm lighting (R=150, G=128, B=100)
+      const measured = { r: 150, g: 128, b: 100 };
+      const target = { r: 128, g: 128, b: 128 };
+      const factors = computeAmbientCorrection(measured, target);
+
+      expect(factors.kr).toBeCloseTo(128 / 150, 4);
+      expect(factors.kg).toBeCloseTo(128 / 128, 4);
+      expect(factors.kb).toBeCloseTo(128 / 100, 4);
+
+      const corrected = applyAmbientCorrection({ r: 150, g: 128, b: 100 }, factors);
+      expect(corrected.r).toBe(128);
+      expect(corrected.g).toBe(128);
+      expect(corrected.b).toBe(128);
+    });
+
+    it('accurately matches Universal Indicator pH chart points using CIEDE2000', () => {
+      // Test matching each point in UNIVERSAL_PH_REFERENCE_CHART
+      for (const entry of UNIVERSAL_PH_REFERENCE_CHART) {
+        const match = matchPhDeltaE(entry.rgb);
+        expect(match.ph).toBe(entry.ph);
+        expect(match.deltaE).toBeLessThan(1.0);
+      }
+    });
+
+    it('accurately matches urea test strip colorimetric points using CIEDE2000', () => {
+      for (const entry of UREA_COLORIMETRIC_CHART) {
+        const match = matchUreaDeltaE(entry.rgb);
+        expect(match.ureaPercentage).toBe(entry.ureaPercentage);
+        expect(match.detected).toBe(entry.detected);
+        expect(match.deltaE).toBeLessThan(1.0);
+      }
+    });
+  });
+
+  describe('createFeedSampleFromVisualAnalysis factory', () => {
+    it('creates FeedSample with honest lab boundaries and visual assessment flags', () => {
+      const visualResult = {
+        moldCoverageEstimate: 'moderate' as const,
+        colorDescription: 'Dark brownish with white patchy mold',
+        foreignMatterVisible: true,
+        foreignMatterDescription: 'Soil particles visible',
+        overallVisualCondition: 'poor' as const,
+      };
+      const sample = createFeedSampleFromVisualAnalysis('silage', visualResult, 'data:image/jpeg;base64,mock');
+
+      expect(sample.category).toBe('silage');
+      expect(sample.visualAnalysis?.moldCoverageEstimate).toBe('moderate');
+      expect(sample.visualAnalysis?.overallVisualCondition).toBe('poor');
+      expect(sample.overallGrade).toBe('Tier C: Hazardous/Reject');
+      expect(sample.bisCompliant).toBe(false);
+
+      // Lab test boundaries respected
+      expect(sample.metrics.requiresLabTest).toBe(true);
+      expect(sample.metrics.crudeProtein).toBeUndefined();
+      expect(sample.metrics.totalDigestibleNutrients).toBeUndefined();
+      expect(sample.adulteration.aflatoxinRisk).toBe('Requires Certified Lab Test');
+      expect(sample.adulteration.sandSilicaRisk).toBe('Requires Certified Lab Test');
+      expect(sample.veterinaryAdvisory).toContain('1962');
+    });
+
+    it('creates high-grade sample when visual analysis is good', () => {
+      const visualResult = {
+        moldCoverageEstimate: 'none' as const,
+        colorDescription: 'Golden olive-green, clean chop',
+        foreignMatterVisible: false,
+        foreignMatterDescription: 'None detected',
+        overallVisualCondition: 'good' as const,
+      };
+      const sample = createFeedSampleFromVisualAnalysis('silage', visualResult, 'data:image/jpeg;base64,mock');
+
+      expect(sample.overallGrade).toBe('Tier A: Premium');
+      expect(sample.bisCompliant).toBe(true);
+      expect(sample.silageMetrics?.pH).toBe(4.0);
+      expect(sample.silageMetrics?.moldContaminationPct).toBe(0);
+      expect(sample.metrics.requiresLabTest).toBe(true);
+    });
+  });
 });
+

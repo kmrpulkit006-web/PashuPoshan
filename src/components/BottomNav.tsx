@@ -12,6 +12,7 @@ interface BottomNavProps {
   hasScanResult: boolean;
   activeGrade?: string;
   theme?: 'light' | 'dark';
+  pendingScansCount?: number;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({
@@ -21,6 +22,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   hasScanResult,
   activeGrade,
   theme = 'light',
+  pendingScansCount = 0,
 }) => {
   const isDark = theme === 'dark';
   const tabs: { id: ActiveTab; labelKey: string; icon: React.ReactNode; badge?: string }[] = [
@@ -28,6 +30,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       id: 'scan',
       labelKey: 'nav.scan',
       icon: <ScanLine className="w-5 h-5" />,
+      badge: pendingScansCount > 0 ? `${pendingScansCount}` : undefined,
     },
     {
       id: 'scorecard',

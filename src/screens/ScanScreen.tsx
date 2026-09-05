@@ -29,6 +29,7 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
     category,
     setCategory,
     isProcessing,
+    processingMessage,
     selectedImage,
     stripColor,
     setStripColor,
@@ -184,7 +185,7 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
             {/* Viewfinder Corner Framing Guide */}
             <div className="absolute inset-3 border border-emerald-400/30 rounded-2xl pointer-events-none" />
 
-            {/* Instruction Content Stack (Clean vertical layout, zero overlap) */}
+            {/* Instruction Content Stack */}
             <div className="text-center space-y-2 z-10 p-2 max-w-xs">
               <div className="w-14 h-14 rounded-full bg-[#1F5D3B]/40 border-2 border-emerald-400 text-emerald-300 flex items-center justify-center mx-auto shadow-xl">
                 {scanMode === 'vision' ? <Camera className="w-7 h-7" /> : <FlaskConical className="w-7 h-7" />}
@@ -193,29 +194,48 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
                 <p className="text-sm font-black text-white leading-snug">
                   {scanMode === 'vision'
                     ? t('scan.pointCamera', locale)
-                    : t('scan.alignStrip', locale)}
+                    : 'Place strip next to reference card inside the box'}
                 </p>
                 <p className="text-[11px] text-slate-300 mt-1 font-semibold">
-                  {t('scan.lightingTip', locale)}
+                  {scanMode === 'vision'
+                    ? t('scan.lightingTip', locale)
+                    : 'स्ट्रिप को बॉक्स के अंदर संदर्भ कार्ड (सफेद पेपर) के पास रखें'}
                 </p>
               </div>
-              <div className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-[10px] text-emerald-300 font-mono font-bold uppercase tracking-wider">
-                <span>Align sample inside frame</span>
-              </div>
+
+              {/* Strip Mode Dual Box Guidance */}
+              {scanMode === 'strip' ? (
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <div className="border-2 border-dashed border-white/60 bg-white/10 rounded-xl p-1.5 text-[10px] text-white font-bold">
+                    <span>⬜ Reference Card</span>
+                    <span className="block text-[8px] text-emerald-200">सफ़ेद संदर्भ कार्ड</span>
+                  </div>
+                  <div className="border-2 border-dashed border-amber-300/80 bg-amber-500/10 rounded-xl p-1.5 text-[10px] text-amber-200 font-bold">
+                    <span>🧪 Test Strip</span>
+                    <span className="block text-[8px] text-amber-300">pH / यूरिया स्ट्रिप</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-[10px] text-emerald-300 font-mono font-bold uppercase tracking-wider">
+                  <span>Align sample inside frame</span>
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* Processing laser overlay */}
         {isProcessing && (
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center z-20">
+          <div className="absolute inset-0 bg-black/85 backdrop-blur-xs flex flex-col items-center justify-center z-20 px-4 text-center">
             <div className="w-full h-1.5 bg-emerald-400 shadow-[0_0_20px_#10b981] absolute top-0 animate-[bounce_2s_infinite]" />
             <RefreshCw className="w-10 h-10 text-emerald-400 animate-spin mb-3" />
             <p className="text-sm font-black text-white animate-pulse">
-              {t('scan.analyzing', locale)}
+              {processingMessage || t('scan.analyzing', locale)}
             </p>
-            <p className="text-xs text-emerald-300 mt-1 font-semibold">
-              Extracting Canvas RGB & Granularity Spectrum...
+            <p className="text-xs text-emerald-300 mt-1.5 font-semibold max-w-xs">
+              {scanMode === 'strip'
+                ? 'Reference Card Gain Normalization & CIEDE2000 Matching...'
+                : 'Physical condition, mold coverage, & foreign matter triage...'}
             </p>
           </div>
         )}

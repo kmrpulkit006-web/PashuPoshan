@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Locale } from '../lib/types';
 import { t } from '../lib/i18n';
-import { Globe, Sun, Moon, Info, X, DownloadCloud, Wifi, WifiOff, Layers, Trash2 } from 'lucide-react';
-import { getPendingSyncQueue, getSyncStatus, clearDemoQueue } from '../lib/storage';
+import { Globe, Sun, Moon, Info, X, DownloadCloud, Wifi, WifiOff, Layers, Trash2, RefreshCw } from 'lucide-react';
+import { getPendingSyncQueue, getPendingOfflineScans, syncPendingScans, clearDemoQueue, clearPendingOfflineScans } from '../lib/storage';
 
 interface MobileHeaderProps {
   locale: Locale;
@@ -10,6 +10,7 @@ interface MobileHeaderProps {
   isOnline: boolean;
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
+  pendingScansCount?: number;
 }
 
 export const MobileHeader: React.FC<MobileHeaderProps> = ({
@@ -18,18 +19,21 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   isOnline,
   theme,
   setTheme,
+  pendingScansCount = 0,
 }) => {
   const [showInfoModal, setShowInfoModal] = useState(false);
-  const [pendingCount, setPendingCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(pendingScansCount);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
 
   useEffect(() => {
     const checkQueue = () => {
-      const queue = getPendingSyncQueue();
-      setPendingCount(queue.length);
+      const q1 = getPendingSyncQueue();
+      const q2 = getPendingOfflineScans();
+      setPendingCount(q1.length + q2.length);
     };
     checkQueue();
-    const interval = setInterval(checkQueue, 3000);
+    const interval = setInterval(checkQueue, 2500);
 
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
@@ -37,11 +41,34 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
+    const handleSyncChange = () => checkQueue();
+    window.addEventListener('pashuposhan_pending_sync_changed', handleSyncChange);
+
     return () => {
       clearInterval(interval);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('pashuposhan_pending_sync_changed', handleSyncChange);
     };
   }, []);
+
+  const handleManualSync = async () => {
+    if (!isOnline) {
+      alert('Cannot sync while offline. Please connect to internet first.');
+      return;
+    }
+    setIsSyncing(true);
+    try {
+      const { successful } = await syncPendingScans();
+      setIsSyncing(false);
+      const q1 = getPendingSyncQueue();
+      const q2 = getPendingOfflineScans();
+      setPendingCount(q1.length + q2.length);
+      alert(`Sync Complete: ${successful} scan(s) synchronized.`);
+    } catch (e: any) {
+      setIsSyncing(false);
+      alert('Sync failed: ' + (e.message || 'Unknown network error'));
+    }
+  };
 
   const handleInstallClick = async () => {
     if (!installPrompt) {
@@ -63,6 +90,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
     );
     if (confirmClear) {
       clearDemoQueue();
+      clearPendingOfflineScans();
       setPendingCount(0);
     }
   };
@@ -265,13 +293,25 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
                 All scans, animal ration records, and alerts are safely saved on this device. When cloud API integration is active, they sync automatically.
               </p>
               {pendingCount > 0 && (
-                <button
-                  onClick={handleClearQueue}
-                  className="w-full mt-1 py-2 px-3 bg-rose-100 hover:bg-rose-200 dark:bg-rose-950 dark:hover:bg-rose-900 text-[#B3261E] dark:text-rose-200 text-xs font-bold rounded-xl border border-rose-300 dark:border-rose-800 flex items-center justify-center space-x-1.5 transition-all min-h-[44px]"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Clear Local Queue</span>
-                </button>
+                <div className="space-y-1.5 pt-1">
+                  <button
+                    type="button"
+                    disabled={isSyncing}
+                    onClick={handleManualSync}
+                    className="w-full py-2.5 px-3 bg-[#1F5D3B] hover:bg-[#194a30] text-white text-xs font-black rounded-xl shadow-sm flex items-center justify-center space-x-1.5 transition-all min-h-[44px] disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                    <span>{isSyncing ? 'Syncing...' : 'Sync Now (अभी सिंक करें)'}</span>
+                  </button>
+
+                  <button
+                    onClick={handleClearQueue}
+                    className="w-full py-2 px-3 bg-rose-100 hover:bg-rose-200 dark:bg-rose-950 dark:hover:bg-rose-900 text-[#B3261E] dark:text-rose-200 text-xs font-bold rounded-xl border border-rose-300 dark:border-rose-800 flex items-center justify-center space-x-1.5 transition-all min-h-[40px]"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Clear Local Queue</span>
+                  </button>
+                </div>
               )}
             </div>
 

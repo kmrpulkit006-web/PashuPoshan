@@ -13,15 +13,25 @@ export type QualityGrade =
 
 export type FliegGrade = 'Excellent' | 'Good' | 'Medium' | 'Poor' | 'Very Bad';
 
+export interface VisualAnalysisResult {
+  moldCoverageEstimate: 'none' | 'trace' | 'moderate' | 'heavy';
+  colorDescription: string;
+  foreignMatterVisible: boolean;
+  foreignMatterDescription: string;
+  overallVisualCondition: 'good' | 'fair' | 'poor';
+  providerNotes?: string;
+}
+
 export interface NutritionMetrics {
-  crudeProtein: number;          // % on Dry Matter basis (e.g., 18.5%)
-  moisture: number;              // % moisture content
-  dryMatter: number;             // % dry matter (100 - moisture)
-  crudeFiber: number;            // % crude fiber
-  acidInsolubleAsh: number;      // % Sand/Silica/Dirt (BIS limit max 2.5-3.5%)
-  neutralDetergentFiber?: number;// % NDF
-  acidDetergentFiber?: number;   // % ADF
-  totalDigestibleNutrients: number; // % TDN (Energy estimate)
+  crudeProtein?: number;          // % on Dry Matter basis (e.g., 18.5%) - LAB ONLY
+  moisture?: number;              // % moisture content
+  dryMatter?: number;             // % dry matter (100 - moisture)
+  crudeFiber?: number;            // % crude fiber - LAB ONLY
+  acidInsolubleAsh?: number;      // % Sand/Silica/Dirt (BIS limit max 2.5-3.5%) - LAB ONLY
+  neutralDetergentFiber?: number;// % NDF - LAB ONLY
+  acidDetergentFiber?: number;   // % ADF - LAB ONLY
+  totalDigestibleNutrients?: number; // % TDN (Energy estimate) - LAB ONLY
+  requiresLabTest?: boolean;      // True for live camera scans where wet chemistry is required
 }
 
 export interface SilageMetrics {
@@ -38,9 +48,10 @@ export interface SilageMetrics {
 export interface AdulterationCheck {
   ureaAdulterationDetected: boolean;
   ureaPercentage: number;        // Normally <0.2% natural, spiked feeds have >1.0%
-  aflatoxinRisk: 'Safe (<10 ppb)' | 'Moderate (10-20 ppb)' | 'Hazardous (>20 ppb - FSSAI Breach)';
-  sandSilicaRisk: 'Within BIS Limits' | 'Moderate Sand (<3.5%)' | 'Critical Sand Contamination (>5%)';
+  aflatoxinRisk?: 'Safe (<10 ppb)' | 'Moderate (10-20 ppb)' | 'Hazardous (>20 ppb - FSSAI Breach)' | 'Requires Certified Lab Test';
+  sandSilicaRisk?: 'Within BIS Limits' | 'Moderate Sand (<3.5%)' | 'Critical Sand Contamination (>5%)' | 'Requires Certified Lab Test';
   foreignStarchOrTallow: boolean;
+  labVerifiedOnly?: boolean;     // Explicit flag: aflatoxin & silica require certified lab assay
 }
 
 export interface RegulatoryCitation {
@@ -58,11 +69,18 @@ export interface FeedSample {
   sourceOrBrand: string;
   timestamp: string;
   imageUrl: string;
-  testedMethod: 'Live Mobile Sensor Analysis' | 'Rapid Colorimetric Strip' | 'SIH Evaluator Simulation Preset';
+  testedMethod: 'Live Mobile Sensor Analysis' | 'Rapid Colorimetric Strip' | 'SIH Evaluator Simulation Preset' | 'AI Vision Triage';
   isSimulated: boolean;
   isPrototypeHeuristic?: boolean;
   heuristicDisclaimer?: string;
   confidenceScore?: number;       // e.g. 88%
+  visualAnalysis?: VisualAnalysisResult;
+  stripReading?: {
+    calibratedPh?: number;
+    calibratedUreaPct?: number;
+    deltaE00?: number;
+    referenceCardDetected?: boolean;
+  };
   metrics: NutritionMetrics;
   silageMetrics?: SilageMetrics;
   adulteration: AdulterationCheck;

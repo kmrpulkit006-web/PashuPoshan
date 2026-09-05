@@ -53,44 +53,30 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({ 
         </div>
       )}
 
-      {/* Detailed Nutritional Gauges */}
+      {/* Detailed Nutritional Gauges or Certified Lab Required Section */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between px-1">
           <h4 className="text-xs font-black text-[#5A5243] dark:text-slate-300 uppercase tracking-wider">
             Nutritional Benchmarks (Dry Matter Basis)
           </h4>
           <span className="text-[10px] text-[#C2703D] dark:text-amber-400 font-bold">
-            *Screening Metric
+            {sample.metrics.requiresLabTest ? '*Lab Verification Required' : '*Screening Metric'}
           </span>
         </div>
 
-        <QualityGauge
-          label={t('score.crudeProtein', locale)}
-          value={sample.metrics.crudeProtein}
-          min={0}
-          max={30}
-          safeMin={sample.category === 'silage' ? 8.0 : 20.0}
-          bisBenchmark={sample.category === 'silage' ? 'Min 8.0%' : 'BIS IS:2052 Min 20.0%'}
-        />
+        {/* Moisture Gauge is available in both preset and live estimation */}
+        {sample.metrics.moisture !== undefined && (
+          <QualityGauge
+            label={t('score.moisture', locale)}
+            value={sample.metrics.moisture}
+            min={0}
+            max={100}
+            safeMax={sample.category === 'silage' ? 70.0 : 11.0}
+            bisBenchmark={sample.category === 'silage' ? 'Max 68-70%' : 'BIS IS:2052 Max 11.0%'}
+          />
+        )}
 
-        <QualityGauge
-          label={t('score.moisture', locale)}
-          value={sample.metrics.moisture}
-          min={0}
-          max={100}
-          safeMax={sample.category === 'silage' ? 70.0 : 11.0}
-          bisBenchmark={sample.category === 'silage' ? 'Max 68-70%' : 'BIS IS:2052 Max 11.0%'}
-        />
-
-        <QualityGauge
-          label={t('score.sandSilica', locale)}
-          value={sample.metrics.acidInsolubleAsh}
-          min={0}
-          max={10}
-          safeMax={sample.category === 'silage' ? 2.5 : 3.5}
-          bisBenchmark="Max 2.5% - 3.5%"
-        />
-
+        {/* Silage pH is available via calibrated test strip or preset */}
         {sample.silageMetrics && (
           <QualityGauge
             label={t('score.silagePh', locale)}
@@ -101,6 +87,61 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({ 
             isSilagePh={true}
             bisBenchmark="Optimum 3.8 - 4.2"
           />
+        )}
+
+        {/* Lab-Only Assays: Crude Protein, Sand/Silica, Fiber */}
+        {sample.metrics.crudeProtein !== undefined && !sample.metrics.requiresLabTest ? (
+          <>
+            <QualityGauge
+              label={t('score.crudeProtein', locale)}
+              value={sample.metrics.crudeProtein}
+              min={0}
+              max={30}
+              safeMin={sample.category === 'silage' ? 8.0 : 20.0}
+              bisBenchmark={sample.category === 'silage' ? 'Min 8.0%' : 'BIS IS:2052 Min 20.0%'}
+            />
+
+            {sample.metrics.acidInsolubleAsh !== undefined && (
+              <QualityGauge
+                label={t('score.sandSilica', locale)}
+                value={sample.metrics.acidInsolubleAsh}
+                min={0}
+                max={10}
+                safeMax={sample.category === 'silage' ? 2.5 : 3.5}
+                bisBenchmark="Max 2.5% - 3.5%"
+              />
+            )}
+          </>
+        ) : (
+          <div className="bg-[#fdf8f4] dark:bg-amber-950/40 border-2 border-[#C2703D] dark:border-amber-600/60 rounded-2xl p-4 space-y-2 text-[#1A1A1A] dark:text-white shadow-sm">
+            <div className="flex items-center space-x-2 text-xs font-black text-[#C2703D] dark:text-amber-300 uppercase tracking-wide">
+              <span>🔬 Requires Certified Lab Test (प्रयोगशाला परीक्षण आवश्यक)</span>
+            </div>
+            <p className="text-xs text-[#5A5243] dark:text-slate-300 leading-relaxed font-semibold">
+              Aflatoxin, crude protein, and fiber require certified wet-chemistry testing (ELISA / NIRS). Not determinable from photo triage.
+            </p>
+            <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+              <div className="bg-white/80 dark:bg-slate-900/80 p-2 rounded-xl border border-[#DCD3BF] dark:border-slate-800">
+                <span className="font-bold block text-[#5A5243] dark:text-slate-400">Crude Protein (CP)</span>
+                <span className="font-black text-[#C2703D] dark:text-amber-400">Kjeldahl Digestion</span>
+              </div>
+              <div className="bg-white/80 dark:bg-slate-900/80 p-2 rounded-xl border border-[#DCD3BF] dark:border-slate-800">
+                <span className="font-bold block text-[#5A5243] dark:text-slate-400">Fiber (ADF/NDF)</span>
+                <span className="font-black text-[#C2703D] dark:text-amber-400">Van Soest Method</span>
+              </div>
+            </div>
+            <div className="pt-1.5 flex items-center justify-between">
+              <span className="text-[10px] text-[#5A5243] dark:text-slate-400 font-medium">
+                Accredited Dairy Lab Analysis
+              </span>
+              <a
+                href="tel:1962"
+                className="text-xs font-black text-[#1F5D3B] dark:text-emerald-400 underline hover:no-underline"
+              >
+                Find Nearest Lab / Call 1962
+              </a>
+            </div>
+          </div>
         )}
       </div>
     </div>
