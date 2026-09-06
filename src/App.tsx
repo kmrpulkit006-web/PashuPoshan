@@ -39,7 +39,21 @@ export const App: React.FC = () => {
     return 'light'; // Default to light Field Mode
   });
 
-  const [locale, setLocale] = useState<Locale>('hi');
+  const [locale, setLocale] = useState<Locale>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('pashuposhan_locale');
+        if (saved === 'hi' || saved === 'en' || saved === 'pa') return saved;
+      } catch (e) {}
+    }
+    return 'hi';
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('pashuposhan_locale', locale);
+    } catch (e) {}
+  }, [locale]);
   const [activeTab, setActiveTab] = useState<ActiveTab>(parseTabFromUrl);
   const [activeSample, setActiveSample] = useState<FeedSample>(() => {
     const loaded = getLocalScans();

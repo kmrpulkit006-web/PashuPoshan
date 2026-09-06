@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Locale, CommunityFeedAlert } from '../lib/types';
 import { t } from '../lib/i18n';
-import { getLocalAlerts, saveLocalAlert, getPendingOfflineScans, syncPendingScans, PendingOfflineScan } from '../lib/storage';
+import {
+  getLocalAlerts,
+  saveLocalAlert,
+  getPendingOfflineScans,
+  syncPendingScans,
+  PendingOfflineScan,
+  fetchRemoteAlerts,
+  postRemoteAlert,
+  queueOfflineAlert,
+  syncPendingAlerts,
+} from '../lib/storage';
 import { AlertTriangle, ShieldCheck, MapPin, Send, QrCode, CheckCircle2, Clock, Plus, X, RefreshCw, Cloud, Layers } from 'lucide-react';
 
 interface AlertsScreenProps {
@@ -13,8 +23,11 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [batchNo, setBatchNo] = useState('');
   const [brand, setBrand] = useState('');
+  const [district, setDistrict] = useState('Pune District');
+  const [taluka, setTaluka] = useState('Baramati');
   const [issue, setIssue] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'online' | 'offline'>('online');
   const [pendingScans, setPendingScans] = useState<PendingOfflineScan[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatusMsg, setSyncStatusMsg] = useState<string>('');
@@ -24,13 +37,40 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
   };
 
   useEffect(() => {
+    // 1. Show immediate local cache
     setAlerts(getLocalAlerts());
     refreshPending();
 
+    // 2. Fetch live remote crowd-sourced alerts
+    fetchRemoteAlerts()
+      .then((remoteAlerts) => {
+        setAlerts(remoteAlerts);
+      })
+      .catch((err) => {
+        console.warn('Could not fetch remote alerts on mount:', err);
+      });
+
+    // 3. Sync any queued offline alerts if online
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+      syncPendingAlerts().catch(() => {});
+    }
+
     const handleSyncChange = () => refreshPending();
+    const handleAlertsChange = () => setAlerts(getLocalAlerts());
+    const handleOnline = () => {
+      syncPendingAlerts()
+        .then(() => fetchRemoteAlerts().then(setAlerts))
+        .catch(() => {});
+    };
+
     window.addEventListener('pashuposhan_pending_sync_changed', handleSyncChange);
+    window.addEventListener('pashuposhan_pending_alerts_changed', handleAlertsChange);
+    window.addEventListener('online', handleOnline);
+
     return () => {
       window.removeEventListener('pashuposhan_pending_sync_changed', handleSyncChange);
+      window.removeEventListener('pashuposhan_pending_alerts_changed', handleAlertsChange);
+      window.removeEventListener('online', handleOnline);
     };
   }, []);
 
@@ -48,6 +88,11 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
         setSyncStatusMsg(`Syncing scan ${current} of ${total}...`);
       });
 
+      // Also sync queued alerts
+      await syncPendingAlerts();
+      const updatedAlerts = await fetchRemoteAlerts();
+      setAlerts(updatedAlerts);
+
       refreshPending();
       setIsSyncing(false);
       if (successful > 0) {
@@ -61,27 +106,43 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
     }
   };
 
-  const handleSubmitReport = (e: React.FormEvent) => {
+  const handleSubmitReport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!batchNo || !brand) return;
 
     const newAlert: CommunityFeedAlert = {
-      id: `alert_${Date.now()}`,
+      id: `alert_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       title: `Suspected Adulteration: ${brand}`,
-      taluka: 'Baramati / Indapur',
-      district: 'Pune District',
+      taluka: taluka.trim() || 'Baramati / Indapur',
+      district: district.trim() || 'Pune District',
       date: 'Just now',
       alertType: 'adulterated_batch',
       severity: 'high',
       brandOrCrop: `${brand} (Batch #${batchNo})`,
+      feedType: 'Compound Cattle Feed',
+      contaminant: 'Suspected Adulterant / Abnormal Residue',
       description: issue || 'Farmer reported abnormal physical consistency, sharp chemical odor, and refusal by herd.',
-      reportedBy: 'Local Dairy Farmer (PashuPoshan App)',
+      advisory: 'Isolate batch and arrange certified laboratory analysis.',
+      reportedBy: 'Local Dairy Farmer (PashuPoshan Crowd Radar)',
       verifiedByCoop: false,
-      syncPending: true,
+      syncPending: false,
     };
 
-    const updated = saveLocalAlert(newAlert);
-    setAlerts(updated);
+    try {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        throw new Error('Offline');
+      }
+      const posted = await postRemoteAlert(newAlert);
+      const updated = saveLocalAlert(posted || newAlert);
+      setAlerts(updated);
+      setSubmitStatus('online');
+    } catch {
+      // Offline fallback: queue offline
+      queueOfflineAlert(newAlert);
+      setAlerts(getLocalAlerts());
+      setSubmitStatus('offline');
+    }
+
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
@@ -89,7 +150,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
       setBatchNo('');
       setBrand('');
       setIssue('');
-    }, 1400);
+    }, 1800);
   };
 
   const handleSimulateQrVerification = () => {
@@ -351,6 +412,11 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
                       <ShieldCheck className="w-4 h-4" />
                       <span>{t('alert.verified', locale)}</span>
                     </span>
+                  ) : alert.syncPending ? (
+                    <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center space-x-1 text-[11px]">
+                      <Clock className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saved Locally (Pending Sync)</span>
+                    </span>
                   ) : (
                     <span className="text-[#C2703D] dark:text-amber-400 font-bold italic text-[11px]">
                       Pending Verification
@@ -383,11 +449,41 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
             {submitted ? (
               <div className="py-8 text-center text-brand-700 dark:text-emerald-400 space-y-2">
                 <CheckCircle2 className="w-12 h-12 mx-auto animate-bounce" />
-                <div className="text-sm font-bold">Report Filed Locally!</div>
-                <div className="text-xs text-field-text/70 dark:text-slate-300">Saved to local demo queue (SIH Prototype)</div>
+                <div className="text-sm font-bold">
+                  {submitStatus === 'online' ? 'Report Published to Live Radar!' : 'Saved locally. Will sync when online.'}
+                </div>
+                <div className="text-xs text-field-text/70 dark:text-slate-300">
+                  {submitStatus === 'online'
+                    ? 'Shared across regional dairy cooperative network'
+                    : 'Queued for automatic community broadcast'}
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmitReport} className="space-y-3 text-sm">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-field-text dark:text-slate-300 font-bold block mb-1 text-xs">District:</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Pune"
+                      value={district}
+                      onChange={(e) => setDistrict(e.target.value)}
+                      className="w-full bg-field-base dark:bg-slate-800 border border-field-border dark:border-slate-700 rounded-xl p-3 text-field-text dark:text-white focus:outline-none focus:border-brand-500 text-sm min-h-[48px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-field-text dark:text-slate-300 font-bold block mb-1 text-xs">Taluka:</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Baramati"
+                      value={taluka}
+                      onChange={(e) => setTaluka(e.target.value)}
+                      className="w-full bg-field-base dark:bg-slate-800 border border-field-border dark:border-slate-700 rounded-xl p-3 text-field-text dark:text-white focus:outline-none focus:border-brand-500 text-sm min-h-[48px]"
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <label className="text-field-text dark:text-slate-300 font-bold block mb-1">Feed Brand / Supplier:</label>
                   <input

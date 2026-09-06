@@ -4,6 +4,7 @@ import {
   PRESET_FEED_SCENARIOS,
   analyzeCanvasImageData,
   createFeedSampleFromVisualAnalysis,
+  sampleCenterPatchRgb,
   KNOWN_REFERENCE_WHITE,
 } from '../lib/feedAnalysisEngine';
 import {
@@ -129,9 +130,18 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
         ctx.drawImage(img, 0, 0, 120, 120);
         const imageData = ctx.getImageData(0, 0, 120, 120);
 
-        let colorRgb = { r: 240, g: 210, b: 50 }; // Default Yellow
-        if (stripColor === 'magenta') colorRgb = { r: 190, g: 30, b: 130 }; // Adulterated Urea
-        else if (stripColor === 'green') colorRgb = { r: 50, g: 170, b: 150 }; // High pH
+        // Sample real photo pixels from central 30x30 patch of the captured image
+        const patchSample = sampleCenterPatchRgb(imageData, 30, 30);
+
+        if (!patchSample.isLightingValid) {
+          setIsProcessing(false);
+          const errorMsg =
+            patchSample.guardWarning === 'too_dark'
+              ? 'Lighting Too Dark (कम रोशनी): Test strip patch is underexposed or in deep shadow. Please center the test strip in clear, indirect light and retake photo.'
+              : 'Glare/Overexposed (अत्यधिक चमक): Test strip patch is washed out or reflective. Avoid direct flash or harsh reflection and retake photo.';
+          alert(errorMsg);
+          return;
+        }
 
         setTimeout(() => {
           setIsProcessing(false);
@@ -139,8 +149,9 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
             category,
             imageData,
             true,
-            colorRgb,
-            KNOWN_REFERENCE_WHITE
+            patchSample.rgb,
+            KNOWN_REFERENCE_WHITE,
+            stripColor
           );
           analyzed.imageUrl = imgUri;
           saveLocalScan(analyzed);

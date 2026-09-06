@@ -17,10 +17,10 @@ export const StripColorSelector: React.FC<StripColorSelectorProps> = ({
     <div className="bg-[#F3EEE1] dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-4 space-y-2.5 text-[#1A1A1A] dark:text-white shadow-sm">
       <div className="flex items-center justify-between">
         <span className="text-xs font-black">
-          {t('scan.stripSimulation', locale)}
+          {locale === 'hi' ? 'जांच पट्टी का प्रकार चुनें' : 'Select Reagent / Strip Type'}
         </span>
         <span className="text-[11px] text-[#5A5243] dark:text-slate-400 font-bold">
-          {t('scan.stripTapTip', locale)}
+          {locale === 'hi' ? 'रंग सीधे तस्वीर से पढ़ा जाएगा' : 'Color sampled from photo'}
         </span>
       </div>
       <div className="grid grid-cols-3 gap-2.5">
@@ -34,7 +34,12 @@ export const StripColorSelector: React.FC<StripColorSelectorProps> = ({
           }`}
         >
           <div className="w-full h-3 rounded-full bg-amber-400 mb-1.5 shadow-inner" />
-          <div className="text-[11px] font-bold leading-tight">{t('scan.yellowSafe', locale)}</div>
+          <div className="text-[11px] font-bold leading-tight">
+            {locale === 'hi' ? 'यूरिया पट्टी' : 'Urea Strip'}
+          </div>
+          <div className="text-[9px] text-[#5A5243] dark:text-slate-400">
+            {locale === 'hi' ? '0-5% पैमाना' : '0-5% Scale'}
+          </div>
         </button>
 
         <button
@@ -47,7 +52,12 @@ export const StripColorSelector: React.FC<StripColorSelectorProps> = ({
           }`}
         >
           <div className="w-full h-3 rounded-full bg-pink-600 mb-1.5 shadow-inner" />
-          <div className="text-[11px] font-bold leading-tight">{t('scan.magentaUrea', locale)}</div>
+          <div className="text-[11px] font-bold leading-tight">
+            {locale === 'hi' ? 'मिलावट पट्टी' : 'Adulteration'}
+          </div>
+          <div className="text-[9px] text-[#5A5243] dark:text-slate-400">
+            {locale === 'hi' ? 'तीव्र रीएजेंट' : 'Spike Reagent'}
+          </div>
         </button>
 
         <button
@@ -60,7 +70,12 @@ export const StripColorSelector: React.FC<StripColorSelectorProps> = ({
           }`}
         >
           <div className="w-full h-3 rounded-full bg-teal-500 mb-1.5 shadow-inner" />
-          <div className="text-[11px] font-bold leading-tight">{t('scan.greenHighPh', locale)}</div>
+          <div className="text-[11px] font-bold leading-tight">
+            {locale === 'hi' ? 'pH पट्टी' : 'pH Indicator'}
+          </div>
+          <div className="text-[9px] text-[#5A5243] dark:text-slate-400">
+            {locale === 'hi' ? 'साइलेज किण्वन' : 'Fermentation'}
+          </div>
         </button>
       </div>
     </div>

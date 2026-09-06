@@ -11,6 +11,7 @@ import {
   matchPhDeltaE,
   matchUreaDeltaE,
   createFeedSampleFromVisualAnalysis,
+  sampleCenterPatchRgb,
   UNIVERSAL_PH_REFERENCE_CHART,
   UREA_COLORIMETRIC_CHART,
 } from '../lib/feedAnalysisEngine';
@@ -314,5 +315,46 @@ describe('feedAnalysisEngine - analyzeCanvasImageData & Safety Logic', () => {
       expect(sample.correctiveActions[0]).toContain('actual livestock feed');
     });
   });
+
+  describe('sampleCenterPatchRgb & Lighting Guards', () => {
+    it('samples average RGB accurately from the center patch of synthetic ImageData', () => {
+      // Create a 100x100 image with background green, but center 30x30 is yellow
+      const img = createSyntheticImageData(100, 100, (x, y) => {
+        if (x >= 35 && x < 65 && y >= 35 && y < 65) {
+          return { r: 230, g: 210, b: 40 }; // Center patch yellow
+        }
+        return { r: 50, g: 150, b: 50 }; // Outer background
+      });
+
+      const result = sampleCenterPatchRgb(img, 30, 30);
+      expect(result.rgb.r).toBe(230);
+      expect(result.rgb.g).toBe(210);
+      expect(result.rgb.b).toBe(40);
+      expect(result.isLightingValid).toBe(true);
+      expect(result.guardWarning).toBeUndefined();
+    });
+
+    it('flags underexposed frames with luminance < 25 as too_dark', () => {
+      // Perceived luminance Y = 0.299*R + 0.587*G + 0.114*B
+      // R=15, G=15, B=15 -> Y = 15 < 25
+      const darkImg = createSyntheticImageData(60, 60, { r: 15, g: 15, b: 15 });
+      const result = sampleCenterPatchRgb(darkImg, 30, 30);
+
+      expect(result.meanLuminance).toBeLessThan(25);
+      expect(result.isLightingValid).toBe(false);
+      expect(result.guardWarning).toBe('too_dark');
+    });
+
+    it('flags overexposed frames with luminance > 245 as blown_out', () => {
+      // R=250, G=250, B=250 -> Y = 250 > 245
+      const brightImg = createSyntheticImageData(60, 60, { r: 250, g: 250, b: 250 });
+      const result = sampleCenterPatchRgb(brightImg, 30, 30);
+
+      expect(result.meanLuminance).toBeGreaterThan(245);
+      expect(result.isLightingValid).toBe(false);
+      expect(result.guardWarning).toBe('blown_out');
+    });
+  });
 });
+
 

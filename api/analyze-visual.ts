@@ -9,6 +9,8 @@
  * 3. All outputs are strictly initial farm-gate screening assessments.
  */
 
+import { Redis } from '@upstash/redis';
+
 // Global process declaration for TypeScript build without node types package
 declare const process: {
   env: {
@@ -16,6 +18,10 @@ declare const process: {
     GEMINI_API_KEY?: string;
     GOOGLE_API_KEY?: string;
     VISION_PROVIDER?: string;
+    KV_REST_API_URL?: string;
+    KV_REST_API_TOKEN?: string;
+    UPSTASH_REDIS_REST_URL?: string;
+    UPSTASH_REDIS_REST_TOKEN?: string;
   };
 };
 
@@ -68,27 +74,25 @@ export class GeminiFlashVisionProvider implements VisionProvider {
       },
     };
 
-    // 1. Try candidate endpoints across v1 and v1beta
+    // 1. Confirmed operational models (15s timeout per request)
     const candidateEndpoints = [
-      'v1beta/models/gemini-1.5-flash',
-      'v1/models/gemini-1.5-flash',
       'v1beta/models/gemini-2.0-flash',
-      'v1/models/gemini-2.0-flash',
-      'v1beta/models/gemini-1.5-flash-latest',
-      'v1/models/gemini-1.5-flash-latest',
-      'v1beta/models/gemini-1.5-pro',
-      'v1/models/gemini-1.5-pro',
+      'v1/models/gemini-1.5-flash',
     ];
 
     let lastError = '';
 
     for (const candidate of candidateEndpoints) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
       try {
         const url = `https://generativelanguage.googleapis.com/${candidate}:generateContent?key=${this.apiKey}`;
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
+          signal: controller.signal,
         });
 
         if (response.ok) {
@@ -109,9 +113,14 @@ export class GeminiFlashVisionProvider implements VisionProvider {
           throw new Error(`Gemini Vision API error (${response.status}): ${parsedError}`);
         }
       } catch (err: any) {
+        if (err.name === 'AbortError') {
+          throw new Error(`Gemini Vision API request to ${candidate} timed out after 15 seconds.`);
+        }
         if (err.message && !err.message.includes('404')) {
           throw err;
         }
+      } finally {
+        clearTimeout(timeoutId);
       }
     }
 
@@ -192,50 +201,104 @@ Return ONLY a JSON object strictly matching this schema:
 
     const data = await this.callGenerateContent(base64Jpeg, prompt);
     const rawContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawContent) {
-      throw new Error('Empty response received from Gemini Vision model.');
-    }
+    return sanitizeVisualAnalysisResponse(rawContent, category);
+  }
+}
 
-    let parsed: any;
-    try {
-      // Strip markdown code fences if model enclosed JSON in ```json ... ```
-      const cleanJson = rawContent.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
-      parsed = JSON.parse(cleanJson);
-    } catch (err) {
-      throw new Error(`Failed to parse vision model response as JSON: ${rawContent}`);
-    }
-
-    // Sanitize and validate fields strictly against the specified schema
-    const validMolds = ['none', 'trace', 'moderate', 'heavy'] as const;
-    const validConditions = ['good', 'fair', 'poor', 'invalid'] as const;
-    const validReasons = ['none', 'not_feed_or_fodder', 'blurry_unreadable', 'poor_lighting'] as const;
-
-    const isFeedSample = Boolean(parsed.isFeedSample);
-    const rejectionReason = validReasons.includes(parsed.rejectionReason)
-      ? parsed.rejectionReason
-      : isFeedSample ? 'none' : 'not_feed_or_fodder';
-
-    const overallVisualCondition = validConditions.includes(parsed.overallVisualCondition)
-      ? parsed.overallVisualCondition
-      : isFeedSample ? 'good' : 'invalid';
-
-    const moldCoverageEstimate = validMolds.includes(parsed.moldCoverageEstimate)
-      ? parsed.moldCoverageEstimate
-      : 'none';
-
+/**
+ * Sanitizes and validates the raw Gemini vision response against the schema.
+ * Safely falls back to defaults for missing fields, out-of-range values, or malformed/empty strings.
+ */
+export function sanitizeVisualAnalysisResponse(
+  rawContent: string | null | undefined,
+  category: string = 'feed'
+): VisualAnalysisResult {
+  if (!rawContent || typeof rawContent !== 'string' || !rawContent.trim()) {
     return {
-      isFeedSample,
-      feedTypeIdentified: typeof parsed.feedTypeIdentified === 'string' ? parsed.feedTypeIdentified : (isFeedSample ? category : 'non_feed'),
-      rejectionReason,
-      rejectionMessage: typeof parsed.rejectionMessage === 'string' && parsed.rejectionMessage ? parsed.rejectionMessage : (isFeedSample ? '' : 'The uploaded photo does not appear to be cattle feed, silage, or fodder. Please capture a clear photo of livestock feed.'),
-      moldCoverageEstimate,
-      colorDescription: typeof parsed.colorDescription === 'string' ? parsed.colorDescription : (isFeedSample ? 'Standard feed coloration.' : 'Non-feed subject.'),
-      foreignMatterVisible: Boolean(parsed.foreignMatterVisible),
-      foreignMatterDescription: typeof parsed.foreignMatterDescription === 'string' ? parsed.foreignMatterDescription : '',
-      overallVisualCondition,
-      providerNotes: 'Analyzed via Google Gemini Vision Triage Pipeline',
+      isFeedSample: false,
+      feedTypeIdentified: 'unknown',
+      rejectionReason: 'blurry_unreadable',
+      rejectionMessage: 'Empty or invalid response from visual analysis model.',
+      moldCoverageEstimate: 'none',
+      colorDescription: 'Unanalyzable response.',
+      foreignMatterVisible: false,
+      foreignMatterDescription: '',
+      overallVisualCondition: 'invalid',
+      providerNotes: 'Fallback due to empty or missing vision response.',
     };
   }
+
+  let parsed: any;
+  try {
+    const cleanJson = rawContent.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+    parsed = JSON.parse(cleanJson);
+  } catch {
+    return {
+      isFeedSample: false,
+      feedTypeIdentified: 'unknown',
+      rejectionReason: 'blurry_unreadable',
+      rejectionMessage: 'The vision model returned an unparseable response format.',
+      moldCoverageEstimate: 'none',
+      colorDescription: 'Unparseable response.',
+      foreignMatterVisible: false,
+      foreignMatterDescription: '',
+      overallVisualCondition: 'invalid',
+      providerNotes: 'Fallback due to malformed JSON response.',
+    };
+  }
+
+  if (!parsed || typeof parsed !== 'object') {
+    return {
+      isFeedSample: false,
+      feedTypeIdentified: 'unknown',
+      rejectionReason: 'blurry_unreadable',
+      rejectionMessage: 'Malformed response object from visual analysis.',
+      moldCoverageEstimate: 'none',
+      colorDescription: 'Unanalyzable response.',
+      foreignMatterVisible: false,
+      foreignMatterDescription: '',
+      overallVisualCondition: 'invalid',
+      providerNotes: 'Fallback due to non-object parsed response.',
+    };
+  }
+
+  const validMolds = ['none', 'trace', 'moderate', 'heavy'] as const;
+  const validConditions = ['good', 'fair', 'poor', 'invalid'] as const;
+  const validReasons = ['none', 'not_feed_or_fodder', 'blurry_unreadable', 'poor_lighting'] as const;
+
+  const isFeedSample = Boolean(parsed.isFeedSample);
+  const rejectionReason = validReasons.includes(parsed.rejectionReason)
+    ? parsed.rejectionReason
+    : isFeedSample ? 'none' : 'not_feed_or_fodder';
+
+  const overallVisualCondition = validConditions.includes(parsed.overallVisualCondition)
+    ? parsed.overallVisualCondition
+    : isFeedSample ? 'good' : 'invalid';
+
+  const moldCoverageEstimate = validMolds.includes(parsed.moldCoverageEstimate)
+    ? parsed.moldCoverageEstimate
+    : 'none'; // Clamps or falls back on unexpected value (e.g. "massive")
+
+  return {
+    isFeedSample,
+    feedTypeIdentified: typeof parsed.feedTypeIdentified === 'string' && parsed.feedTypeIdentified
+      ? parsed.feedTypeIdentified
+      : (isFeedSample ? category : 'non_feed'),
+    rejectionReason,
+    rejectionMessage: typeof parsed.rejectionMessage === 'string' && parsed.rejectionMessage
+      ? parsed.rejectionMessage
+      : (isFeedSample ? '' : 'The uploaded photo does not appear to be cattle feed, silage, or fodder. Please capture a clear photo of livestock feed.'),
+    moldCoverageEstimate,
+    colorDescription: typeof parsed.colorDescription === 'string' && parsed.colorDescription
+      ? parsed.colorDescription
+      : (isFeedSample ? 'Standard feed coloration.' : 'Non-feed subject.'),
+    foreignMatterVisible: Boolean(parsed.foreignMatterVisible),
+    foreignMatterDescription: typeof parsed.foreignMatterDescription === 'string'
+      ? parsed.foreignMatterDescription
+      : '',
+    overallVisualCondition,
+    providerNotes: 'Analyzed via Google Gemini Vision Triage Pipeline',
+  };
 }
 
 /**
@@ -247,6 +310,57 @@ export function getVisionProvider(apiKey?: string): VisionProvider {
     throw new Error('GEMINI_API_KEY is not configured in the server environment.');
   }
   return new GeminiFlashVisionProvider(resolvedKey);
+}
+
+const RATE_LIMIT_MAX = 20;
+const RATE_LIMIT_WINDOW_SECONDS = 3600; // 1 hour
+const inMemoryRateLimit = new Map<string, { count: number; resetTime: number }>();
+
+function getClientIp(req: any): string {
+  const xForwardedFor = req.headers?.['x-forwarded-for'] || req.headers?.['x-real-ip'];
+  if (typeof xForwardedFor === 'string') {
+    return xForwardedFor.split(',')[0].trim();
+  }
+  return req.socket?.remoteAddress || '127.0.0.1';
+}
+
+function getRedisClient(): Redis | null {
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (url && token) {
+    try {
+      return new Redis({ url, token });
+    } catch (e) {
+      console.warn('Redis rate limiter initialization failed, using in-memory map:', e);
+    }
+  }
+  return null;
+}
+
+export async function checkRateLimit(ip: string): Promise<boolean> {
+  const redis = getRedisClient();
+  if (redis) {
+    try {
+      const key = `rate_limit:${ip}`;
+      const count = await redis.incr(key);
+      if (count === 1) {
+        await redis.expire(key, RATE_LIMIT_WINDOW_SECONDS);
+      }
+      return count <= RATE_LIMIT_MAX;
+    } catch (err) {
+      console.warn('Redis rate limit check error, falling back to in-memory:', err);
+    }
+  }
+
+  const now = Date.now();
+  const entry = inMemoryRateLimit.get(ip);
+  if (!entry || now > entry.resetTime) {
+    inMemoryRateLimit.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_SECONDS * 1000 });
+    return true;
+  }
+
+  entry.count += 1;
+  return entry.count <= RATE_LIMIT_MAX;
 }
 
 /**
@@ -266,6 +380,15 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({
       error: 'Method Not Allowed. Use POST with imageBase64 payload.',
       code: 'METHOD_NOT_ALLOWED',
+    });
+  }
+
+  // Rate Limiting (20 requests per hour per IP)
+  const clientIp = getClientIp(req);
+  const isAllowed = await checkRateLimit(clientIp);
+  if (!isAllowed) {
+    return res.status(429).json({
+      error: 'Rate limit exceeded. Please try again later.',
     });
   }
 

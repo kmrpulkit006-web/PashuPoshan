@@ -649,12 +649,84 @@ export function createFeedSampleFromVisualAnalysis(
 // REAL CANVAS IMAGE DATA & CALIBRATED STRIP ANALYSIS
 // ============================================================================
 
+export interface PatchSamplingResult {
+  rgb: RGB;
+  meanLuminance: number;
+  isLightingValid: boolean;
+  guardWarning?: 'too_dark' | 'blown_out';
+}
+
+/**
+ * Samples a central patch (default 30x30px) from the image canvas
+ * and computes the average RGB and perceived luminance.
+ * Protects against underexposed (near-black, Y < 25) or overexposed (blown out, Y > 245) frames.
+ */
+export function sampleCenterPatchRgb(
+  imageData: ImageData,
+  patchWidth = 30,
+  patchHeight = 30
+): PatchSamplingResult {
+  const { width, height, data } = imageData;
+  const startX = Math.max(0, Math.floor((width - patchWidth) / 2));
+  const startY = Math.max(0, Math.floor((height - patchHeight) / 2));
+  const endX = Math.min(width, startX + patchWidth);
+  const endY = Math.min(height, startY + patchHeight);
+
+  let totalR = 0;
+  let totalG = 0;
+  let totalB = 0;
+  let count = 0;
+
+  for (let y = startY; y < endY; y++) {
+    for (let x = startX; x < endX; x++) {
+      const idx = (y * width + x) * 4;
+      totalR += data[idx];
+      totalG += data[idx + 1];
+      totalB += data[idx + 2];
+      count++;
+    }
+  }
+
+  if (count === 0) {
+    return {
+      rgb: { r: 128, g: 128, b: 128 },
+      meanLuminance: 128,
+      isLightingValid: false,
+      guardWarning: 'too_dark',
+    };
+  }
+
+  const r = Math.round(totalR / count);
+  const g = Math.round(totalG / count);
+  const b = Math.round(totalB / count);
+  const meanLuminance = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+
+  let isLightingValid = true;
+  let guardWarning: 'too_dark' | 'blown_out' | undefined;
+
+  if (meanLuminance < 25) {
+    isLightingValid = false;
+    guardWarning = 'too_dark';
+  } else if (meanLuminance > 245) {
+    isLightingValid = false;
+    guardWarning = 'blown_out';
+  }
+
+  return {
+    rgb: { r, g, b },
+    meanLuminance,
+    isLightingValid,
+    guardWarning,
+  };
+}
+
 export function analyzeCanvasImageData(
   category: FeedCategory,
   imageData: ImageData,
   isStripMode: boolean,
   stripColorRgb?: RGB,
-  referenceColorRgb?: RGB
+  referenceColorRgb?: RGB,
+  targetReagent?: 'yellow' | 'magenta' | 'green' | 'urea_test' | 'ph_indicator'
 ): FeedSample {
   const isSilage = category === 'silage';
   const data = imageData.data;
@@ -699,9 +771,13 @@ export function analyzeCanvasImageData(
       : { kr: 1.0, kg: 1.0, kb: 1.0 };
 
     const correctedStripRgb = applyAmbientCorrection(stripColorRgb, gains);
+    const stripLum = 0.299 * stripColorRgb.r + 0.587 * stripColorRgb.g + 0.114 * stripColorRgb.b;
+    const isBadLighting = stripLum < 25 || stripLum > 245;
 
-    if (isSilage) {
-      // Silage utilizes universal indicator pH strip for fermentation quality
+    const targetIsPh = targetReagent === 'green' || targetReagent === 'ph_indicator' || (!targetReagent && isSilage);
+
+    if (targetIsPh) {
+      // Silage / pH strip utilizes universal indicator pH scale for fermentation quality
       const phMatch = matchPhDeltaE(correctedStripRgb);
       calibratedPh = phMatch.ph;
       phMatchedLabel = phMatch.label;
@@ -709,11 +785,57 @@ export function analyzeCanvasImageData(
       ureaDetected = false;
       ureaPercentage = 0.1;
     } else {
-      // Concentrate/dry feed utilizes rapid urease colorimetric test strip for adulteration
+      // Concentrate / urea strip utilizes rapid urease colorimetric test strip for adulteration
       const ureaMatch = matchUreaDeltaE(correctedStripRgb);
       ureaPercentage = ureaMatch.ureaPercentage;
       ureaDetected = ureaMatch.detected;
       ureaDeltaE = ureaMatch.deltaE;
+    }
+
+    if (isBadLighting) {
+      return {
+        id: `live_scan_${Date.now()}`,
+        name: isSilage ? 'Underexposed/Overexposed Silage Strip' : 'Underexposed/Overexposed Strip',
+        category,
+        batchNumber: `STRIP-LIGHT-${Math.floor(1000 + Math.random() * 9000)}`,
+        sourceOrBrand: 'Field Strip Optical Reader',
+        timestamp: new Date().toLocaleString('en-IN'),
+        imageUrl: '',
+        testedMethod: 'Rapid Colorimetric Strip',
+        isSimulated: false,
+        isPrototypeHeuristic: true,
+        confidenceScore: 25,
+        isNonFeedSample: true,
+        heuristicDisclaimer: 'Image lighting invalid — strip area is too dark or overexposed. Colorimetric reading is unreliable. Please retake photo with the test strip centered in even, indirect daylight.',
+        metrics: {
+          moisture: 10.0,
+          dryMatter: 90.0,
+          requiresLabTest: true,
+        },
+        adulteration: {
+          ureaAdulterationDetected: false,
+          ureaPercentage: 0,
+          aflatoxinRisk: 'Requires Certified Lab Test',
+          sandSilicaRisk: 'Requires Certified Lab Test',
+          foreignStarchOrTallow: false,
+          labVerifiedOnly: true,
+        },
+        overallGrade: 'Tier C: Hazardous/Reject',
+        bisCompliant: false,
+        regulatoryCitation: {
+          standardCode: 'Optical Image Quality Standard',
+          authority: 'PashuPoshan Colorimetry Engine',
+          clause: 'Illumination & Exposure Bounds',
+          prescribedLimits: 'Mean luminance between 25 and 245 (non-saturated, non-underexposed)',
+        },
+        disclaimer: LEGAL_DISCLAIMER,
+        veterinaryAdvisory: 'The strip region was too dark or overexposed. Colorimetric reading is unreliable. Please retake photo with the test strip centered in clear, indirect daylight.',
+        correctiveActions: [
+          'Move to a well-lit location with even, indirect natural light.',
+          'Avoid casting phone or hand shadows directly across the test strip.',
+          'Ensure the camera lens is clean and focused before capturing.',
+        ],
+      };
     }
   } else {
     // Optical camera triage fallback for silage

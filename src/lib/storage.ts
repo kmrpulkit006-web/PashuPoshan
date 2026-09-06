@@ -8,6 +8,7 @@ const PITS_KEY = 'pashuposhan_pits_v1';
 const ALERTS_KEY = 'pashuposhan_alerts_v1';
 const SYNC_QUEUE_KEY = 'pashuposhan_sync_queue_v1';
 const PENDING_SCANS_KEY = 'pashuposhan_pending_scans_v1';
+const PENDING_ALERTS_KEY = 'pashuposhan_pending_alerts_v1';
 
 function safeSetItem(key: string, value: string): boolean {
   try {
@@ -137,6 +138,19 @@ const INITIAL_ALERTS: CommunityFeedAlert[] = [
     brandOrCrop: 'Certified Grade-A Maize Silage',
     description: 'NDDB certified silage bales available at ₹4.20/kg for cooperative members to counter seasonal dry fodder deficit.',
     reportedBy: 'Gujarat Cooperative Milk Marketing Federation',
+    verifiedByCoop: true,
+  },
+  {
+    id: 'alert_4',
+    title: 'High Non-Protein Nitrogen Warning in Mustard Cake',
+    taluka: 'Khanna',
+    district: 'Ludhiana, Punjab',
+    date: '26 Aug 2026',
+    alertType: 'adulterated_batch',
+    severity: 'high',
+    brandOrCrop: 'Commercial Khal (Loose Bags)',
+    description: 'Field reagent strip testing detected >3.5% non-protein nitrogen (synthetic urea) in unbranded solvent-extracted cake.',
+    reportedBy: 'District Dairy Cooperative Society',
     verifiedByCoop: true,
   }
 ];
@@ -269,12 +283,121 @@ export function getLocalAlerts(): CommunityFeedAlert[] {
   }
 }
 
+export function saveLocalAlerts(alerts: CommunityFeedAlert[]): void {
+  safeSetItem(ALERTS_KEY, JSON.stringify(alerts));
+}
+
 export function saveLocalAlert(alert: CommunityFeedAlert): CommunityFeedAlert[] {
   const current = getLocalAlerts();
-  const updated = [alert, ...current];
+  const updated = [alert, ...current.filter(a => a.id !== alert.id)];
   safeSetItem(ALERTS_KEY, JSON.stringify(updated));
   queueOfflineAction('community_alert', 'create', alert);
   return updated;
+}
+
+export function getPendingOfflineAlerts(): CommunityFeedAlert[] {
+  try {
+    const raw = localStorage.getItem(PENDING_ALERTS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function queueOfflineAlert(alert: CommunityFeedAlert): CommunityFeedAlert[] {
+  const current = getPendingOfflineAlerts();
+  const alertWithFlag = { ...alert, syncPending: true };
+  const updated = [...current.filter(a => a.id !== alert.id), alertWithFlag];
+  safeSetItem(PENDING_ALERTS_KEY, JSON.stringify(updated));
+  saveLocalAlert(alertWithFlag);
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('pashuposhan_pending_alerts_changed'));
+  }
+  return updated;
+}
+
+export function clearSyncedAlerts(syncedIds?: string[]): void {
+  try {
+    if (!syncedIds || syncedIds.length === 0) {
+      localStorage.removeItem(PENDING_ALERTS_KEY);
+    } else {
+      const current = getPendingOfflineAlerts();
+      const remaining = current.filter(a => !syncedIds.includes(a.id));
+      safeSetItem(PENDING_ALERTS_KEY, JSON.stringify(remaining));
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('pashuposhan_pending_alerts_changed'));
+    }
+  } catch (e) {
+    console.error('Failed to clear synced alerts:', e);
+  }
+}
+
+export async function fetchRemoteAlerts(): Promise<CommunityFeedAlert[]> {
+  try {
+    const response = await fetch('/api/alerts', { method: 'GET' });
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data.alerts)) {
+        // Merge with any unsynced offline alerts
+        const pending = getPendingOfflineAlerts();
+        const serverIds = new Set(data.alerts.map((a: CommunityFeedAlert) => a.id));
+        const unsynced = pending.filter(p => !serverIds.has(p.id));
+        const merged = [...unsynced, ...data.alerts];
+        saveLocalAlerts(merged);
+        return merged;
+      }
+    }
+  } catch (err) {
+    console.warn('Network error fetching remote alerts, falling back to local storage:', err);
+  }
+  return getLocalAlerts();
+}
+
+export async function postRemoteAlert(alert: Partial<CommunityFeedAlert>): Promise<CommunityFeedAlert> {
+  const response = await fetch('/api/alerts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(alert),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData.error || `Failed to post alert (${response.status})`);
+  }
+
+  const data = await response.json();
+  return data.alert;
+}
+
+export async function syncPendingAlerts(): Promise<{ successful: number; failed: number }> {
+  const pending = getPendingOfflineAlerts();
+  if (pending.length === 0) return { successful: 0, failed: 0 };
+
+  let successful = 0;
+  let failed = 0;
+  const syncedIds: string[] = [];
+
+  for (const alert of pending) {
+    try {
+      await postRemoteAlert(alert);
+      syncedIds.push(alert.id);
+      successful++;
+    } catch (e) {
+      console.warn(`Failed to sync alert ${alert.id}:`, e);
+      failed++;
+    }
+  }
+
+  if (syncedIds.length > 0) {
+    clearSyncedAlerts(syncedIds);
+    // Update local alert sync flags
+    const current = getLocalAlerts().map(a => syncedIds.includes(a.id) ? { ...a, syncPending: false } : a);
+    saveLocalAlerts(current);
+  }
+
+  return { successful, failed };
 }
 
 // Offline Sync Queue Operations
@@ -338,6 +461,7 @@ export interface PendingOfflineScan {
   stripColor?: 'yellow' | 'magenta' | 'green';
   syncStatus: 'pending' | 'syncing' | 'failed';
   errorMessage?: string;
+  retryCount?: number;
 }
 
 export function getPendingOfflineScans(): PendingOfflineScan[] {
@@ -358,6 +482,7 @@ export function queuePendingOfflineScan(
     ...scan,
     id,
     syncStatus: 'pending',
+    retryCount: 0,
   };
 
   if (scan.photoBase64 && scan.photoBase64.startsWith('data:')) {
@@ -374,6 +499,20 @@ export function queuePendingOfflineScan(
     );
   }
   return newItem;
+}
+
+export function updatePendingOfflineScan(
+  id: string,
+  updates: Partial<PendingOfflineScan>
+): void {
+  const current = getPendingOfflineScans();
+  const updated = current.map(s => (s.id === id ? { ...s, ...updates } : s));
+  safeSetItem(PENDING_SCANS_KEY, JSON.stringify(updated));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('pashuposhan_pending_sync_changed', { detail: { count: updated.length } })
+    );
+  }
 }
 
 export function removePendingOfflineScan(id: string): void {
@@ -441,8 +580,13 @@ export async function syncPendingScans(
         removePendingOfflineScan(item.id);
         successful++;
       }
-    } catch (err) {
+    } catch (err: any) {
       console.warn(`Failed to sync item ${item.id}:`, err);
+      updatePendingOfflineScan(item.id, {
+        syncStatus: 'failed',
+        retryCount: (item.retryCount || 0) + 1,
+        errorMessage: err.message || 'Sync failed',
+      });
       failed++;
     }
   }

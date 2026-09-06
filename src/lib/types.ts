@@ -179,6 +179,11 @@ export interface CommunityFeedAlert {
   reportedBy: string;
   verifiedByCoop: boolean;
   syncPending?: boolean;
+  state?: string;
+  contaminant?: string;
+  feedType?: string;
+  advisory?: string;
+  timestamp?: string;
 }
 
 export interface OfflineSyncItem {
