@@ -3,8 +3,8 @@
  * Features dynamic runtime caching for Vite assets, ensuring true offline availability.
  */
 
-const STATIC_CACHE_NAME = 'pashuposhan-static-v5';
-const RUNTIME_CACHE_NAME = 'pashuposhan-runtime-v5';
+const STATIC_CACHE_NAME = 'pashuposhan-static-v6';
+const RUNTIME_CACHE_NAME = 'pashuposhan-runtime-v6';
 
 const PRECACHE_URLS = [
   '/',
@@ -39,12 +39,44 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET and cross-origin requests
-  if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
+  // Only handle GET requests
+  if (event.request.method !== 'GET') {
     return;
   }
 
   const url = new URL(event.request.url);
+
+  // Strategy 0: Cache-First for cross-origin TensorFlow.js MobileNet model weights & shards
+  // Enables on-device feed sanity pre-filtering even in remote cattle sheds without internet
+  const isTfjsModelRequest =
+    (url.hostname === 'storage.googleapis.com' && url.pathname.includes('/tfjs-models/')) ||
+    url.hostname === 'tfhub.dev' ||
+    (url.hostname.includes('tfhub') && url.pathname.includes('mobilenet'));
+
+  if (isTfjsModelRequest) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(event.request).then((networkResponse) => {
+          if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
+            const responseToCache = networkResponse.clone();
+            caches.open(RUNTIME_CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        });
+      })
+    );
+    return;
+  }
+
+  // Skip other cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
 
   // Strategy 1: Stale-While-Revalidate for bundled assets (/assets/)
   // Immediate load in remote sheds with zero signal or spotty 2G

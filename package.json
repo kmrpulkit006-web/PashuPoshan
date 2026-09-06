@@ -10,6 +10,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@tensorflow-models/mobilenet": "^2.1.1",
+    "@tensorflow/tfjs": "^4.22.0",
     "@upstash/redis": "^1.38.4",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",

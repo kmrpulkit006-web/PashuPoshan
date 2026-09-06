@@ -13,6 +13,7 @@ import {
   createOfflinePlaceholderSample,
 } from '../lib/storage';
 import { compressImage } from '../lib/imageStorage';
+import { classifyFeedTypeOnDevice } from '../lib/onDeviceVision';
 import confetti from 'canvas-confetti';
 
 interface UseScanEngineProps {
@@ -53,6 +54,28 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
     setIsProcessing(true);
 
     if (scanMode === 'vision') {
+      setProcessingMessage('Checking image on device (डिवाइस पर छवि जांच हो रही है)...');
+
+      // Client-Side Feed-Type Sanity Check (MobileNetV1, ~1.8MB weights)
+      // Checks for unmistakable non-feed objects (laptop, vehicle, pet, etc.) with >60% confidence
+      // Organic feed matter or ambiguous results proceed silently to Gemini without prompting
+      try {
+        const sanityCheck = await classifyFeedTypeOnDevice(imgUri);
+        if (sanityCheck.shouldWarnUser && sanityCheck.warningMessage) {
+          const proceed =
+            typeof window !== 'undefined' && window.confirm
+              ? window.confirm(sanityCheck.warningMessage)
+              : true;
+          if (!proceed) {
+            setIsProcessing(false);
+            return;
+          }
+        }
+      } catch (e) {
+        // Safe fail-open: any error in on-device vision must never block scan
+        console.warn('On-device feed check bypassed due to error:', e);
+      }
+
       setProcessingMessage('Analyzing image with AI (AI द्वारा छवि का विश्लेषण हो रहा है)...');
 
       try {

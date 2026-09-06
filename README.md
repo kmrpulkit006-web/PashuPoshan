@@ -11,8 +11,9 @@
 ## 🚀 Key Features
 
 1. **AI Rapid Quality Scanner (`/scan`)**:
-   - **Physical Examination**: Analyzes feed texture, particle granularity, and fungal mold (*Aspergillus / Penicillium*) using computer vision.
-   - **Colorimetric Test Strip Analysis**: Scans chemical paper strip reaction (e.g. $p$-DMAB for urea adulteration detection and pH paper for silage leachate).
+   - **On-Device Feed-Type Sanity Pre-Filter**: Client-side MobileNetV1 ($\alpha=0.25$, ~1.8MB model weights) pre-screens camera and uploaded images before network requests. Discards unmistakable non-feed items (laptops, vehicles, pets, screens) when confidence exceeds 60%, prompting farmers to retake or confirm and saving cellular bandwidth. Organic agricultural matter (corn, hay, straw, forage) and ambiguous frames proceed silently.
+   - **Physical Examination & Spoilage Triage**: Cloud-assisted visual analysis (Google Gemini 1.5 Flash Vision) paired with optical luminance & dark-ratio heuristics for texture, granularity, and fungal mold (*Aspergillus / Penicillium*) screening.
+   - **Colorimetric Test Strip Analysis**: Scans chemical paper strip reaction using CIEDE2000 color calibration with standardized reference white card (e.g. $p$-DMAB for urea adulteration detection and pH paper for silage leachate).
    - **1-Tap Evaluator Demos**: Preloaded with real-world scenarios (Grade A Maize Silage, 4.2% Spiked Urea Pellets, Waterlogged Sorghum Silage, Cottonseed Cake).
 
 2. **Official Feed Quality Certificate (`/scorecard`)**:
@@ -68,8 +69,13 @@ The application will launch on `http://localhost:5174/` (or network IP for testi
 ## 🛠️ Tech Stack
 - **Framework**: React 18 + TypeScript + Vite
 - **Styling**: Tailwind CSS (Mobile-responsive UI shell)
+- **On-Device Machine Learning (Edge AI)**: TensorFlow.js (`@tensorflow/tfjs` + `@tensorflow-models/mobilenet`)
+  - **Pre-trained Model**: MobileNetV1 ($\alpha=0.25$, ~1.8MB weight files) loaded client-side for rapid feed-type pre-filtering.
+  - **Lazy-Loaded Code-Split Bundles**: Total dynamically imported runtime is ~1.96 MB raw (~329.5 kB gzipped) across three split chunks: `mobilenet.esm` (33.3 kB), `graph_model` (651.3 kB), and `tfjs runtime` (1,281.3 kB).
+  - **Instant Initial Load**: Initial PWA application bundle remains lightweight at 362 kB (108 kB gzipped).
+  - **Zero-Network PWA Offline Caching**: `public/sw.js` implements a Cache-First runtime strategy for cross-origin TFJS model assets (`storage.googleapis.com/tfjs-models/` and `tfhub.dev`), ensuring on-device inference functions in remote cattle sheds even without internet access.
 - **Icons**: Lucide React
 - **Audio Guidance**: Web Speech Synthesis API (Multilingual: HI, EN, MR, GU, PA)
 - **Animation**: Canvas-Confetti
-- **Testing**: Vitest (Comprehensive safety & compliance suites)
-- **CI/CD**: GitHub Actions Automated Build & Test Pipeline
+- **Testing**: Vitest (Comprehensive safety, compliance, & ML threshold suites)
+- **CI/CD**: GitHub Actions Automated Build & Test Pipeline (Clean `ubuntu-latest` verification)
