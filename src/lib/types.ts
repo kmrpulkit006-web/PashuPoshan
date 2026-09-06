@@ -1,4 +1,9 @@
 export type Locale = 'en' | 'hi' | 'mr' | 'gu' | 'pa';
+export const SUPPORTED_LOCALES: readonly Locale[] = ['en', 'hi', 'mr', 'gu', 'pa'] as const;
+
+export function isSupportedLocale(value: unknown): value is Locale {
+  return typeof value === 'string' && (SUPPORTED_LOCALES as readonly string[]).includes(value);
+}
 
 export type FeedCategory = 
   | 'concentrate'    // Compounded cattle feed pellets, mash, oil cakes (khal)

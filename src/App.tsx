@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Locale, FeedSample } from './lib/types';
+import { Locale, FeedSample, isSupportedLocale } from './lib/types';
 import { getLocalScans, getPendingOfflineScans, syncPendingScans } from './lib/storage';
 import { MobileHeader } from './components/MobileHeader';
 import { BottomNav, ActiveTab } from './components/BottomNav';
@@ -43,7 +43,7 @@ export const App: React.FC = () => {
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('pashuposhan_locale');
-        if (saved === 'hi' || saved === 'en' || saved === 'pa') return saved;
+        if (isSupportedLocale(saved)) return saved;
       } catch (e) {}
     }
     return 'hi';
