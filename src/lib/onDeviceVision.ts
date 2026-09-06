@@ -75,13 +75,6 @@ export const ORGANIC_FEED_KEYWORDS: string[] = [
   'feed',
   'herb',
   'agriculture',
-  'pot',
-  'flowerpot',
-  'fungus',
-  'mushroom',
-  'agaric',
-  'bolete',
-  'earthstar',
 ];
 
 /**

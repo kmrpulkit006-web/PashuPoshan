@@ -1,4 +1,4 @@
-import { FeedSample, FeedCategory, QualityGrade, VisualAnalysisResult } from './types';
+import { FeedSample, FeedCategory, QualityGrade, VisualAnalysisResult, OfflineMoldHeuristicResult } from './types';
 import { calculateFliegScore } from './fliegScore';
 
 /**
@@ -838,8 +838,8 @@ export function analyzeCanvasImageData(
       };
     }
   } else {
-    // Optical camera triage fallback for silage
-    if (darkRatio > 0.12 && isSilage) {
+    // Optical camera triage fallback for silage (vision mode only)
+    if (!isStripMode && darkRatio > 0.12 && isSilage) {
       calibratedPh = 5.2;
     }
   }
@@ -861,7 +861,7 @@ export function analyzeCanvasImageData(
     bisCompliant = false;
     overallGrade = 'Tier C: Hazardous/Reject';
     nonComplianceReasons.push(`Silage fermentation failed (pH ${calibratedPh}, Flieg Score ${flieg?.score}/100 - High Butyric Acid).`);
-  } else if (darkRatio > 0.12) {
+  } else if (!isStripMode && darkRatio > 0.12) {
     bisCompliant = false;
     overallGrade = 'Tier C: Hazardous/Reject';
     nonComplianceReasons.push(`High surface dark pixel ratio (${(darkRatio * 100).toFixed(1)}%) indicates active fungal mold.`);
@@ -905,7 +905,7 @@ export function analyzeCanvasImageData(
               : 'Lactic Acid (Well Preserved)',
           ammoniaNitrogenPct: calibratedPh > 4.5 ? 15.0 : 6.0,
           aerobicStabilityHours: calibratedPh > 4.5 ? 6 : 44,
-          moldContaminationPct: +(darkRatio * 100).toFixed(1),
+          moldContaminationPct: isStripMode ? 0 : +(darkRatio * 100).toFixed(1),
           temperatureC: calibratedPh > 4.5 ? 42.5 : 32.0,
         }
       : undefined,
@@ -937,6 +937,179 @@ export function analyzeCanvasImageData(
             'Verify crude protein and dry matter via certified district dairy testing laboratory.',
             'Store in a well-ventilated dry room raised off the ground.',
           ],
+  };
+}
+
+/**
+ * Offline Feed-Image Relative Color-Cluster Mold Heuristic
+ * 
+ * Lightweight client-side spatial grid analysis that inspects actual feed photos
+ * when offline or when cloud AI visual triage is unreachable.
+ * 
+ * RELATIVE DIVERGENCE ARCHITECTURE (Anti-False-Positive Guard):
+ * To prevent false alarms on naturally pale/cream feeds (e.g. wheat straw, bhusa, cream pellets),
+ * a cell is flagged as an anomaly ONLY if BOTH conditions are met:
+ * 1. Condition A (Statistical Minority Divergence): The cell's RGB and luminance diverge significantly
+ *    from the frame's dominant (median) background color (ΔC >= 30 and (|ΔY| >= 25 or chromatic shift)).
+ *    On uniform pale or uniform dark feeds, ΔC ≈ 0, ensuring zero false positives.
+ * 2. Condition B (Archetype Signature Match): The divergent cell matches one of three fungal archetypes:
+ *    - 'cottony_white' (Aspergillus-type): distinctly lighter than background (Y_c - Y_dom >= 35),
+ *      high absolute luminance (Y_c >= 175), low chroma/saturation (S_c <= 40).
+ *    - 'olive_penicillium' (Penicillium-type): marked green dominance (G_c >= R_c + 15, G_c >= B_c + 10)
+ *      with relative green shift compared to frame background.
+ *    - 'black_speckled': distinctly darker than background (Y_dom - Y_c >= 40) with Y_c <= 50.
+ */
+export function detectColorClusterMoldHeuristic(imageData: ImageData): OfflineMoldHeuristicResult {
+  const { data, width, height } = imageData;
+  const GRID_SIZE = 10; // 10x10 = 100 cells
+  const cellWidth = Math.max(1, Math.floor(width / GRID_SIZE));
+  const cellHeight = Math.max(1, Math.floor(height / GRID_SIZE));
+
+  interface CellStats {
+    r: number;
+    g: number;
+    b: number;
+    lum: number;
+    sat: number;
+  }
+
+  const cells: CellStats[] = [];
+
+  for (let gy = 0; gy < GRID_SIZE; gy++) {
+    for (let gx = 0; gx < GRID_SIZE; gx++) {
+      const startX = gx * cellWidth;
+      const startY = gy * cellHeight;
+      const endX = Math.min(width, (gx + 1) * cellWidth);
+      const endY = Math.min(height, (gy + 1) * cellHeight);
+
+      let sumR = 0;
+      let sumG = 0;
+      let sumB = 0;
+      let pixelCount = 0;
+
+      for (let y = startY; y < endY; y += 2) {
+        for (let x = startX; x < endX; x += 2) {
+          const idx = (y * width + x) * 4;
+          sumR += data[idx];
+          sumG += data[idx + 1];
+          sumB += data[idx + 2];
+          pixelCount++;
+        }
+      }
+
+      if (pixelCount === 0) continue;
+
+      const r = sumR / pixelCount;
+      const g = sumG / pixelCount;
+      const b = sumB / pixelCount;
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      const sat = Math.max(r, g, b) - Math.min(r, g, b);
+
+      cells.push({ r, g, b, lum, sat });
+    }
+  }
+
+  if (cells.length === 0) {
+    return {
+      moldSuspicionLevel: 'none',
+      affectedAreaPct: 0,
+      detectedSignatures: [],
+      isPrototypeHeuristic: true,
+      heuristicDisclaimer:
+        'Prototype on-device color-cluster heuristic — detects relative surface color deviations. Rough on-device estimate only; not a laboratory or certified AI diagnosis. Full Gemini AI visual triage will supersede automatically once connected.',
+    };
+  }
+
+  // 1. Calculate dominant (median) background color across all cells
+  const sortedR = [...cells.map((c) => c.r)].sort((a, b) => a - b);
+  const sortedG = [...cells.map((c) => c.g)].sort((a, b) => a - b);
+  const sortedB = [...cells.map((c) => c.b)].sort((a, b) => a - b);
+  const sortedLum = [...cells.map((c) => c.lum)].sort((a, b) => a - b);
+
+  const mid = Math.floor(cells.length / 2);
+  const domR = sortedR[mid];
+  const domG = sortedG[mid];
+  const domB = sortedB[mid];
+  const domLum = sortedLum[mid];
+
+  // 2. Identify anomalous cells adhering strictly to Condition A & Condition B
+  const signaturesSet = new Set<'cottony_white' | 'olive_penicillium' | 'black_speckled'>();
+  let anomalousCount = 0;
+
+  for (const cell of cells) {
+    // Condition A: Must diverge meaningfully from dominant background
+    const deltaC = Math.sqrt(
+      Math.pow(cell.r - domR, 2) +
+      Math.pow(cell.g - domG, 2) +
+      Math.pow(cell.b - domB, 2)
+    );
+    const deltaLum = Math.abs(cell.lum - domLum);
+
+    // If cell color is very close to the dominant background, it is normal feed matter
+    if (deltaC < 30 && deltaLum < 25) {
+      continue;
+    }
+
+    // Condition B: Separately matches one of the three mold archetypes
+    let matched = false;
+
+    // Archetype 1: Cottony White / Light-Grey (Aspergillus)
+    // Distinctly lighter than background, high absolute luminance, low saturation
+    if (
+      cell.lum - domLum >= 35 &&
+      cell.lum >= 175 &&
+      cell.sat <= 40
+    ) {
+      signaturesSet.add('cottony_white');
+      matched = true;
+    }
+
+    // Archetype 2: Olive / Blue-Green (Penicillium)
+    // Marked green dominance over red/blue and distinct green chromatic shift from dominant frame
+    const domGreenRatio = (domG + 1) / (domR + 1);
+    const cellGreenRatio = (cell.g + 1) / (cell.r + 1);
+    if (
+      !matched &&
+      cell.g >= cell.r + 15 &&
+      cell.g >= cell.b + 10 &&
+      cellGreenRatio >= domGreenRatio + 0.20
+    ) {
+      signaturesSet.add('olive_penicillium');
+      matched = true;
+    }
+
+    // Archetype 3: Black Speckled Patches
+    // Distinctly darker than background and very dark absolute luminance
+    if (
+      !matched &&
+      domLum - cell.lum >= 40 &&
+      cell.lum <= 50
+    ) {
+      signaturesSet.add('black_speckled');
+      matched = true;
+    }
+
+    if (matched) {
+      anomalousCount++;
+    }
+  }
+
+  const affectedAreaPct = +((anomalousCount / cells.length) * 100).toFixed(1);
+
+  let moldSuspicionLevel: 'none' | 'possible' | 'likely' = 'none';
+  if (affectedAreaPct >= 10.0) {
+    moldSuspicionLevel = 'likely';
+  } else if (affectedAreaPct >= 3.0) {
+    moldSuspicionLevel = 'possible';
+  }
+
+  return {
+    moldSuspicionLevel,
+    affectedAreaPct,
+    detectedSignatures: Array.from(signaturesSet),
+    isPrototypeHeuristic: true,
+    heuristicDisclaimer:
+      'Prototype on-device color-cluster heuristic — detects relative surface color deviations (cottony white, olive-green, black patches) against frame background. Rough on-device estimate only; not a laboratory or certified AI diagnosis. Full Gemini AI visual triage will supersede automatically once connected.',
   };
 }
 

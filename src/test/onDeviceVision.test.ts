@@ -35,6 +35,14 @@ describe('On-Device Feed Sanity Vision Module', () => {
       expect(matchesKeywords('LAPTOP, NOTEBOOK COMPUTER', NON_FEED_KEYWORDS)).toBe(true);
       expect(matchesKeywords('cellular telephone', NON_FEED_KEYWORDS)).toBe(true);
     });
+
+    it('does not treat mushroom-fruiting bodies or flowerpots as organic feed matter', () => {
+      expect(matchesKeywords('agaric', ORGANIC_FEED_KEYWORDS)).toBe(false);
+      expect(matchesKeywords('mushroom', ORGANIC_FEED_KEYWORDS)).toBe(false);
+      expect(matchesKeywords('bolete', ORGANIC_FEED_KEYWORDS)).toBe(false);
+      expect(matchesKeywords('earthstar', ORGANIC_FEED_KEYWORDS)).toBe(false);
+      expect(matchesKeywords('pot, flowerpot', ORGANIC_FEED_KEYWORDS)).toBe(false);
+    });
   });
 
   describe('evaluateFeedTypePredictions (thresholding and decision rules)', () => {
@@ -108,6 +116,17 @@ describe('On-Device Feed Sanity Vision Module', () => {
         { className: 'bubble', probability: 0.75 },
       ];
       const result = evaluateFeedTypePredictions(predictions, 30);
+
+      expect(result.looksLikeOrganicFeedMatter).toBe(true);
+      expect(result.shouldWarnUser).toBe(false);
+      expect(result.reason).toBe('ambiguous_or_low_confidence');
+    });
+
+    it('treats mushroom-fruiting bodies as ambiguous rather than organic feed match', () => {
+      const predictions: PredictionItem[] = [
+        { className: 'agaric, agaricus', probability: 0.82 },
+      ];
+      const result = evaluateFeedTypePredictions(predictions, 25);
 
       expect(result.looksLikeOrganicFeedMatter).toBe(true);
       expect(result.shouldWarnUser).toBe(false);

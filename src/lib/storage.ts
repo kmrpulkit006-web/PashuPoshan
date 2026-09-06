@@ -1,4 +1,4 @@
-import { CowProfile, FeedSample, SilageBunker, SilagePitLog, CommunityFeedAlert, OfflineSyncItem, FeedCategory } from './types';
+import { CowProfile, FeedSample, SilageBunker, SilagePitLog, CommunityFeedAlert, OfflineSyncItem, FeedCategory, OfflineMoldHeuristicResult } from './types';
 import { PRESET_FEED_SCENARIOS, createFeedSampleFromVisualAnalysis } from './feedAnalysisEngine';
 import { storeImageInIndexedDb } from './imageStorage';
 
@@ -601,14 +601,50 @@ export async function syncPendingScans(
 export function createOfflinePlaceholderSample(
   category: FeedCategory,
   photoUri: string,
-  pendingId: string
+  pendingId: string,
+  heuristicResult?: OfflineMoldHeuristicResult
 ): FeedSample {
   const isSilage = category === 'silage';
+  const categoryLabel = isSilage ? 'Silage' : category.replace('_', ' ').toUpperCase();
+
+  let name = `${categoryLabel} (Offline — Pending Sync)`;
+  let veterinaryAdvisory =
+    'Offline scan queued. When in mobile data range, the AI visual triage will evaluate surface mold and discoloration.';
+  let actionableSummary =
+    'Photo safely saved in offline queue. Connect to internet to run AI visual triage.';
+  let correctiveActions = [
+    'Photo stored safely in local phone memory.',
+    'Tap "Sync now" in the Alerts tab or Header info when in cellular network range.',
+  ];
+  let heuristicDisclaimer =
+    'Image captured offline in low-connectivity area. Saved to local sync queue. Full AI visual analysis will complete automatically when reconnected.';
+
+  if (heuristicResult) {
+    if (heuristicResult.moldSuspicionLevel === 'likely') {
+      name = `${categoryLabel} (Offline Estimate: Mold Suspected — Unconfirmed)`;
+      veterinaryAdvisory = `Offline Heuristic Notice (Unconfirmed): Localized surface color clusters detected (~${heuristicResult.affectedAreaPct}% coverage) resembling mold. Full AI visual analysis will confirm once online. Do not discard feed prematurely based on this rough offline estimate.`;
+      actionableSummary = `Offline Heuristic Alert: Surface discoloration detected (~${heuristicResult.affectedAreaPct}% coverage). Status: Unconfirmed. Connect to internet to confirm.`;
+      correctiveActions = [
+        `Offline Heuristic Alert: ~${heuristicResult.affectedAreaPct}% surface discoloration detected. Status: Unconfirmed Offline Estimate.`,
+        'Keep sample dry, well-ventilated, and shaded; re-verify with AI visual triage once online.',
+        'Tap "Sync now" in the Alerts tab or Header info when cellular network is restored.',
+      ];
+      heuristicDisclaimer = heuristicResult.heuristicDisclaimer;
+    } else if (heuristicResult.moldSuspicionLevel === 'possible') {
+      name = `${categoryLabel} (Offline Estimate: Minor Discoloration — Unconfirmed)`;
+      veterinaryAdvisory = `Offline Heuristic Notice (Unconfirmed): Minor surface color anomalies detected (~${heuristicResult.affectedAreaPct}% coverage). Full AI visual analysis will evaluate when online.`;
+      actionableSummary = `Offline Heuristic Notice: Minor surface anomalies detected (~${heuristicResult.affectedAreaPct}% coverage). Status: Unconfirmed.`;
+      correctiveActions = [
+        `Offline Heuristic Notice: Minor surface anomalies detected (~${heuristicResult.affectedAreaPct}% coverage). Status: Unconfirmed.`,
+        'Photo stored safely in offline queue. Sync when network is restored.',
+      ];
+      heuristicDisclaimer = heuristicResult.heuristicDisclaimer;
+    }
+  }
+
   return {
     id: `offline_pending_${pendingId}`,
-    name: isSilage
-      ? 'Silage (Offline - Pending Sync)'
-      : `${category.replace('_', ' ').toUpperCase()} (Offline - Pending Sync)`,
+    name,
     category,
     batchNumber: 'OFFLINE-QUEUE',
     sourceOrBrand: 'Field Camera (Saved Locally)',
@@ -617,13 +653,24 @@ export function createOfflinePlaceholderSample(
     testedMethod: 'AI Vision Triage',
     isSimulated: false,
     isPrototypeHeuristic: true,
-    heuristicDisclaimer:
-      'Image captured offline in low-connectivity area. Saved to local sync queue. Full AI visual analysis will complete automatically when reconnected.',
+    heuristicDisclaimer,
     metrics: {
       moisture: isSilage ? 68.0 : 10.5,
       dryMatter: isSilage ? 32.0 : 89.5,
       requiresLabTest: true,
     },
+    silageMetrics: isSilage
+      ? {
+          pH: 4.0,
+          fliegScore: 75,
+          fliegGrade: 'Good',
+          primaryAcid: 'Lactic Acid (Well Preserved)',
+          ammoniaNitrogenPct: 7.0,
+          aerobicStabilityHours: 36,
+          moldContaminationPct: heuristicResult ? heuristicResult.affectedAreaPct : 0,
+          temperatureC: 32.0,
+        }
+      : undefined,
     adulteration: {
       ureaAdulterationDetected: false,
       ureaPercentage: 0.1,
@@ -632,7 +679,7 @@ export function createOfflinePlaceholderSample(
       foreignStarchOrTallow: false,
       labVerifiedOnly: true,
     },
-    overallGrade: 'Tier B: Sub-Standard',
+    overallGrade: 'Tier B: Sub-Standard', // Capped at Tier B (Unconfirmed estimate)
     bisCompliant: true,
     regulatoryCitation: {
       standardCode: 'Field Gate Rapid Triage Protocol',
@@ -642,13 +689,10 @@ export function createOfflinePlaceholderSample(
     },
     disclaimer:
       'This record was created while offline. It will be updated once internet connectivity is restored.',
-    actionableSummary: 'Photo safely saved in offline queue. Connect to internet to run AI visual triage.',
-    veterinaryAdvisory:
-      'Offline scan queued. When in mobile data range, the AI visual triage will evaluate surface mold and discoloration.',
-    correctiveActions: [
-      'Photo stored safely in local phone memory.',
-      'Tap "Sync now" in the Alerts tab or Header info when in cellular network range.',
-    ],
+    actionableSummary,
+    veterinaryAdvisory,
+    correctiveActions,
+    offlineMoldHeuristic: heuristicResult,
   };
 }
 

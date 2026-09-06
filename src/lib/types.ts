@@ -101,6 +101,15 @@ export interface FeedSample {
   actionableSummary?: string;
   veterinaryAdvisory: string;
   correctiveActions: string[];
+  offlineMoldHeuristic?: OfflineMoldHeuristicResult;
+}
+
+export interface OfflineMoldHeuristicResult {
+  moldSuspicionLevel: 'none' | 'possible' | 'likely';
+  affectedAreaPct: number;
+  detectedSignatures: Array<'cottony_white' | 'olive_penicillium' | 'black_speckled'>;
+  isPrototypeHeuristic: true;
+  heuristicDisclaimer: string;
 }
 
 export interface CowProfile {

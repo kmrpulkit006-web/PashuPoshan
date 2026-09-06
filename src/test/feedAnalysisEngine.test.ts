@@ -14,7 +14,9 @@ import {
   sampleCenterPatchRgb,
   UNIVERSAL_PH_REFERENCE_CHART,
   UREA_COLORIMETRIC_CHART,
+  detectColorClusterMoldHeuristic,
 } from '../lib/feedAnalysisEngine';
+import { createOfflinePlaceholderSample } from '../lib/storage';
 
 // Helper to construct a synthetic ImageData object for tests
 function createSyntheticImageData(
@@ -353,6 +355,134 @@ describe('feedAnalysisEngine - analyzeCanvasImageData & Safety Logic', () => {
       expect(result.meanLuminance).toBeGreaterThan(245);
       expect(result.isLightingValid).toBe(false);
       expect(result.guardWarning).toBe('blown_out');
+    });
+  });
+
+  describe('Fix 1: Strip-Mode Mold Decoupling (Regression Guard)', () => {
+    it('does not produce mold-related Tier C penalty when strip photo has dark pixels', () => {
+      // Create a 60x60 strip photo where 40% of pixels are dark background (< 60 lum)
+      const stripImgWithDarkBg = createSyntheticImageData(60, 60, (x, y) => {
+        if (y < 24) {
+          return { r: 20, g: 20, b: 20 }; // 40% dark background
+        }
+        return { r: 235, g: 205, b: 55 }; // Clean yellow urea test strip
+      });
+
+      // Yellow test strip color (~negative urea)
+      const yellowStripColor = { r: 235, g: 205, b: 55 };
+
+      // When isStripMode is true:
+      const result = analyzeCanvasImageData('concentrate', stripImgWithDarkBg, true, yellowStripColor);
+
+      // Must NOT fail with Tier C or mold claims on a strip photo!
+      expect(result.overallGrade).toBe('Tier A: Premium');
+      expect(result.bisCompliant).toBe(true);
+      expect(result.correctiveActions.some((act) => act.includes('active fungal mold'))).toBe(false);
+      expect(result.silageMetrics?.moldContaminationPct ?? 0).toBe(0);
+    });
+
+    it('does not populate moldContaminationPct in silageMetrics for strip mode', () => {
+      // Silage strip photo with dark borders
+      const silageStripImg = createSyntheticImageData(60, 60, (x, y) => {
+        if (x < 15) return { r: 10, g: 10, b: 10 }; // Dark left edge
+        return { r: 245, g: 130, b: 10 }; // Optimum orange pH strip
+      });
+      const orangeStripColor = { r: 245, g: 130, b: 10 };
+
+      const result = analyzeCanvasImageData('silage', silageStripImg, true, orangeStripColor);
+
+      expect(result.silageMetrics).toBeDefined();
+      expect(result.silageMetrics?.moldContaminationPct).toBe(0);
+      expect(result.correctiveActions.some((act) => act.includes('active fungal mold'))).toBe(false);
+    });
+  });
+
+  describe('Fix 2: Relative Color-Cluster Mold Heuristic (Offline Vision)', () => {
+    it('reports moldSuspicionLevel: "none" for uniform golden-brown silage canvas', () => {
+      // Uniform golden-brown silage canvas
+      const uniformSilage = createSyntheticImageData(100, 100, { r: 180, g: 150, b: 60 });
+      const heuristic = detectColorClusterMoldHeuristic(uniformSilage);
+
+      expect(heuristic.moldSuspicionLevel).toBe('none');
+      expect(heuristic.affectedAreaPct).toBe(0);
+      expect(heuristic.detectedSignatures).toEqual([]);
+      expect(heuristic.isPrototypeHeuristic).toBe(true);
+    });
+
+    it('reports moldSuspicionLevel: "none" for uniform pale/cream canvas (anti-false-positive guard for dry straw/bhusa)', () => {
+      // Critical false-positive scenario: Naturally pale dry straw / bhusa (R=220, G=210, B=170, Y ~ 208)
+      // Must NOT be falsely identified as cottony white mold!
+      const uniformStraw = createSyntheticImageData(100, 100, { r: 220, g: 210, b: 170 });
+      const heuristic = detectColorClusterMoldHeuristic(uniformStraw);
+
+      expect(heuristic.moldSuspicionLevel).toBe('none');
+      expect(heuristic.affectedAreaPct).toBe(0);
+      expect(heuristic.detectedSignatures).toEqual([]);
+    });
+
+    it('detects localized cottony white mold cluster against darker background as likely', () => {
+      // 100x100 canvas: 84% golden silage, 16% localized cottony white patch (40x40 at center)
+      const moldySilage = createSyntheticImageData(100, 100, (x, y) => {
+        if (x >= 30 && x < 70 && y >= 30 && y < 70) {
+          return { r: 235, g: 235, b: 235 }; // Cottony white Aspergillus patch (16% of area)
+        }
+        return { r: 160, g: 130, b: 50 }; // Golden-brown silage background
+      });
+
+      const heuristic = detectColorClusterMoldHeuristic(moldySilage);
+
+      expect(heuristic.moldSuspicionLevel).toBe('likely');
+      expect(heuristic.affectedAreaPct).toBeGreaterThanOrEqual(10.0);
+      expect(heuristic.detectedSignatures).toContain('cottony_white');
+    });
+
+    it('detects localized olive/blue-green penicillium cluster as possible', () => {
+      // 100x100 canvas: ~6% olive/penicillium green patch (25x25 at top-left)
+      const penicilliumSilage = createSyntheticImageData(100, 100, (x, y) => {
+        if (x < 25 && y < 25) {
+          return { r: 60, g: 130, b: 70 }; // Olive Penicillium patch (~6.25% of area)
+        }
+        return { r: 170, g: 140, b: 60 }; // Golden silage background
+      });
+
+      const heuristic = detectColorClusterMoldHeuristic(penicilliumSilage);
+
+      expect(heuristic.moldSuspicionLevel).toBe('possible');
+      expect(heuristic.affectedAreaPct).toBeGreaterThanOrEqual(3.0);
+      expect(heuristic.affectedAreaPct).toBeLessThan(10.0);
+      expect(heuristic.detectedSignatures).toContain('olive_penicillium');
+    });
+
+    it('caps offline placeholder severity at Tier B and labels sample as unconfirmed', () => {
+      // When heuristic detects likely mold, verify createOfflinePlaceholderSample
+      // does NOT produce a premature Tier C emergency alarm
+      const likelyHeuristic = {
+        moldSuspicionLevel: 'likely' as const,
+        affectedAreaPct: 14.5,
+        detectedSignatures: ['cottony_white' as const],
+        isPrototypeHeuristic: true as const,
+        heuristicDisclaimer: 'Prototype heuristic test disclaimer',
+      };
+
+      const sample = createOfflinePlaceholderSample(
+        'silage',
+        'data:image/jpeg;base64,mock',
+        'offline_123',
+        likelyHeuristic
+      );
+
+      // Severity cap: Must be Tier B, NEVER Tier C without lab/cloud confirmation
+      expect(sample.overallGrade).toBe('Tier B: Sub-Standard');
+      expect(sample.overallGrade.includes('Tier C')).toBe(false);
+
+      // Visible Unconfirmed labeling in name and guidance
+      expect(sample.name).toContain('Unconfirmed');
+      expect(sample.name).toContain('Mold Suspected');
+      expect(sample.silageMetrics?.moldContaminationPct).toBe(14.5);
+      expect(sample.veterinaryAdvisory).toContain('Unconfirmed');
+      expect(sample.correctiveActions[0]).toContain('Unconfirmed Offline Estimate');
+      expect(sample.actionableSummary).toContain('Unconfirmed');
+      expect(sample.offlineMoldHeuristic).toBe(likelyHeuristic);
     });
   });
 });

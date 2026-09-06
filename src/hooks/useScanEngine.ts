@@ -1,11 +1,12 @@
 import { useState, useRef } from 'react';
-import { FeedSample, FeedCategory, VisualAnalysisResult } from '../lib/types';
+import { FeedSample, FeedCategory, VisualAnalysisResult, OfflineMoldHeuristicResult } from '../lib/types';
 import {
   PRESET_FEED_SCENARIOS,
   analyzeCanvasImageData,
   createFeedSampleFromVisualAnalysis,
   sampleCenterPatchRgb,
   KNOWN_REFERENCE_WHITE,
+  detectColorClusterMoldHeuristic,
 } from '../lib/feedAnalysisEngine';
 import {
   saveLocalScan,
@@ -109,6 +110,31 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
       } catch (err: any) {
         console.warn('Online AI analysis unavailable or offline. Falling back to offline sync queue:', err);
 
+        // Run lightweight client-side relative color-cluster heuristic on actual feed photo
+        let offlineHeuristic: OfflineMoldHeuristicResult | undefined;
+        try {
+          if (typeof document !== 'undefined') {
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = 160;
+            offCanvas.height = 160;
+            const ctx = offCanvas.getContext('2d');
+            if (ctx) {
+              const img = new Image();
+              img.crossOrigin = 'anonymous';
+              await new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject(new Error('Image decode failed'));
+                img.src = imgUri;
+              });
+              ctx.drawImage(img, 0, 0, 160, 160);
+              const imgData = ctx.getImageData(0, 0, 160, 160);
+              offlineHeuristic = detectColorClusterMoldHeuristic(imgData);
+            }
+          }
+        } catch (heuristicErr) {
+          console.warn('Offline color-cluster heuristic analysis bypassed or failed open:', heuristicErr);
+        }
+
         // Save photo to pending sync queue
         const pending = queuePendingOfflineScan({
           category,
@@ -117,7 +143,7 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
           scanMode: 'vision',
         });
 
-        const fallbackSample = createOfflinePlaceholderSample(category, imgUri, pending.id);
+        const fallbackSample = createOfflinePlaceholderSample(category, imgUri, pending.id, offlineHeuristic);
         saveLocalScan(fallbackSample);
 
         setIsProcessing(false);
