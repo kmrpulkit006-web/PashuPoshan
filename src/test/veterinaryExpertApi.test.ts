@@ -140,6 +140,52 @@ describe('AI Veterinary & Nutrition Expert API (api/veterinary-expert.ts)', () =
       });
       expect(safeFallback).toContain('Acceptable Profile');
     });
+
+    it('extracts scorecard data and builds prompt from sample object directly', () => {
+      const payload: any = {
+        mode: 'scorecard_clinical_review',
+        sample: {
+          name: 'Fermented Napier Silage',
+          category: 'silage',
+          overallGrade: 'Tier C: Hazardous/Reject',
+          metrics: { crudeProtein: 7.2 },
+          silageMetrics: { pH: 5.4, fliegScore: 42 },
+          adulteration: { ureaAdulterationDetected: true },
+          visualAnalysis: { moldCoverageEstimate: 'moderate' },
+        },
+      };
+
+      const messages = buildPromptForRequest(payload);
+      expect(messages.length).toBe(2);
+      expect(messages[1].content).toContain('Fermented Napier Silage');
+      expect(messages[1].content).toContain('Silage pH: 5.4');
+      expect(messages[1].content).toContain('YES (CRITICAL HAZARD)');
+    });
+
+    it('extracts ration data from rationPlan and cowProfile directly', () => {
+      const payload: any = {
+        mode: 'ration_optimization',
+        rationPlan: {
+          targetDryMatterKg: 13.0,
+          targetCrudeProteinG: 1500,
+          greenFodderKg: 20,
+          dryFodderKg: 5,
+          concentrateKg: 4.5,
+          mineralMixtureG: 60,
+        },
+        cowProfile: {
+          breed: 'Sahiwal',
+          weight: 480,
+          dailyYield: 14,
+        },
+      };
+
+      const messages = buildPromptForRequest(payload);
+      expect(messages.length).toBe(2);
+      expect(messages[1].content).toContain('Sahiwal');
+      expect(messages[1].content).toContain('14 Liters/day');
+      expect(messages[1].content).toContain('Green Fodder: 20 kg');
+    });
   });
 
   describe('Rate Limiting (checkRateLimit)', () => {

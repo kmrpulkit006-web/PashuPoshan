@@ -58,7 +58,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
       if (!res.ok) {
         throw new Error(data.error || 'Failed to fetch clinical review');
       }
-      setClinicalReview(data.review || data.reply);
+      setClinicalReview(data.review || data.reply || data.advice);
     } catch (err: any) {
       setClinicalReviewError(err.message || 'Could not complete clinical consultation.');
     } finally {

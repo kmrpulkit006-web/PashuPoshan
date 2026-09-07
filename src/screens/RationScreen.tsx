@@ -54,7 +54,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
       if (!res.ok) {
         throw new Error(data.error || 'Failed to optimize ration');
       }
-      setRationAdvice(data.review || data.reply);
+      setRationAdvice(data.review || data.reply || data.advice);
     } catch (err: any) {
       setRationAdviceError(err.message || 'Could not complete ration optimization consultation.');
     } finally {

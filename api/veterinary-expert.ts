@@ -130,11 +130,53 @@ Guidelines:
 - Maintain an encouraging and respectful tone. Include terms in Hindi/English where helpful (e.g., bhusa, khal, chana churi, achar/silage).
 - CRITICAL DIRECTIVE: You must NOT output internal thinking steps, chain-of-thought, or introspective preambles (such as "Okay, the user is asking..."). Provide the direct, actionable veterinary response immediately in clean Markdown.`;
 
+export function extractScorecardData(payload: any) {
+  if (payload.scorecardData) return payload.scorecardData;
+  if (payload.sample) {
+    const s = payload.sample;
+    return {
+      feedName: s.name || 'Feed Sample',
+      category: s.category || 'General',
+      overallGrade: s.overallGrade || 'Under Review',
+      silagePh: s.silageMetrics?.pH,
+      fliegScore: s.silageMetrics?.fliegScore,
+      moldCoverageEstimate: s.visualAnalysis?.moldCoverageEstimate,
+      estimatedCP: s.metrics?.crudeProtein,
+      ureaSpiked: s.adulteration?.ureaAdulterationDetected,
+      nonComplianceReasons: s.adulteration?.ureaAdulterationDetected ? ['Urea adulteration detected'] : [],
+    };
+  }
+  return undefined;
+}
+
+export function extractRationData(payload: any) {
+  if (payload.rationData) return payload.rationData;
+  if (payload.rationPlan || payload.cowProfile) {
+    const plan = payload.rationPlan;
+    const cow = payload.cowProfile;
+    return {
+      breedName: cow?.breed || cow?.name || 'Dairy Cow',
+      bodyWeightKg: cow?.weight || 450,
+      dailyMilkLiters: cow?.dailyYield || 10,
+      fatPercentage: 4.0,
+      lactationStage: 'Mid Lactation',
+      dryMatterTargetKg: plan?.targetDryMatterKg || 12,
+      crudeProteinTargetG: plan?.targetCrudeProteinG || 1400,
+      greenFodderKg: plan?.greenFodderKg || 15,
+      dryBhusaKg: plan?.dryFodderKg || 4,
+      concentrateKg: plan?.concentrateKg || 4,
+      mineralMixtureG: plan?.mineralMixtureG || 50,
+    };
+  }
+  return undefined;
+}
+
 export function buildPromptForRequest(payload: VeterinaryExpertRequest): ChatMessage[] {
   const messages: ChatMessage[] = [{ role: 'system', content: SYSTEM_PROMPT_VET }];
 
-  if (payload.mode === 'scorecard_clinical_review' && payload.scorecardData) {
-    const s = payload.scorecardData;
+  const scorecardData = extractScorecardData(payload);
+  if (payload.mode === 'scorecard_clinical_review' && scorecardData) {
+    const s = scorecardData;
     const reviewPrompt = `Perform a deep clinical veterinary pathology review on the following tested cattle feed sample:
 - Feed Type: ${s.feedName} (${s.category})
 - Tested Overall Grade: ${s.overallGrade}
@@ -154,8 +196,9 @@ Please provide:
     return messages;
   }
 
-  if (payload.mode === 'ration_optimization' && payload.rationData) {
-    const r = payload.rationData;
+  const rationData = extractRationData(payload);
+  if (payload.mode === 'ration_optimization' && rationData) {
+    const r = rationData;
     const rationPrompt = `Evaluate and optimize the following Total Mixed Ration (TMR) formulated under ICAR-NDRI standards:
 - Animal: ${r.breedName} (Body Weight: ${r.bodyWeightKg} kg, Lactation: ${r.lactationStage})
 - Production: ${r.dailyMilkLiters} Liters/day (Milk Fat: ${r.fatPercentage}%)
@@ -187,9 +230,10 @@ Please provide:
 }
 
 export function generateOfflineVeterinaryFallback(payload: VeterinaryExpertRequest): string {
+  const scorecardData = extractScorecardData(payload);
   if (payload.mode === 'scorecard_clinical_review') {
-    const s = payload.scorecardData;
-    const isCritical = s?.ureaSpiked || s?.overallGrade.includes('Tier C');
+    const s = scorecardData;
+    const isCritical = s?.ureaSpiked || s?.overallGrade?.includes('Tier C');
     return `### Clinical Veterinary Review (ICAR-NDRI Guidelines Offline Summary)
 **Sample**: ${s?.feedName || 'Feed Sample'} | **Grade**: ${s?.overallGrade || 'Under Review'}
 
@@ -205,8 +249,9 @@ export function generateOfflineVeterinaryFallback(payload: VeterinaryExpertReque
    - In case of acute bloat, shivering, or rapid breathing, contact your nearest Veterinary Dispensary or call the National Animal Disease Helpline at **1962** immediately.`;
   }
 
+  const rationData = extractRationData(payload);
   if (payload.mode === 'ration_optimization') {
-    const r = payload.rationData;
+    const r = rationData;
     return `### ICAR-NDRI Precision Ration Advisory (Offline Standard Guidelines)
 **Target**: ${r?.breedName || 'Dairy Cow'} (${r?.dailyMilkLiters || 10} L/day)
 
@@ -395,8 +440,11 @@ export default async function handler(req: any, res: any) {
       }
 
       if (answer && typeof answer === 'string' && answer.trim()) {
+        const text = answer.trim();
         return res.status(200).json({
-          advice: answer.trim(),
+          advice: text,
+          review: text,
+          reply: text,
           model: activeModel,
           isFallback: false,
           usage: completionData.usage,
@@ -408,6 +456,8 @@ export default async function handler(req: any, res: any) {
     const fallbackResponse = generateOfflineVeterinaryFallback(body);
     return res.status(200).json({
       advice: fallbackResponse,
+      review: fallbackResponse,
+      reply: fallbackResponse,
       model: 'icar-ndri-resilient-fallback',
       isFallback: true,
       disclaimer: 'Advisory generated via ICAR-NDRI fallback following upstream connection timeout.',
