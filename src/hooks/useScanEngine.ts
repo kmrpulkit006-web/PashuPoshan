@@ -4,8 +4,7 @@ import {
   PRESET_FEED_SCENARIOS,
   analyzeCanvasImageData,
   createFeedSampleFromVisualAnalysis,
-  sampleCenterPatchRgb,
-  KNOWN_REFERENCE_WHITE,
+  sampleStripModePatches,
   detectColorClusterMoldHeuristic,
 } from '../lib/feedAnalysisEngine';
 import {
@@ -197,15 +196,27 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
         ctx.drawImage(img, 0, 0, 120, 120);
         const imageData = ctx.getImageData(0, 0, 120, 120);
 
-        // Sample real photo pixels from central 30x30 patch of the captured image
-        const patchSample = sampleCenterPatchRgb(imageData, 30, 30);
+        // Sample dual patches: left box = reference card, right box = test strip
+        const { referenceCardPatch, testStripPatch } = sampleStripModePatches(imageData, 30, 30);
 
-        if (!patchSample.isLightingValid) {
+        // Independent lighting guard for reference card
+        if (!referenceCardPatch.isLightingValid) {
           setIsProcessing(false);
           const errorMsg =
-            patchSample.guardWarning === 'too_dark'
-              ? 'Lighting Too Dark (कम रोशनी): Test strip patch is underexposed or in deep shadow. Please center the test strip in clear, indirect light and retake photo.'
-              : 'Glare/Overexposed (अत्यधिक चमक): Test strip patch is washed out or reflective. Avoid direct flash or harsh reflection and retake photo.';
+            referenceCardPatch.guardWarning === 'too_dark'
+              ? 'Lighting Too Dark on Reference Card (संदर्भ कार्ड पर कम रोशनी): Reference card area is underexposed or in deep shadow. Please position the white reference card in clear, indirect light and retake photo.'
+              : 'Glare/Overexposed on Reference Card (संदर्भ कार्ड पर अत्यधिक चमक): Reference card area is washed out or reflecting direct glare. Avoid harsh reflections on the card and retake photo.';
+          alert(errorMsg);
+          return;
+        }
+
+        // Independent lighting guard for test strip
+        if (!testStripPatch.isLightingValid) {
+          setIsProcessing(false);
+          const errorMsg =
+            testStripPatch.guardWarning === 'too_dark'
+              ? 'Lighting Too Dark on Test Strip (स्ट्रिप पर कम रोशनी): Test strip patch is underexposed or in deep shadow. Please center the test strip in clear, indirect light and retake photo.'
+              : 'Glare/Overexposed on Test Strip (स्ट्रिप पर अत्यधिक चमक): Test strip patch is washed out or reflective. Avoid direct flash or harsh reflection and retake photo.';
           alert(errorMsg);
           return;
         }
@@ -216,8 +227,8 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
             category,
             imageData,
             true,
-            patchSample.rgb,
-            KNOWN_REFERENCE_WHITE,
+            testStripPatch.rgb,
+            referenceCardPatch.rgb,
             stripColor
           );
           analyzed.imageUrl = imgUri;

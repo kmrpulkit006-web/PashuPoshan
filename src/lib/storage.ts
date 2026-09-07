@@ -255,7 +255,7 @@ export function saveYieldLogEntry(entry: CowYieldLogEntry): CowYieldLogEntry[] {
       updated = [entry, ...all];
     }
     safeSetItem(YIELD_LOGS_KEY, JSON.stringify(updated));
-    queueOfflineAction('yield_log' as any, existingIdx >= 0 ? 'update' : 'create', entry);
+    queueOfflineAction('yield_log', existingIdx >= 0 ? 'update' : 'create', entry);
     return updated.filter(e => e && e.cowId === entry.cowId);
   } catch (e) {
     return [entry];

@@ -212,7 +212,7 @@ export interface CommunityFeedAlert {
 
 export interface OfflineSyncItem {
   id: string;
-  entityType: 'cow' | 'scan' | 'silage_pit' | 'community_alert';
+  entityType: 'cow' | 'scan' | 'silage_pit' | 'community_alert' | 'yield_log';
   action: 'create' | 'update' | 'delete';
   payload: any;
   timestamp: string;

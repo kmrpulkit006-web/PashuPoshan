@@ -657,28 +657,30 @@ export interface PatchSamplingResult {
 }
 
 /**
- * Samples a central patch (default 30x30px) from the image canvas
+ * Samples a rectangular patch from the image canvas
  * and computes the average RGB and perceived luminance.
  * Protects against underexposed (near-black, Y < 25) or overexposed (blown out, Y > 245) frames.
  */
-export function sampleCenterPatchRgb(
+export function samplePatchRgb(
   imageData: ImageData,
+  startX: number,
+  startY: number,
   patchWidth = 30,
   patchHeight = 30
 ): PatchSamplingResult {
   const { width, height, data } = imageData;
-  const startX = Math.max(0, Math.floor((width - patchWidth) / 2));
-  const startY = Math.max(0, Math.floor((height - patchHeight) / 2));
-  const endX = Math.min(width, startX + patchWidth);
-  const endY = Math.min(height, startY + patchHeight);
+  const clampedStartX = Math.max(0, Math.min(width, Math.floor(startX)));
+  const clampedStartY = Math.max(0, Math.min(height, Math.floor(startY)));
+  const endX = Math.min(width, clampedStartX + patchWidth);
+  const endY = Math.min(height, clampedStartY + patchHeight);
 
   let totalR = 0;
   let totalG = 0;
   let totalB = 0;
   let count = 0;
 
-  for (let y = startY; y < endY; y++) {
-    for (let x = startX; x < endX; x++) {
+  for (let y = clampedStartY; y < endY; y++) {
+    for (let x = clampedStartX; x < endX; x++) {
       const idx = (y * width + x) * 4;
       totalR += data[idx];
       totalG += data[idx + 1];
@@ -718,6 +720,105 @@ export function sampleCenterPatchRgb(
     isLightingValid,
     guardWarning,
   };
+}
+
+/**
+ * Samples a central patch (default 30x30px) from the image canvas
+ * and computes the average RGB and perceived luminance.
+ * Protects against underexposed (near-black, Y < 25) or overexposed (blown out, Y > 245) frames.
+ */
+export function sampleCenterPatchRgb(
+  imageData: ImageData,
+  patchWidth = 30,
+  patchHeight = 30
+): PatchSamplingResult {
+  const startX = Math.max(0, Math.floor((imageData.width - patchWidth) / 2));
+  const startY = Math.max(0, Math.floor((imageData.height - patchHeight) / 2));
+  return samplePatchRgb(imageData, startX, startY, patchWidth, patchHeight);
+}
+
+export interface PatchBounds {
+  startX: number;
+  startY: number;
+  width: number;
+  height: number;
+}
+
+export interface StripModePatchesResult {
+  referenceCardPatch: PatchSamplingResult;
+  testStripPatch: PatchSamplingResult;
+  referenceBounds: PatchBounds;
+  stripBounds: PatchBounds;
+}
+
+/**
+ * Samples two distinct non-overlapping patches from the canvas:
+ * - Left half: Reference Card region (centered at width * 0.25, height * 0.5)
+ * - Right half: Test Strip region (centered at width * 0.75, height * 0.5)
+ * Matching the two-box layout in ScanScreen.tsx.
+ */
+export function sampleStripModePatches(
+  imageData: ImageData,
+  patchWidth = 30,
+  patchHeight = 30
+): StripModePatchesResult {
+  const { width, height } = imageData;
+
+  // Left region (Reference Card): centered at (0.25 * width, 0.5 * height)
+  const refCenterX = Math.floor(width * 0.25);
+  const refCenterY = Math.floor(height * 0.5);
+  const refStartX = Math.max(0, Math.floor(refCenterX - patchWidth / 2));
+  const refStartY = Math.max(0, Math.floor(refCenterY - patchHeight / 2));
+
+  // Right region (Test Strip): centered at (0.75 * width, 0.5 * height)
+  const stripCenterX = Math.floor(width * 0.75);
+  const stripCenterY = Math.floor(height * 0.5);
+  const stripStartX = Math.max(0, Math.floor(stripCenterX - patchWidth / 2));
+  const stripStartY = Math.max(0, Math.floor(stripCenterY - patchHeight / 2));
+
+  const referenceBounds: PatchBounds = {
+    startX: refStartX,
+    startY: refStartY,
+    width: patchWidth,
+    height: patchHeight,
+  };
+
+  const stripBounds: PatchBounds = {
+    startX: stripStartX,
+    startY: stripStartY,
+    width: patchWidth,
+    height: patchHeight,
+  };
+
+  const referenceCardPatch = samplePatchRgb(imageData, refStartX, refStartY, patchWidth, patchHeight);
+  const testStripPatch = samplePatchRgb(imageData, stripStartX, stripStartY, patchWidth, patchHeight);
+
+  return {
+    referenceCardPatch,
+    testStripPatch,
+    referenceBounds,
+    stripBounds,
+  };
+}
+
+/**
+ * Validates whether a sampled RGB patch represents a real white reference card.
+ * Requires:
+ * 1. Moderate-to-high luminance (meanLuminance >= 80)
+ * 2. Neutral hue / low saturation (HSV saturation <= 0.35)
+ * Rejects dark patches, shadows, and strongly colored surfaces.
+ */
+export function isReasonablyWhiteReference(rgb?: RGB): boolean {
+  if (!rgb) return false;
+  const { r, g, b } = rgb;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  if (max === 0) return false;
+
+  const saturation = (max - min) / max;
+  const meanLuminance = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+
+  return meanLuminance >= 80 && saturation <= 0.35;
 }
 
 export function analyzeCanvasImageData(
@@ -763,10 +864,12 @@ export function analyzeCanvasImageData(
   let ureaPercentage = 0.1;
   let ureaDetected = false;
   let ureaDeltaE = 0;
+  let hasValidReference = false;
 
   if (isStripMode && stripColorRgb) {
-    // Ambient lighting gain normalization using reference card if present
-    const gains = referenceColorRgb
+    // Ambient lighting gain normalization using reference card if present and valid
+    hasValidReference = isReasonablyWhiteReference(referenceColorRgb);
+    const gains = hasValidReference && referenceColorRgb
       ? computeAmbientCorrection(referenceColorRgb)
       : { kr: 1.0, kg: 1.0, kb: 1.0 };
 
@@ -885,7 +988,7 @@ export function analyzeCanvasImageData(
           calibratedPh,
           calibratedUreaPct: ureaPercentage,
           deltaE00: Math.max(phDeltaE, ureaDeltaE),
-          referenceCardDetected: Boolean(referenceColorRgb),
+          referenceCardDetected: hasValidReference,
         }
       : undefined,
     metrics: {

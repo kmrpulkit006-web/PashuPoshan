@@ -12,6 +12,10 @@ import {
   matchUreaDeltaE,
   createFeedSampleFromVisualAnalysis,
   sampleCenterPatchRgb,
+  samplePatchRgb,
+  sampleStripModePatches,
+  isReasonablyWhiteReference,
+  KNOWN_REFERENCE_WHITE,
   UNIVERSAL_PH_REFERENCE_CHART,
   UREA_COLORIMETRIC_CHART,
   detectColorClusterMoldHeuristic,
@@ -355,6 +359,113 @@ describe('feedAnalysisEngine - analyzeCanvasImageData & Safety Logic', () => {
       expect(result.meanLuminance).toBeGreaterThan(245);
       expect(result.isLightingValid).toBe(false);
       expect(result.guardWarning).toBe('blown_out');
+    });
+  });
+
+  describe('Strip Mode Dual-Patch Sampling & Reference Card Detection', () => {
+    it('(a) validates synthetic reference patch close to white -> gains ≈ 1.0, referenceCardDetected: true', () => {
+      // White reference patch close to 90% photographic white card (R=242, G=245, B=240)
+      const nearWhiteRef = { r: 242, g: 245, b: 240 };
+      expect(isReasonablyWhiteReference(nearWhiteRef)).toBe(true);
+
+      const gains = computeAmbientCorrection(nearWhiteRef);
+      expect(gains.kr).toBeCloseTo(1.0, 1);
+      expect(gains.kg).toBeCloseTo(1.0, 1);
+      expect(gains.kb).toBeCloseTo(1.0, 1);
+
+      // Analyze with near-white reference card
+      const dummyImg = createSyntheticImageData(120, 120, { r: 128, g: 128, b: 128 });
+      const stripColor = { r: 235, g: 205, b: 50 };
+      const result = analyzeCanvasImageData('silage', dummyImg, true, stripColor, nearWhiteRef);
+
+      expect(result.stripReading?.referenceCardDetected).toBe(true);
+    });
+
+    it('(b) rejects synthetic reference patch that is clearly not white/neutral -> referenceCardDetected: false, uncorrected gains used', () => {
+      // Strongly colored red patch (R=255, G=20, B=20)
+      const stronglyColoredRef = { r: 255, g: 20, b: 20 };
+      expect(isReasonablyWhiteReference(stronglyColoredRef)).toBe(false);
+
+      // Very dark patch (R=30, G=30, B=30)
+      const darkRef = { r: 30, g: 30, b: 30 };
+      expect(isReasonablyWhiteReference(darkRef)).toBe(false);
+
+      const dummyImg = createSyntheticImageData(120, 120, { r: 128, g: 128, b: 128 });
+      const stripColor = { r: 235, g: 205, b: 50 };
+
+      // Result with no reference card at all
+      const baselineNoRef = analyzeCanvasImageData('silage', dummyImg, true, stripColor, undefined);
+
+      // Result with invalid colored reference card
+      const resultColored = analyzeCanvasImageData('silage', dummyImg, true, stripColor, stronglyColoredRef);
+      expect(resultColored.stripReading?.referenceCardDetected).toBe(false);
+      // Uncorrected gains (1.0, 1.0, 1.0) must produce identical results to no-reference baseline
+      expect(resultColored.stripReading?.calibratedPh).toBe(baselineNoRef.stripReading?.calibratedPh);
+      expect(resultColored.stripReading?.deltaE00).toBe(baselineNoRef.stripReading?.deltaE00);
+
+      // Result with dark reference card
+      const resultDark = analyzeCanvasImageData('silage', dummyImg, true, stripColor, darkRef);
+      expect(resultDark.stripReading?.referenceCardDetected).toBe(false);
+      expect(resultDark.stripReading?.calibratedPh).toBe(baselineNoRef.stripReading?.calibratedPh);
+    });
+
+    it('(c) confirms the two patches sample distinct, non-overlapping regions of the 120x120 canvas', () => {
+      // Synthetic 120x120 canvas:
+      // Left half (x < 60): Pure white (Reference Card region)
+      // Right half (x >= 60): Yellow (Test Strip region)
+      const dualCanvas = createSyntheticImageData(120, 120, (x, y) => {
+        if (x < 60) {
+          return { r: 245, g: 245, b: 245 }; // Left: Reference Card
+        }
+        return { r: 235, g: 205, b: 50 }; // Right: Test Strip
+      });
+
+      const { referenceCardPatch, testStripPatch, referenceBounds, stripBounds } = sampleStripModePatches(dualCanvas, 30, 30);
+
+      // Confirm non-overlapping coordinates
+      expect(referenceBounds.startX + referenceBounds.width).toBeLessThanOrEqual(stripBounds.startX);
+      // Left patch must be strictly in left half (x in [0, 60))
+      expect(referenceBounds.startX).toBeGreaterThanOrEqual(0);
+      expect(referenceBounds.startX + referenceBounds.width).toBeLessThanOrEqual(60);
+      // Right patch must be strictly in right half (x in [60, 120))
+      expect(stripBounds.startX).toBeGreaterThanOrEqual(60);
+      expect(stripBounds.startX + stripBounds.width).toBeLessThanOrEqual(120);
+
+      // Verify reference card sampled pure white from left half
+      expect(referenceCardPatch.rgb.r).toBe(245);
+      expect(referenceCardPatch.rgb.g).toBe(245);
+      expect(referenceCardPatch.rgb.b).toBe(245);
+      expect(referenceCardPatch.isLightingValid).toBe(true);
+
+      // Verify test strip sampled yellow from right half
+      expect(testStripPatch.rgb.r).toBe(235);
+      expect(testStripPatch.rgb.g).toBe(205);
+      expect(testStripPatch.rgb.b).toBe(50);
+      expect(testStripPatch.isLightingValid).toBe(true);
+    });
+
+    it('independently detects lighting flaws for reference card vs test strip', () => {
+      // Canvas where reference card is underexposed (< 25) but test strip is well lit
+      const darkRefCanvas = createSyntheticImageData(120, 120, (x, y) => {
+        if (x < 60) return { r: 15, g: 15, b: 15 }; // Left: too dark
+        return { r: 200, g: 180, b: 40 }; // Right: valid strip
+      });
+
+      const darkRefResult = sampleStripModePatches(darkRefCanvas, 30, 30);
+      expect(darkRefResult.referenceCardPatch.isLightingValid).toBe(false);
+      expect(darkRefResult.referenceCardPatch.guardWarning).toBe('too_dark');
+      expect(darkRefResult.testStripPatch.isLightingValid).toBe(true);
+
+      // Canvas where reference card is valid but test strip is blown out (> 245)
+      const brightStripCanvas = createSyntheticImageData(120, 120, (x, y) => {
+        if (x < 60) return { r: 240, g: 240, b: 240 }; // Left: valid reference card
+        return { r: 250, g: 250, b: 250 }; // Right: blown out strip
+      });
+
+      const brightStripResult = sampleStripModePatches(brightStripCanvas, 30, 30);
+      expect(brightStripResult.referenceCardPatch.isLightingValid).toBe(true);
+      expect(brightStripResult.testStripPatch.isLightingValid).toBe(false);
+      expect(brightStripResult.testStripPatch.guardWarning).toBe('blown_out');
     });
   });
 
