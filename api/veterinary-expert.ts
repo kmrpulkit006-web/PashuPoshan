@@ -19,7 +19,8 @@ declare const process: {
   };
 };
 
-export const DEFAULT_NVIDIA_MODEL = 'nvidia/nemotron-3-ultra-550b-a55b';
+export const DEFAULT_NVIDIA_MODEL = 'nvidia/nemotron-3-super-120b-a12b';
+export const ULTRA_NVIDIA_MODEL = 'nvidia/nemotron-3-ultra-550b-a55b';
 const NVIDIA_API_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
 export const RATE_LIMIT_MAX = 20; // 20 requests per hour per IP
@@ -124,7 +125,8 @@ Guidelines:
 - Provide authoritative, practical, and compassionate guidance tailored for Indian smallholder farmers.
 - Use clear bullet points and actionable steps.
 - Always highlight emergency first-aid (e.g. for suspected urea toxicity or severe acidosis) and recommend immediate consultation with local veterinary dispensary or National Helpline 1962 when high-risk conditions are detected.
-- Maintain an encouraging and respectful tone. Include terms in Hindi/English where helpful (e.g., bhusa, khal, chana churi, achar/silage).`;
+- Maintain an encouraging and respectful tone. Include terms in Hindi/English where helpful (e.g., bhusa, khal, chana churi, achar/silage).
+- CRITICAL DIRECTIVE: You must NOT output internal thinking steps, chain-of-thought, or introspective preambles (such as "Okay, the user is asking..."). Provide the direct, actionable veterinary response immediately in clean Markdown.`;
 
 export function buildPromptForRequest(payload: VeterinaryExpertRequest): ChatMessage[] {
   const messages: ChatMessage[] = [{ role: 'system', content: SYSTEM_PROMPT_VET }];
@@ -217,6 +219,49 @@ export function generateOfflineVeterinaryFallback(payload: VeterinaryExpertReque
    - Mix legume fodder (berseem, lucerne, cowpea) with cereal fodder (maize, sorghum) to reduce concentrate dependency by 15-20%.`;
   }
 
+  const lastUserMsg = payload.messages?.filter(m => m.role === 'user').pop()?.content || payload.query || '';
+  const q = lastUserMsg.toLowerCase();
+
+  if (q.includes('ph') || q.includes('silage') || q.includes('साइलेज')) {
+    return `### PashuPoshan AI - ICAR-NDRI Silage Advisory (Field Guide)
+- **Target pH Range**: Optimal maize/sorghum silage pH is **3.8 to 4.2**.
+- **pH 4.8 – 5.5 (Warning)**: Indicates incomplete lactic fermentation. Risk of clostridial butyric spoilage or aerobic heating.
+- **Actionable Farm Steps**:
+  1. Inspect for rancid butter smell (butyric acid) or warm pockets (>35°C).
+  2. Restrict intake to ≤30% of total roughage dry matter.
+  3. Discard any surface mold or black/slimy patches.
+  4. Ensure bunker pit face is scraped clean daily (minimum 15-20 cm removal per day) to prevent secondary aerobic spoilage.`;
+  }
+
+  if (q.includes('urea') || q.includes('poison') || q.includes('toxicity') || q.includes('यूरिया')) {
+    return `### 🚨 Emergency Veterinary Advisory: Suspected Urea Toxicity (PashuPoshan AI)
+- **Signs of Toxicity**: Excessive salivation, severe bloat, muscle tremors, staggered gait, rapid breathing within 20-60 min of feeding.
+- **Immediate First-Aid**:
+  1. **Vinegar Drench**: Administer 2–3 liters of household vinegar (dilute acetic acid 5%) mixed with 1–2 liters of cold water to neutralize rumen ammonia.
+  2. **Cold Water**: Drench with 20–30 liters of cold water to lower rumen temperature and halt urease enzymatic activity.
+  3. **Withdraw Feed**: Stop all suspected feed and concentrate batches immediately.
+  4. **Urgent**: Call local veterinary dispensary or National Helpline **1962** immediately.`;
+  }
+
+  if (q.includes('acidosis') || q.includes('sara') || q.includes('bloat') || q.includes('पेट फूलना') || q.includes('अफारा')) {
+    return `### PashuPoshan AI - Rumen Acidosis (SARA) & Bloat Management
+- **Primary Cause**: Feeding excessive grains/concentrates without adequate effective fiber (bhusa/fodder).
+- **Corrective Protocol**:
+  1. Drench with **Sodium Bicarbonate (meetha soda)**: 60–100g in 500ml water to buffer rumen pH back above 6.0.
+  2. Increase long-stem dry roughage (wheat/paddy straw cut to >3 cm) to stimulate cud-chewing and natural saliva bicarbonate flow.
+  3. For frothy bloat, administer 50–100 ml vegetable oil or bloat remedy (e.g., Tympol/Bloatosil) as oral drench.`;
+  }
+
+  if (q.includes('bhusa') || q.includes('fodder') || q.includes('ration') || q.includes('दूध') || q.includes('milk') || q.includes('चारा')) {
+    return `### PashuPoshan AI - Daily Dairy Feeding Rule-of-Thumb
+- **Dry Matter Intake (DMI)**: 2.5–3.0 kg per 100 kg body weight (e.g. 10–12 kg DM for a 400 kg cow).
+- **Portion Ratio**:
+  - **Green Fodder**: 15–20 kg daily (succulent vitamins & crude protein).
+  - **Dry Bhusa**: 4–6 kg daily (effective fiber for rumination).
+  - **Compound Feed**: 1.5 kg for body maintenance + 1 kg for every 2.5 L milk produced.
+  - **Mineral Mixture**: 50g daily + 30g common salt.`;
+  }
+
   return `### PashuPoshan AI Veterinary Guidance (Standard Guidelines)
 Thank you for your query regarding cattle nutrition and feed health.
 - Ensure all compound feed complies with BIS IS:2052 standards (minimum 20% crude protein for high-yield dairy).
@@ -278,66 +323,93 @@ export default async function handler(req: any, res: any) {
 
     const messages = buildPromptForRequest(body);
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+    const callNvidia = async (targetModel: string, timeoutMs: number) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(NVIDIA_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: targetModel,
+            messages,
+            temperature: 0.25,
+            max_tokens: 800,
+            top_p: 0.9,
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        return response;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        throw err;
+      }
+    };
+
+    let upstreamResponse: any = null;
+    let activeModel = model;
 
     try {
-      const upstreamResponse = await fetch(NVIDIA_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          temperature: 0.3,
-          max_tokens: 1200,
-          top_p: 0.9,
-        }),
-        signal: controller.signal,
-      });
+      upstreamResponse = await callNvidia(model, 14000);
+      if (!upstreamResponse.ok && model !== DEFAULT_NVIDIA_MODEL) {
+        console.warn(`Primary model ${model} failed (${upstreamResponse.status}), failing over to ${DEFAULT_NVIDIA_MODEL}...`);
+        upstreamResponse = await callNvidia(DEFAULT_NVIDIA_MODEL, 12000);
+        activeModel = DEFAULT_NVIDIA_MODEL;
+      }
+    } catch (primaryErr) {
+      if (model !== DEFAULT_NVIDIA_MODEL) {
+        console.warn(`Primary model ${model} timed out or failed, failing over to ${DEFAULT_NVIDIA_MODEL}...`);
+        try {
+          upstreamResponse = await callNvidia(DEFAULT_NVIDIA_MODEL, 12000);
+          activeModel = DEFAULT_NVIDIA_MODEL;
+        } catch (fallbackErr) {
+          // both failed
+        }
+      }
+    }
 
-      clearTimeout(timeoutId);
+    if (upstreamResponse && upstreamResponse.ok) {
+      const completionData = await upstreamResponse.json();
+      let answer = completionData.choices?.[0]?.message?.content;
 
-      if (!upstreamResponse.ok) {
-        const errText = await upstreamResponse.text();
-        console.warn(`NVIDIA NIM API responded with ${upstreamResponse.status}: ${errText}`);
-        const fallbackResponse = generateOfflineVeterinaryFallback(body);
+      // In Nemotron-3 reasoning models, answer might be in content or reasoning_content
+      if (!answer && completionData.choices?.[0]?.message?.reasoning_content) {
+        answer = completionData.choices?.[0]?.message?.reasoning_content;
+      }
+
+      // If answer leaked internal monologue preamble, strip it to start at the actual response
+      if (typeof answer === 'string') {
+        const trimmed = answer.trim();
+        if (trimmed.startsWith('Okay, the user') || trimmed.startsWith("Here's a thinking process")) {
+          const parts = trimmed.split('\n\n');
+          if (parts.length > 1) {
+            answer = parts.slice(1).join('\n\n').trim();
+          }
+        }
+      }
+
+      if (answer && typeof answer === 'string' && answer.trim()) {
         return res.status(200).json({
-          advice: fallbackResponse,
-          model: 'icar-ndri-resilient-fallback',
-          isFallback: true,
-          upstreamError: `NVIDIA API error (${upstreamResponse.status})`,
-          disclaimer: 'Advisory generated via ICAR-NDRI fallback following upstream connection timeout.',
+          advice: answer.trim(),
+          model: activeModel,
+          isFallback: false,
+          usage: completionData.usage,
+          disclaimer: 'Grounded in ICAR-NDRI scientific veterinary nutrition benchmarks powered by NVIDIA Nemotron-3.',
         });
       }
-
-      const completionData = await upstreamResponse.json();
-      const answer = completionData.choices?.[0]?.message?.content;
-
-      if (!answer) {
-        throw new Error('NVIDIA API returned an empty completion.');
-      }
-
-      return res.status(200).json({
-        advice: answer,
-        model,
-        isFallback: false,
-        usage: completionData.usage,
-        disclaimer: 'Grounded in ICAR-NDRI scientific veterinary nutrition benchmarks powered by NVIDIA Nemotron-3-Ultra.',
-      });
-    } catch (networkError: any) {
-      clearTimeout(timeoutId);
-      console.warn('NVIDIA API connection error, engaging ICAR-NDRI fallback:', networkError);
-      const fallbackResponse = generateOfflineVeterinaryFallback(body);
-      return res.status(200).json({
-        advice: fallbackResponse,
-        model: 'icar-ndri-resilient-fallback',
-        isFallback: true,
-        disclaimer: 'Advisory generated via ICAR-NDRI fallback following network unavailability.',
-      });
     }
+
+    const fallbackResponse = generateOfflineVeterinaryFallback(body);
+    return res.status(200).json({
+      advice: fallbackResponse,
+      model: 'icar-ndri-resilient-fallback',
+      isFallback: true,
+      disclaimer: 'Advisory generated via ICAR-NDRI fallback following upstream connection timeout.',
+    });
   } catch (error: any) {
     console.error('Veterinary Expert Handler Exception:', error);
     return res.status(500).json({
