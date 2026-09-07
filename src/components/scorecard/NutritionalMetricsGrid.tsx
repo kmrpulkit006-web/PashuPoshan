@@ -6,9 +6,14 @@ import { t } from '../../lib/i18n';
 interface NutritionalMetricsGridProps {
   sample: FeedSample;
   locale: Locale;
+  onOpenLabModal?: () => void;
 }
 
-export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({ sample, locale }) => {
+export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
+  sample,
+  locale,
+  onOpenLabModal,
+}) => {
   return (
     <div className="space-y-3">
       {/* Silage Specific Flieg Scorecard */}
@@ -134,12 +139,22 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({ 
               <span className="text-[10px] text-[#5A5243] dark:text-slate-400 font-medium">
                 Accredited Dairy Lab Analysis
               </span>
-              <a
-                href="tel:1962"
-                className="text-xs font-black text-[#1F5D3B] dark:text-emerald-400 underline hover:no-underline"
-              >
-                Find Nearest Lab / Call 1962
-              </a>
+              {onOpenLabModal ? (
+                <button
+                  type="button"
+                  onClick={onOpenLabModal}
+                  className="text-xs font-black text-[#1F5D3B] dark:text-emerald-400 underline hover:no-underline"
+                >
+                  Find Nearest Lab / Directory
+                </button>
+              ) : (
+                <a
+                  href="tel:1962"
+                  className="text-xs font-black text-[#1F5D3B] dark:text-emerald-400 underline hover:no-underline"
+                >
+                  Find Nearest Lab / Call 1962
+                </a>
+              )}
             </div>
           </div>
         )}

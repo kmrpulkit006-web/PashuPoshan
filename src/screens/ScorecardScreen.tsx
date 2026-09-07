@@ -8,6 +8,7 @@ import { HeuristicDisclaimerBanner } from '../components/scorecard/HeuristicDisc
 import { CertificateBanner } from '../components/scorecard/CertificateBanner';
 import { AdulterationAlertBox } from '../components/scorecard/AdulterationAlertBox';
 import { NutritionalMetricsGrid } from '../components/scorecard/NutritionalMetricsGrid';
+import { NearestLabModal } from '../components/NearestLabModal';
 import {
   Share2,
   Printer,
@@ -19,7 +20,8 @@ import {
   ChevronUp,
   FlaskConical,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  MapPin,
 } from 'lucide-react';
 
 interface ScorecardScreenProps {
@@ -36,6 +38,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
   onRetest,
 }) => {
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
+  const [showLabModal, setShowLabModal] = useState(false);
   const [isRequestingClinicalReview, setIsRequestingClinicalReview] = useState(false);
   const [clinicalReview, setClinicalReview] = useState<string | null>(null);
   const [clinicalReviewError, setClinicalReviewError] = useState<string | null>(null);
@@ -244,10 +247,18 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
               <CertificateBanner sample={sample} locale={locale} />
 
               {/* Adulteration & Contaminant Screening Panel */}
-              <AdulterationAlertBox sample={sample} locale={locale} />
+              <AdulterationAlertBox
+                sample={sample}
+                locale={locale}
+                onOpenLabModal={() => setShowLabModal(true)}
+              />
 
               {/* Nutritional Parameter Gauges & Flieg Score */}
-              <NutritionalMetricsGrid sample={sample} locale={locale} />
+              <NutritionalMetricsGrid
+                sample={sample}
+                locale={locale}
+                onOpenLabModal={() => setShowLabModal(true)}
+              />
 
               {/* Legal Disclaimer Notice */}
               <div className="p-3 bg-white dark:bg-slate-800 border border-[#DCD3BF] dark:border-slate-700 rounded-xl text-[11px] text-[#5A5243] dark:text-slate-400 leading-relaxed font-medium">
@@ -273,17 +284,27 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
           <p className="text-xs text-[#5A5243] dark:text-slate-300 leading-relaxed font-semibold">
             Aflatoxin, crude protein, and fiber require certified wet-chemistry testing (ELISA / NIRS). Not determinable from photo triage. Confirmatory testing by an accredited district lab is advised.
           </p>
-          <div className="pt-1 flex items-center justify-between">
+          <div className="pt-1 flex items-center justify-between flex-wrap gap-2">
             <span className="text-xs font-bold text-[#1A1A1A] dark:text-slate-200">
               National Dairy Helpline: <strong>1962</strong>
             </span>
-            <a
-              href="tel:1962"
-              className="px-3 py-2 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs rounded-xl shadow min-h-[44px] flex items-center space-x-1.5"
-            >
-              <PhoneCall className="w-3.5 h-3.5" />
-              <span>Call Helpline 1962</span>
-            </a>
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={() => setShowLabModal(true)}
+                className="px-3 py-2 bg-white dark:bg-slate-800 border-2 border-[#1F5D3B] dark:border-emerald-500 text-[#1F5D3B] dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 font-black text-xs rounded-xl shadow-sm min-h-[44px] flex items-center space-x-1.5 active:scale-98 transition-all"
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                <span>Find Nearest Lab</span>
+              </button>
+              <a
+                href="tel:1962"
+                className="px-3 py-2 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs rounded-xl shadow min-h-[44px] flex items-center space-x-1.5 active:scale-98 transition-all"
+              >
+                <PhoneCall className="w-3.5 h-3.5" />
+                <span>Call Helpline 1962</span>
+              </a>
+            </div>
           </div>
         </div>
 
@@ -322,6 +343,13 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
           <span>🌾 Incorporate Feed into Daily Ration (TMR) →</span>
         </button>
       </div>
+
+      {/* Accredited Feed Testing Laboratories Directory Modal */}
+      <NearestLabModal
+        isOpen={showLabModal}
+        onClose={() => setShowLabModal(false)}
+        locale={locale}
+      />
     </>
   );
 };

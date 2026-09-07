@@ -1,14 +1,19 @@
 import React from 'react';
-import { AlertOctagon, CheckCircle, FlaskConical, ExternalLink } from 'lucide-react';
+import { AlertOctagon, CheckCircle, FlaskConical, ExternalLink, MapPin, PhoneCall } from 'lucide-react';
 import { FeedSample, Locale } from '../../lib/types';
 import { t } from '../../lib/i18n';
 
 interface AdulterationAlertBoxProps {
   sample: FeedSample;
   locale: Locale;
+  onOpenLabModal?: () => void;
 }
 
-export const AdulterationAlertBox: React.FC<AdulterationAlertBoxProps> = ({ sample, locale }) => {
+export const AdulterationAlertBox: React.FC<AdulterationAlertBoxProps> = ({
+  sample,
+  locale,
+  onOpenLabModal,
+}) => {
   const isHighRisk =
     sample.adulteration.ureaAdulterationDetected ||
     (sample.adulteration.sandSilicaRisk && sample.adulteration.sandSilicaRisk.includes('Critical')) ||
@@ -140,17 +145,29 @@ export const AdulterationAlertBox: React.FC<AdulterationAlertBoxProps> = ({ samp
         <p className="text-[11px] text-[#5A5243] dark:text-slate-300 leading-relaxed font-semibold">
           Aflatoxin, crude protein, and fiber require certified wet-chemistry testing (ELISA / NIRS). Not determinable from photo triage.
         </p>
-        <div className="pt-1 flex items-center justify-between">
+        <div className="pt-1 flex items-center justify-between flex-wrap gap-2">
           <span className="text-[10px] font-bold text-[#1F5D3B] dark:text-emerald-400">
             District Dairy Lab / NDDB Network
           </span>
-          <a
-            href="tel:1962"
-            className="inline-flex items-center space-x-1 text-[10px] font-black px-2 py-1 rounded-lg bg-[#1F5D3B] text-white hover:bg-[#194a30] transition-all"
-          >
-            <span>Call Helpline 1962</span>
-            <ExternalLink className="w-3 h-3 ml-0.5" />
-          </a>
+          <div className="flex items-center space-x-1.5">
+            {onOpenLabModal && (
+              <button
+                type="button"
+                onClick={onOpenLabModal}
+                className="inline-flex items-center space-x-1 text-[10px] font-black px-2 py-1 rounded-lg bg-white dark:bg-slate-800 border border-[#1F5D3B] dark:border-emerald-500 text-[#1F5D3B] dark:text-emerald-300 hover:bg-emerald-50 transition-all shadow-sm"
+              >
+                <MapPin className="w-3 h-3" />
+                <span>Find Lab</span>
+              </button>
+            )}
+            <a
+              href="tel:1962"
+              className="inline-flex items-center space-x-1 text-[10px] font-black px-2 py-1 rounded-lg bg-[#1F5D3B] text-white hover:bg-[#194a30] transition-all shadow-sm"
+            >
+              <PhoneCall className="w-3 h-3" />
+              <span>Call 1962</span>
+            </a>
+          </div>
         </div>
       </div>
     </div>
