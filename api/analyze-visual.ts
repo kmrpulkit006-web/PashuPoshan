@@ -18,6 +18,8 @@ declare const process: {
     GEMINI_API_KEY?: string;
     GOOGLE_API_KEY?: string;
     NVIDIA_API_KEY?: string;
+    NVIDIA_API_KEY_01?: string;
+    NVIDIA_KEY?: string;
     NVIDIA_VISION_MODEL?: string;
     VISION_PROVIDER?: string;
     KV_REST_API_URL?: string;
@@ -379,9 +381,10 @@ export function sanitizeVisualAnalysisResponse(
  */
 export function getVisionProvider(apiKey?: string, providerName?: string): VisionProvider {
   const chosenProvider = (providerName || process.env.VISION_PROVIDER || '').toLowerCase();
+  const envNvidiaKey = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_01 || process.env.NVIDIA_KEY;
 
-  if (chosenProvider === 'nvidia' || (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY && (apiKey || process.env.NVIDIA_API_KEY))) {
-    const key = apiKey || process.env.NVIDIA_API_KEY;
+  if (chosenProvider === 'nvidia' || (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY && (apiKey || envNvidiaKey))) {
+    const key = apiKey || envNvidiaKey;
     if (!key) {
       throw new Error('NVIDIA_API_KEY is not configured in the server environment.');
     }
@@ -510,7 +513,8 @@ export default async function handler(req: any, res: any) {
 
     // Check API Key for Gemini or NVIDIA
     const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
-    const hasNvidiaKey = Boolean(process.env.NVIDIA_API_KEY);
+    const resolvedNvidiaKey = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_01 || process.env.NVIDIA_KEY;
+    const hasNvidiaKey = Boolean(resolvedNvidiaKey);
     const isNvidiaPreferred = process.env.VISION_PROVIDER?.toLowerCase() === 'nvidia';
 
     if (!hasGeminiKey && !hasNvidiaKey) {
@@ -521,7 +525,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const provider = getVisionProvider(
-      isNvidiaPreferred || (!hasGeminiKey && hasNvidiaKey) ? process.env.NVIDIA_API_KEY : undefined,
+      isNvidiaPreferred || (!hasGeminiKey && hasNvidiaKey) ? resolvedNvidiaKey : undefined,
       isNvidiaPreferred ? 'nvidia' : undefined
     );
     const result = await provider.analyzeImage(cleanBase64, category);

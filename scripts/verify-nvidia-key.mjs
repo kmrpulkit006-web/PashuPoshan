@@ -2,14 +2,15 @@ import fs from 'fs';
 import path from 'path';
 
 const envLocalPath = path.resolve(process.cwd(), '.env.local');
-let apiKey = process.env.NVIDIA_API_KEY;
+let apiKey = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_01 || process.env.NVIDIA_KEY;
 
 if (fs.existsSync(envLocalPath)) {
   const content = fs.readFileSync(envLocalPath, 'utf-8');
   for (const line of content.split('\n')) {
     const trimmed = line.trim();
-    if (trimmed.startsWith('NVIDIA_API_KEY=')) {
-      apiKey = trimmed.substring('NVIDIA_API_KEY='.length).trim().replace(/^['"]|['"]$/g, '');
+    if (trimmed.startsWith('NVIDIA_API_KEY=') || trimmed.startsWith('NVIDIA_API_KEY_01=') || trimmed.startsWith('NVIDIA_KEY=')) {
+      const parts = trimmed.split('=');
+      apiKey = parts.slice(1).join('=').trim().replace(/^['"]|['"]$/g, '');
       break;
     }
   }

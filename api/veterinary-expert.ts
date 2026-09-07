@@ -11,6 +11,8 @@ declare const process: {
   env: {
     [key: string]: string | undefined;
     NVIDIA_API_KEY?: string;
+    NVIDIA_API_KEY_01?: string;
+    NVIDIA_KEY?: string;
     NVIDIA_MODEL_ID?: string;
     KV_REST_API_URL?: string;
     KV_REST_API_TOKEN?: string;
@@ -306,7 +308,7 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Request body must be a valid JSON object.' });
     }
 
-    const apiKey = process.env.NVIDIA_API_KEY;
+    const apiKey = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_01 || process.env.NVIDIA_KEY;
     const model = process.env.NVIDIA_MODEL_ID || DEFAULT_NVIDIA_MODEL;
 
     // Fallback if NVIDIA API key is not yet configured in environment
