@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FeedSample, Locale } from '../lib/types';
 import { t } from '../lib/i18n';
 import { useRationManager } from '../hooks/useRationManager';
 import { AddCowModal } from '../components/ration/AddCowModal';
 import { RationNutrientCards } from '../components/ration/RationNutrientCards';
+import { CowHistoryTimeline } from '../components/ration/CowHistoryTimeline';
+import { saveLocalScan } from '../lib/storage';
 import { Scale, Plus, Trash2, Minus, Sparkles, RefreshCw, Bot } from 'lucide-react';
 
 interface RationScreenProps {
@@ -16,6 +18,11 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
   const [isOptimizingRation, setIsOptimizingRation] = useState(false);
   const [rationAdvice, setRationAdvice] = useState<string | null>(null);
   const [rationAdviceError, setRationAdviceError] = useState<string | null>(null);
+  const [currentSample, setCurrentSample] = useState<FeedSample | undefined>(activeSample);
+
+  useEffect(() => {
+    setCurrentSample(activeSample);
+  }, [activeSample]);
 
   const {
     cows,
@@ -28,7 +35,16 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
     handleSelectCow,
     handleSaveCow,
     handleDeleteCow,
-  } = useRationManager({ activeSample });
+  } = useRationManager({ activeSample: currentSample });
+
+  const activeCow = cows.find((c) => c.id === selectedCowId) || cows[0];
+
+  const handleLinkSampleToCow = () => {
+    if (!currentSample || currentSample.linkedCowId || !selectedCowId) return;
+    const updated = { ...currentSample, linkedCowId: selectedCowId };
+    saveLocalScan(updated);
+    setCurrentSample(updated);
+  };
 
   const handleOptimizeRation = async () => {
     setIsOptimizingRation(true);
@@ -97,19 +113,37 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
         </p>
 
         {/* Tested Feed Allocation Banner */}
-        {activeSample && (
-          <div className="mt-3 bg-[#edf7f0] dark:bg-emerald-950/60 border border-[#b0dec0] dark:border-emerald-500/40 rounded-2xl p-2.5 flex items-center justify-between text-xs">
+        {currentSample && (
+          <div className="mt-3 bg-[#edf7f0] dark:bg-emerald-950/60 border border-[#b0dec0] dark:border-emerald-500/40 rounded-2xl p-2.5 flex items-center justify-between text-xs flex-wrap gap-2">
             <div className="flex items-center space-x-2">
               <span className="text-[10px] uppercase font-black text-[#1F5D3B] dark:text-emerald-300 bg-white/90 dark:bg-black/40 px-2 py-0.5 rounded-lg border border-[#b0dec0] dark:border-emerald-500/30">
-                {activeSample.category.replace('_', ' ')} Slot
+                {currentSample.category.replace('_', ' ')} Slot
               </span>
               <span className="font-bold text-[#1A1A1A] dark:text-white text-xs truncate max-w-[170px]">
-                {activeSample.name} (CP {activeSample.metrics.crudeProtein}%)
+                {currentSample.name} (CP {currentSample.metrics.crudeProtein}%)
               </span>
             </div>
-            <span className="text-[10px] text-[#1F5D3B] dark:text-emerald-300 font-black">
-              In Ration ✓
-            </span>
+            <div className="flex items-center space-x-1.5">
+              {!currentSample.linkedCowId ? (
+                <button
+                  type="button"
+                  onClick={handleLinkSampleToCow}
+                  className="text-[10px] text-white bg-[#1F5D3B] hover:bg-[#184a2f] font-black px-2.5 py-1.5 rounded-lg transition-all active:scale-95 min-h-[36px] flex items-center space-x-1"
+                  title={`Link this tested feed sample to ${activeCow?.name || 'selected cow'}`}
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Link to {activeCow?.name?.split(' ')[0] || 'Cow'}</span>
+                </button>
+              ) : currentSample.linkedCowId === selectedCowId ? (
+                <span className="text-[10px] text-[#1F5D3B] dark:text-emerald-300 font-black">
+                  Linked to {activeCow?.name?.split(' ')[0]} ✓
+                </span>
+              ) : (
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
+                  Linked to {cows.find((c) => c.id === currentSample.linkedCowId)?.name?.split(' ')[0] || 'Other Cattle'}
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -229,6 +263,16 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
           </div>
         </div>
       </div>
+
+      {/* Per-Cow Health & Yield History Timeline */}
+      {activeCow && (
+        <CowHistoryTimeline
+          cow={activeCow}
+          locale={locale}
+          activeSample={currentSample}
+          onYieldLogged={(newYield) => setDailyYield(newYield)}
+        />
+      )}
 
       {/* Calculated Total Mixed Ration (TMR) Breakdown Cards */}
       <RationNutrientCards rationPlan={rationPlan} locale={locale} />

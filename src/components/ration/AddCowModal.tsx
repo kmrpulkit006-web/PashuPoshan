@@ -45,6 +45,7 @@ export const AddCowModal: React.FC<AddCowModalProps> = ({
       lactationStage: 'Early (0-90 days)',
       dailyMilkYieldLiters: Number(newCowYield),
       milkFatPct: newCowBreed.includes('Buffalo') ? 7.0 : 4.0,
+      createdAt: new Date().toISOString(),
     };
 
     onSaveCow(newCow);

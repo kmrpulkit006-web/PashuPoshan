@@ -1,9 +1,10 @@
-import { CowProfile, FeedSample, SilageBunker, SilagePitLog, CommunityFeedAlert, OfflineSyncItem, FeedCategory, OfflineMoldHeuristicResult } from './types';
+import { CowProfile, FeedSample, SilageBunker, SilagePitLog, CommunityFeedAlert, OfflineSyncItem, FeedCategory, OfflineMoldHeuristicResult, CowYieldLogEntry } from './types';
 import { PRESET_FEED_SCENARIOS, createFeedSampleFromVisualAnalysis } from './feedAnalysisEngine';
 import { storeImageInIndexedDb } from './imageStorage';
 
 const COWS_KEY = 'pashuposhan_cows_v1';
 const SCANS_KEY = 'pashuposhan_scans_v1';
+const YIELD_LOGS_KEY = 'pashuposhan_yield_logs_v1';
 const PITS_KEY = 'pashuposhan_pits_v1';
 const ALERTS_KEY = 'pashuposhan_alerts_v1';
 const SYNC_QUEUE_KEY = 'pashuposhan_sync_queue_v1';
@@ -46,6 +47,7 @@ const INITIAL_COWS: CowProfile[] = [
     lactationStage: 'Early (0-90 days)',
     dailyMilkYieldLiters: 12,
     milkFatPct: 4.6,
+    createdAt: '2026-08-01T06:00:00.000Z',
   },
   {
     id: 'cow_hf_ganga',
@@ -56,6 +58,7 @@ const INITIAL_COWS: CowProfile[] = [
     lactationStage: 'Mid (91-200 days)',
     dailyMilkYieldLiters: 18,
     milkFatPct: 3.8,
+    createdAt: '2026-08-05T06:00:00.000Z',
   },
   {
     id: 'cow_murrah_yamuna',
@@ -66,6 +69,7 @@ const INITIAL_COWS: CowProfile[] = [
     lactationStage: 'Early (0-90 days)',
     dailyMilkYieldLiters: 14,
     milkFatPct: 7.2,
+    createdAt: '2026-08-10T06:00:00.000Z',
   },
 ];
 
@@ -219,6 +223,49 @@ export function saveLocalScan(sample: FeedSample): FeedSample[] {
   safeSetItem(SCANS_KEY, JSON.stringify(updated));
   queueOfflineAction('scan', 'create', { ...sample, imageUrl: '' }); // Queue lightweight metadata
   return updated;
+}
+
+// Cow Milk Yield Logs Operations
+export function getLocalYieldLogs(cowId?: string): CowYieldLogEntry[] {
+  try {
+    const raw = localStorage.getItem(YIELD_LOGS_KEY);
+    if (!raw) {
+      return [];
+    }
+    const all: CowYieldLogEntry[] = JSON.parse(raw);
+    if (cowId) {
+      return all.filter(l => l && l.cowId === cowId);
+    }
+    return all;
+  } catch (e) {
+    return [];
+  }
+}
+
+export function saveYieldLogEntry(entry: CowYieldLogEntry): CowYieldLogEntry[] {
+  try {
+    const raw = localStorage.getItem(YIELD_LOGS_KEY);
+    const all: CowYieldLogEntry[] = raw ? JSON.parse(raw) : [];
+    const existingIdx = all.findIndex(e => e.id === entry.id);
+    let updated: CowYieldLogEntry[];
+    if (existingIdx >= 0) {
+      updated = [...all];
+      updated[existingIdx] = entry;
+    } else {
+      updated = [entry, ...all];
+    }
+    safeSetItem(YIELD_LOGS_KEY, JSON.stringify(updated));
+    queueOfflineAction('yield_log' as any, existingIdx >= 0 ? 'update' : 'create', entry);
+    return updated.filter(e => e && e.cowId === entry.cowId);
+  } catch (e) {
+    return [entry];
+  }
+}
+
+export function getSamplesForCow(cowId: string): FeedSample[] {
+  if (!cowId) return [];
+  const scans = getLocalScans();
+  return scans.filter(s => s && s.linkedCowId === cowId);
 }
 
 // Silage Pit Operations

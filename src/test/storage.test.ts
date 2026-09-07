@@ -50,6 +50,10 @@ import {
   queueOfflineAlert,
   fetchRemoteAlerts,
   syncPendingAlerts,
+  getLocalYieldLogs,
+  saveYieldLogEntry,
+  getSamplesForCow,
+  saveLocalScan,
 } from '../lib/storage';
 
 describe('Storage Operations & Offline Syncing (storage.ts)', () => {
@@ -230,6 +234,100 @@ describe('Storage Operations & Offline Syncing (storage.ts)', () => {
 
       const result = await fetchRemoteAlerts();
       expect(result.some(a => a.id === 'server_alert_1')).toBe(true);
+    });
+  });
+
+  describe('Cow Health & Yield Logs (storage.ts)', () => {
+    it('returns empty array when no yield logs exist for a cow', () => {
+      const logs = getLocalYieldLogs('cow_nonexistent');
+      expect(logs).toEqual([]);
+    });
+
+    it('saves a new yield log entry and returns updated logs for that cow', () => {
+      const entry1 = {
+        id: 'log_1',
+        cowId: 'cow_gir_lakshmi',
+        timestamp: '2026-09-01T08:00:00.000Z',
+        dailyMilkYieldLiters: 12.5,
+        note: 'Normal ration',
+      };
+
+      const result = saveYieldLogEntry(entry1);
+      expect(result.length).toBe(1);
+      expect(result[0]).toEqual(entry1);
+
+      const logsFromStorage = getLocalYieldLogs('cow_gir_lakshmi');
+      expect(logsFromStorage.length).toBe(1);
+      expect(logsFromStorage[0].dailyMilkYieldLiters).toBe(12.5);
+    });
+
+    it('updates an existing yield log entry when ID matches', () => {
+      saveYieldLogEntry({
+        id: 'log_update_test',
+        cowId: 'cow_hf_ganga',
+        timestamp: '2026-09-02T08:00:00.000Z',
+        dailyMilkYieldLiters: 16.0,
+      });
+
+      const updated = saveYieldLogEntry({
+        id: 'log_update_test',
+        cowId: 'cow_hf_ganga',
+        timestamp: '2026-09-02T08:00:00.000Z',
+        dailyMilkYieldLiters: 17.5,
+        note: 'Adjusted concentrate',
+      });
+
+      expect(updated.length).toBe(1);
+      expect(updated[0].dailyMilkYieldLiters).toBe(17.5);
+      expect(updated[0].note).toBe('Adjusted concentrate');
+    });
+
+    it('getSamplesForCow filters scans by linkedCowId and handles undefined linkedCowId gracefully', () => {
+      // Legacy scan without linkedCowId (backward compatibility test)
+      const legacySample: any = {
+        id: 'scan_legacy_1',
+        name: 'Legacy Wheat Straw',
+        category: 'dry_fodder',
+        overallGrade: 'Tier A: Premium',
+        timestamp: '2026-08-10',
+      };
+      saveLocalScan(legacySample);
+
+      // Scan linked to cow_gir_lakshmi
+      const linkedSample1: any = {
+        id: 'scan_linked_1',
+        name: 'Fresh Napier Grass',
+        category: 'green_fodder',
+        overallGrade: 'Tier A: Premium',
+        timestamp: '2026-09-03',
+        linkedCowId: 'cow_gir_lakshmi',
+      };
+      saveLocalScan(linkedSample1);
+
+      // Scan linked to cow_hf_ganga
+      const linkedSample2: any = {
+        id: 'scan_linked_2',
+        name: 'Maize Silage Bunker 2',
+        category: 'silage',
+        overallGrade: 'Tier C: Hazardous/Reject',
+        timestamp: '2026-09-04',
+        linkedCowId: 'cow_hf_ganga',
+      };
+      saveLocalScan(linkedSample2);
+
+      // Test filtering for cow_gir_lakshmi
+      const lakshmiScans = getSamplesForCow('cow_gir_lakshmi');
+      expect(lakshmiScans.length).toBe(1);
+      expect(lakshmiScans[0].id).toBe('scan_linked_1');
+
+      // Test filtering for cow_hf_ganga
+      const gangaScans = getSamplesForCow('cow_hf_ganga');
+      expect(gangaScans.length).toBe(1);
+      expect(gangaScans[0].id).toBe('scan_linked_2');
+
+      // Test filtering for nonexistent cow returns empty array without crashing
+      const emptyScans = getSamplesForCow('cow_unassigned');
+      expect(emptyScans).toEqual([]);
     });
   });
 });

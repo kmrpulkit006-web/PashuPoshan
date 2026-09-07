@@ -102,6 +102,15 @@ export interface FeedSample {
   veterinaryAdvisory: string;
   correctiveActions: string[];
   offlineMoldHeuristic?: OfflineMoldHeuristicResult;
+  linkedCowId?: string;
+}
+
+export interface CowYieldLogEntry {
+  id: string;
+  cowId: string;
+  timestamp: string;
+  dailyMilkYieldLiters: number;
+  note?: string;
 }
 
 export interface OfflineMoldHeuristicResult {
@@ -121,6 +130,7 @@ export interface CowProfile {
   lactationStage: 'Early (0-90 days)' | 'Mid (91-200 days)' | 'Late (>200 days)' | 'Dry Pregnant';
   dailyMilkYieldLiters: number;
   milkFatPct: number;
+  createdAt?: string;
 }
 
 export interface RationSlotItem {
