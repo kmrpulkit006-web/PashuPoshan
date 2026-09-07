@@ -4,7 +4,7 @@ import { t } from '../lib/i18n';
 import { useRationManager } from '../hooks/useRationManager';
 import { AddCowModal } from '../components/ration/AddCowModal';
 import { RationNutrientCards } from '../components/ration/RationNutrientCards';
-import { Scale, Plus, Trash2, Minus } from 'lucide-react';
+import { Scale, Plus, Trash2, Minus, Sparkles, RefreshCw, Bot } from 'lucide-react';
 
 interface RationScreenProps {
   activeSample?: FeedSample;
@@ -13,6 +13,9 @@ interface RationScreenProps {
 
 export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale }) => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isOptimizingRation, setIsOptimizingRation] = useState(false);
+  const [rationAdvice, setRationAdvice] = useState<string | null>(null);
+  const [rationAdviceError, setRationAdviceError] = useState<string | null>(null);
 
   const {
     cows,
@@ -26,6 +29,38 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
     handleSaveCow,
     handleDeleteCow,
   } = useRationManager({ activeSample });
+
+  const handleOptimizeRation = async () => {
+    setIsOptimizingRation(true);
+    setRationAdviceError(null);
+    try {
+      const activeCow = cows.find((c) => c.id === selectedCowId);
+      const res = await fetch('/api/veterinary-expert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'ration_optimization',
+          rationPlan,
+          cowProfile: {
+            name: activeCow?.name || 'Selected Cow',
+            breed: activeCow?.breed || 'Crossbred Dairy Cow',
+            weight: cowWeight,
+            dailyYield,
+          },
+          locale,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to optimize ration');
+      }
+      setRationAdvice(data.review || data.reply);
+    } catch (err: any) {
+      setRationAdviceError(err.message || 'Could not complete ration optimization consultation.');
+    } finally {
+      setIsOptimizingRation(false);
+    }
+  };
 
   const adjustYield = (delta: number) => {
     setDailyYield((prev) => Math.min(45, Math.max(2, prev + delta)));
@@ -197,6 +232,85 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
 
       {/* Calculated Total Mixed Ration (TMR) Breakdown Cards */}
       <RationNutrientCards rationPlan={rationPlan} locale={locale} />
+
+      {/* AI Precision Veterinary Ration Balancer (NVIDIA Nemotron-3-Ultra) */}
+      <div className="bg-[#F3EEE1] dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-4 space-y-3 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 rounded-xl bg-emerald-600/15 text-[#1F5D3B] dark:text-emerald-400 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-300" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-black text-[#1A1A1A] dark:text-white leading-none">
+                AI Precision Ration Advisory
+              </h3>
+              <p className="text-[10px] text-[#5A5243] dark:text-slate-400 font-semibold mt-0.5">
+                Powered by NVIDIA Nemotron-3-Ultra (550B)
+              </p>
+            </div>
+          </div>
+          <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-[#1F5D3B] dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-700">
+            ICAR-NDRI TMR
+          </span>
+        </div>
+
+        {!rationAdvice ? (
+          <button
+            type="button"
+            onClick={handleOptimizeRation}
+            disabled={isOptimizingRation}
+            className="w-full py-3.5 px-4 bg-gradient-to-r from-[#1F5D3B] to-teal-800 hover:from-[#184a2f] hover:to-teal-900 text-white rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-md transition-all active:scale-98 disabled:opacity-60 min-h-[50px]"
+          >
+            {isOptimizingRation ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin text-emerald-200" />
+                <span>Balancing Rumen Nutrients & SARA Risks...</span>
+              </>
+            ) : (
+              <>
+                <Bot className="w-4 h-4 text-emerald-300" />
+                <span>Consult Nemotron AI for TMR Optimization</span>
+              </>
+            )}
+          </button>
+        ) : (
+          <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 rounded-2xl space-y-2 text-xs">
+            <div className="flex items-center justify-between border-b border-emerald-200 dark:border-emerald-800 pb-1.5">
+              <span className="font-extrabold text-[#1F5D3B] dark:text-emerald-300">
+                Nutritional Feasibility & Clinical Precautions
+              </span>
+              <button
+                type="button"
+                onClick={() => setRationAdvice(null)}
+                className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-[10px] font-bold underline"
+              >
+                Close
+              </button>
+            </div>
+            <div className="text-slate-800 dark:text-slate-200 whitespace-pre-line leading-relaxed font-medium">
+              {rationAdvice}
+            </div>
+            <div className="pt-1 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+              <span>Metabolic Safeguard: Subacute Ruminal Acidosis & Milk Urea Nitrogen</span>
+              <button
+                type="button"
+                onClick={handleOptimizeRation}
+                disabled={isOptimizingRation}
+                className="text-[#1F5D3B] dark:text-emerald-400 font-extrabold flex items-center space-x-1"
+              >
+                <RefreshCw className={`w-3 h-3 ${isOptimizingRation ? 'animate-spin' : ''}`} />
+                <span>Re-Analyze</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {rationAdviceError && (
+          <p className="text-[11px] text-red-600 dark:text-red-400 font-semibold">
+            {rationAdviceError}
+          </p>
+        )}
+      </div>
 
       {/* Add Cattle Modal */}
       <AddCowModal

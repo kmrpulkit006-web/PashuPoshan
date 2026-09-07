@@ -113,19 +113,31 @@ export const DEFAULT_ALERTS: AlertPayload[] = [
   },
 ];
 
-const MAX_STORED_ALERTS = 50;
-const REDIS_KEY = 'pashuposhan:community_alerts';
+export const MAX_STORED_ALERTS = 50;
+export const REDIS_KEY = 'pashuposhan:community_alerts';
+
+export const RATE_LIMIT_MAX = 20; // 20 alert submissions per hour per IP
+export const RATE_LIMIT_WINDOW_SECONDS = 3600; // 1 hour
+export const inMemoryRateLimit = new Map<string, { count: number; resetTime: number }>();
 
 // In-memory fallback for local development or when Redis credentials are not configured
 let inMemoryAlerts: AlertPayload[] = [...DEFAULT_ALERTS];
 
-function getRedisClient(): Redis | null {
+export function getClientIp(req: any): string {
+  const xForwardedFor = req.headers?.['x-forwarded-for'] || req.headers?.['x-real-ip'];
+  if (typeof xForwardedFor === 'string') {
+    return xForwardedFor.split(',')[0].trim();
+  }
+  return req.socket?.remoteAddress || '127.0.0.1';
+}
+
+export function getRedisClient(): Redis | null {
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (url && token) {
     try {
-      return new Redis({ url, token });
+      return new Redis({ url, token, retry: { retries: 0 } });
     } catch (e) {
       console.warn('Failed to initialize Redis client, falling back to in-memory storage:', e);
     }
@@ -133,7 +145,45 @@ function getRedisClient(): Redis | null {
   return null;
 }
 
-async function loadAlerts(): Promise<AlertPayload[]> {
+export async function checkRateLimit(ip: string): Promise<boolean> {
+  const redis = getRedisClient();
+  if (redis) {
+    try {
+      const key = `rate_limit:alerts:${ip}`;
+      const count = await redis.incr(key);
+      if (count === 1) {
+        await redis.expire(key, RATE_LIMIT_WINDOW_SECONDS);
+      }
+      return count <= RATE_LIMIT_MAX;
+    } catch (err) {
+      console.warn('Redis rate limit check error, falling back to in-memory:', err);
+    }
+  }
+
+  const now = Date.now();
+  const entry = inMemoryRateLimit.get(ip);
+  if (!entry || now > entry.resetTime) {
+    inMemoryRateLimit.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_SECONDS * 1000 });
+    return true;
+  }
+
+  entry.count += 1;
+  return entry.count <= RATE_LIMIT_MAX;
+}
+
+export function resetRateLimits(): void {
+  inMemoryRateLimit.clear();
+}
+
+export function resetInMemoryAlerts(): void {
+  inMemoryAlerts = [...DEFAULT_ALERTS];
+}
+
+export function getInMemoryAlerts(): AlertPayload[] {
+  return inMemoryAlerts;
+}
+
+export async function loadAlerts(): Promise<AlertPayload[]> {
   const redis = getRedisClient();
   if (redis) {
     try {
@@ -151,7 +201,7 @@ async function loadAlerts(): Promise<AlertPayload[]> {
   return inMemoryAlerts;
 }
 
-async function saveAlert(newAlert: AlertPayload): Promise<AlertPayload[]> {
+export async function saveAlert(newAlert: AlertPayload): Promise<AlertPayload[]> {
   const current = await loadAlerts();
   const updated = [newAlert, ...current.filter(a => a.id !== newAlert.id)].slice(0, MAX_STORED_ALERTS);
 
@@ -201,6 +251,14 @@ export default async function handler(req: any, res: any) {
   }
 
   if (req.method === 'POST') {
+    // Rate Limiting (20 submissions per hour per IP)
+    const clientIp = getClientIp(req);
+    const isAllowed = await checkRateLimit(clientIp);
+    if (!isAllowed) {
+      return res.status(429).json({
+        error: 'Rate limit exceeded. Please try again later.',
+      });
+    }
     try {
       let body = req.body;
       if (typeof body === 'string') {

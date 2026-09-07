@@ -17,6 +17,8 @@ declare const process: {
     [key: string]: string | undefined;
     GEMINI_API_KEY?: string;
     GOOGLE_API_KEY?: string;
+    NVIDIA_API_KEY?: string;
+    NVIDIA_VISION_MODEL?: string;
     VISION_PROVIDER?: string;
     KV_REST_API_URL?: string;
     KV_REST_API_TOKEN?: string;
@@ -206,6 +208,77 @@ Return ONLY a JSON object strictly matching this schema:
 }
 
 /**
+ * NVIDIA NIM Vision-Language Model Provider Implementation
+ * Compatible with OpenAI vision format via integrate.api.nvidia.com
+ */
+export class NvidiaVisionProvider implements VisionProvider {
+  private apiKey: string;
+  private model: string;
+
+  constructor(apiKey: string, model: string = 'meta/llama-3.2-11b-vision-instruct') {
+    this.apiKey = apiKey;
+    this.model = model;
+  }
+
+  async analyzeImage(base64Jpeg: string, category: string = 'feed'): Promise<VisualAnalysisResult> {
+    const prompt = `You are a dairy cattle feed quality and silage evaluation vision system for Indian dairy farming (ICAR-NDRI standards).
+Analyze this uploaded feed sample image.
+
+Target category indicated by farmer: "${category}".
+
+Return ONLY valid raw JSON with no markdown formatting, matching this exact schema:
+{
+  "isFeedSample": true,
+  "feedTypeIdentified": "silage" | "green_fodder" | "dry_fodder" | "concentrate_pellets" | "non_feed",
+  "rejectionReason": "none" | "not_feed_or_fodder" | "blurry_unreadable" | "poor_lighting",
+  "rejectionMessage": "",
+  "moldCoverageEstimate": "none" | "trace" | "moderate" | "heavy",
+  "colorDescription": "Brief description of sample color",
+  "foreignMatterVisible": false,
+  "foreignMatterDescription": "",
+  "overallVisualCondition": "good" | "fair" | "poor" | "invalid"
+}`;
+
+    const imageUrl = base64Jpeg.startsWith('data:')
+      ? base64Jpeg
+      : `data:image/jpeg;base64,${base64Jpeg}`;
+
+    const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: this.model,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: imageUrl } },
+            ],
+          },
+        ],
+        temperature: 0.2,
+        max_tokens: 500,
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`NVIDIA Vision API error (${response.status}): ${errText}`);
+    }
+
+    const data = await response.json();
+    const rawContent = data.choices?.[0]?.message?.content || '';
+    const res = sanitizeVisualAnalysisResponse(rawContent, category);
+    res.providerNotes = `Analyzed via NVIDIA NIM Vision Pipeline (${this.model})`;
+    return res;
+  }
+}
+
+/**
  * Sanitizes and validates the raw Gemini vision response against the schema.
  * Safely falls back to defaults for missing fields, out-of-range values, or malformed/empty strings.
  */
@@ -304,10 +377,21 @@ export function sanitizeVisualAnalysisResponse(
 /**
  * Provider factory enabling future swappability (e.g. Anthropic Claude, OpenAI GPT-4V)
  */
-export function getVisionProvider(apiKey?: string): VisionProvider {
+export function getVisionProvider(apiKey?: string, providerName?: string): VisionProvider {
+  const chosenProvider = (providerName || process.env.VISION_PROVIDER || '').toLowerCase();
+
+  if (chosenProvider === 'nvidia' || (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY && (apiKey || process.env.NVIDIA_API_KEY))) {
+    const key = apiKey || process.env.NVIDIA_API_KEY;
+    if (!key) {
+      throw new Error('NVIDIA_API_KEY is not configured in the server environment.');
+    }
+    const model = process.env.NVIDIA_VISION_MODEL || 'meta/llama-3.2-11b-vision-instruct';
+    return new NvidiaVisionProvider(key, model);
+  }
+
   const resolvedKey = apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!resolvedKey) {
-    throw new Error('GEMINI_API_KEY is not configured in the server environment.');
+    throw new Error('GEMINI_API_KEY (or NVIDIA_API_KEY) is not configured in the server environment.');
   }
   return new GeminiFlashVisionProvider(resolvedKey);
 }
@@ -329,7 +413,7 @@ function getRedisClient(): Redis | null {
   const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
   if (url && token) {
     try {
-      return new Redis({ url, token });
+      return new Redis({ url, token, retry: { retries: 0 } });
     } catch (e) {
       console.warn('Redis rate limiter initialization failed, using in-memory map:', e);
     }
@@ -424,16 +508,22 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    // Check API Key
-    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-    if (!apiKey) {
+    // Check API Key for Gemini or NVIDIA
+    const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
+    const hasNvidiaKey = Boolean(process.env.NVIDIA_API_KEY);
+    const isNvidiaPreferred = process.env.VISION_PROVIDER?.toLowerCase() === 'nvidia';
+
+    if (!hasGeminiKey && !hasNvidiaKey) {
       return res.status(503).json({
-        error: 'Vision AI service is unconfigured on the server (GEMINI_API_KEY is missing). Fallback to offline queuing is advised.',
+        error: 'Vision AI service is unconfigured on the server (neither GEMINI_API_KEY nor NVIDIA_API_KEY is present). Fallback to offline queuing is advised.',
         code: 'API_KEY_UNCONFIGURED',
       });
     }
 
-    const provider = getVisionProvider(apiKey);
+    const provider = getVisionProvider(
+      isNvidiaPreferred || (!hasGeminiKey && hasNvidiaKey) ? process.env.NVIDIA_API_KEY : undefined,
+      isNvidiaPreferred ? 'nvidia' : undefined
+    );
     const result = await provider.analyzeImage(cleanBase64, category);
 
     return res.status(200).json(result);

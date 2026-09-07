@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Locale } from '../lib/types';
 import { t } from '../lib/i18n';
-import { Globe, Sun, Moon, Info, X, DownloadCloud, Wifi, WifiOff, Layers, Trash2, RefreshCw } from 'lucide-react';
+import { Globe, Sun, Moon, Info, X, DownloadCloud, Wifi, WifiOff, Layers, Trash2, RefreshCw, Bot } from 'lucide-react';
 import { getPendingSyncQueue, getPendingOfflineScans, syncPendingScans, clearDemoQueue, clearPendingOfflineScans } from '../lib/storage';
+import { VeterinaryChatModal } from './VeterinaryChatModal';
 
 interface MobileHeaderProps {
   locale: Locale;
@@ -22,6 +23,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   pendingScansCount = 0,
 }) => {
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
   const [pendingCount, setPendingCount] = useState(pendingScansCount);
   const [isSyncing, setIsSyncing] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
@@ -166,6 +168,16 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
                 <option value="pa" className="text-slate-900 bg-white">ਪੰਜਾਬੀ (PA)</option>
               </select>
             </div>
+
+            {/* Pashu Seva AI / Veterinary Expert Chat Trigger */}
+            <button
+              onClick={() => setShowChatModal(true)}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-black/20 hover:bg-black/30 dark:bg-slate-800 border border-emerald-400/40 dark:border-emerald-500/40 flex items-center justify-center text-white transition-all shrink-0 active:scale-95 shadow-inner"
+              title="Pashu Seva AI (Veterinary Expert Chat)"
+              aria-label="Pashu Seva AI Chat"
+            >
+              <Bot className="w-4 h-4 text-emerald-300" />
+            </button>
 
             {/* Manual Light/Dark Theme Toggle Icon Button */}
             <button
@@ -326,6 +338,13 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
           </div>
         </div>
       )}
+
+      {/* Pashu Seva AI Veterinary Chat Modal */}
+      <VeterinaryChatModal
+        isOpen={showChatModal}
+        onClose={() => setShowChatModal(false)}
+        locale={locale}
+      />
     </>
   );
 };

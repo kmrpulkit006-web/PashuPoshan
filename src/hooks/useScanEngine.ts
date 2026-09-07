@@ -17,6 +17,24 @@ import { compressImage } from '../lib/imageStorage';
 import { classifyFeedTypeOnDevice } from '../lib/onDeviceVision';
 import confetti from 'canvas-confetti';
 
+let isFirstOnDeviceClassification = true;
+
+export function resetFirstOnDeviceClassification() {
+  isFirstOnDeviceClassification = true;
+}
+
+export function getIsFirstOnDeviceClassification(): boolean {
+  return isFirstOnDeviceClassification;
+}
+
+export function getOnDeviceClassificationMessage(): string {
+  if (isFirstOnDeviceClassification) {
+    isFirstOnDeviceClassification = false;
+    return 'Loading AI assistant (one-time download, ~15-20 seconds on slow networks)...';
+  }
+  return 'Checking image on device (डिवाइस पर छवि जांच हो रही है)...';
+}
+
 interface UseScanEngineProps {
   onScanComplete: (sample: FeedSample) => void;
 }
@@ -55,7 +73,7 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
     setIsProcessing(true);
 
     if (scanMode === 'vision') {
-      setProcessingMessage('Checking image on device (डिवाइस पर छवि जांच हो रही है)...');
+      setProcessingMessage(getOnDeviceClassificationMessage());
 
       // Client-Side Feed-Type Sanity Check (MobileNetV1, ~1.8MB weights)
       // Checks for unmistakable non-feed objects (laptop, vehicle, pet, etc.) with >60% confidence

@@ -37,6 +37,12 @@
    - Taluka-level crowd-sourced bulletin for spiked feed batches and seasonal fodder deficits.
    - Farmer grievance filing and BIS QR code manufacturer verification.
 
+6. **Pashu Seva AI - Conversational Veterinary & Clinical Advisory (`/api/veterinary-expert`)**:
+   - **NVIDIA Nemotron-3-Ultra-550B-A55B Reasoning Engine**: Ultra-large parameter reasoning model delivering real-time dairy pathology consults, emergency first-aid protocols (e.g. acute urea toxicity, mycotoxicosis, acidosis), and vernacular advisories in 5 Indic languages with speech synthesis.
+   - **Deep Scorecard Clinical Review**: Produces clinical-grade rumen biome impact assessments and feed pathology risk matrices directly inside the Feed Scorecard.
+   - **Precision Rumen Balancer Optimization**: Analyzes Total Mixed Rations (TMR) for Subacute Ruminal Acidosis (SARA) and Milk Urea Nitrogen (MUN) risks, suggesting economical local agro-byproduct substitutions.
+   - **Pluggable Multi-Cloud Vision AI**: Seamlessly routes visual screening between Google Gemini 1.5 Flash Vision and NVIDIA NIM Vision (`meta/llama-3.2-11b-vision-instruct`).
+
 ---
 
 ## 💻 Quick Start & Run
@@ -50,6 +56,23 @@ npm run dev
 ```
 
 The application will launch on `http://localhost:5174/` (or network IP for testing directly on your smartphone).
+
+---
+
+## ⚙️ Environment Variables
+
+PashuPoshan AI runs out-of-the-box in local development with zero mandatory configuration. All cloud dependencies implement automatic, graceful in-memory fallbacks when environment variables are absent or network-unreachable.
+
+For production cloud deployment (e.g., Vercel Serverless Functions), configure the following environment variables:
+
+| Variable | Scope / Endpoint | Purpose | Fallback Behavior When Unset or Unreachable |
+| :--- | :--- | :--- | :--- |
+| `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) | `/api/analyze-visual` | Google Gemini 1.5 Flash Vision API key for cloud-based multimodal visual analysis, feed texture recognition, and veterinary advisories. | If unset or invalid, the API endpoint returns an error. The client PWA automatically falls back to **100% offline triage** (on-device relative color-cluster mold heuristic + CIEDE2000 pH reading) and saves the scan photo to the IndexedDB offline queue for background sync upon network reconnection. |
+| `NVIDIA_API_KEY` | `/api/veterinary-expert`<br/>`/api/analyze-visual` | NVIDIA NIM API key for ultra-large reasoning models (`nvidia/nemotron-3-ultra-550b-a55b`) and pluggable NIM Vision models (`meta/llama-3.2-11b-vision-instruct`). | **Deterministic ICAR-NDRI Fallback**: If unset or network-unreachable, `/api/veterinary-expert` automatically generates scientific rule-based veterinary advisories, TMR nutritional assessments, and emergency protocols without failing. `/api/analyze-visual` falls back to Gemini or client-side heuristics. |
+| `NVIDIA_MODEL_ID` | `/api/veterinary-expert` | Custom model ID override for NVIDIA NIM reasoning (defaults to `nvidia/nemotron-3-ultra-550b-a55b`). | Defaults to `nvidia/nemotron-3-ultra-550b-a55b`. |
+| `VISION_PROVIDER` | `/api/analyze-visual` | Select active cloud vision inference provider: `gemini` (default) or `nvidia`. | Defaults to `gemini`. If unset but `NVIDIA_API_KEY` is present and `GEMINI_API_KEY` is absent, automatically selects `nvidia`. |
+| `KV_REST_API_URL`<br/>*(or `UPSTASH_REDIS_REST_URL`)* | `/api/alerts`<br/>`/api/analyze-visual`<br/>`/api/veterinary-expert` | REST endpoint URL for Upstash Redis / Vercel KV distributed database. Used for persistent crowd-sourced alerts and distributed per-IP rate limiting. | **In-Memory Fallback**: Reads and writes succeed per serverless instance using an in-memory cache/map, but state does not persist across serverless cold starts or synchronize across multiple users/distributed instances. |
+| `KV_REST_API_TOKEN`<br/>*(or `UPSTASH_REDIS_REST_TOKEN`)* | `/api/alerts`<br/>`/api/analyze-visual`<br/>`/api/veterinary-expert` | Bearer authentication token for Upstash Redis / Vercel KV REST API. | Falls back to in-memory storage and in-memory rate limiting alongside the URL. |
 
 ---
 
