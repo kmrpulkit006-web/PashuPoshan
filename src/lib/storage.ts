@@ -1,6 +1,6 @@
 import { CowProfile, FeedSample, SilageBunker, SilagePitLog, CommunityFeedAlert, OfflineSyncItem, FeedCategory, OfflineMoldHeuristicResult, CowYieldLogEntry } from './types';
 import { PRESET_FEED_SCENARIOS, createFeedSampleFromVisualAnalysis } from './feedAnalysisEngine';
-import { storeImageInIndexedDb, getImageFromIndexedDb, deleteImageFromIndexedDb } from './imageStorage';
+import { storeImageInIndexedDb, getImageFromIndexedDb, deleteImageFromIndexedDb, clearAllImagesFromIndexedDb } from './imageStorage';
 
 const COWS_KEY = 'pashuposhan_cows_v1';
 const SCANS_KEY = 'pashuposhan_scans_v1';
@@ -241,10 +241,7 @@ export function deleteLocalScan(id: string): FeedSample[] {
 }
 
 export function clearAllLocalScans(): FeedSample[] {
-  const current = getLocalScans();
-  current.forEach(s => {
-    deleteImageFromIndexedDb(s.id).catch(() => {});
-  });
+  clearAllImagesFromIndexedDb().catch(() => {});
   safeSetItem(SCANS_KEY, JSON.stringify([]));
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('pashuposhan_scans_updated', { detail: { count: 0 } }));

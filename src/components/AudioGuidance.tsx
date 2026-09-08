@@ -92,6 +92,7 @@ export const AudioGuidance: React.FC<AudioGuidanceProps> = ({
       }`}
     >
       <button
+        type="button"
         onClick={handleTogglePlay}
         className={`w-full py-4 px-4 rounded-xl font-black text-sm sm:text-base flex items-center justify-center space-x-3 shadow-lg transition-all min-h-[56px] ${
           isPlaying
@@ -103,7 +104,7 @@ export const AudioGuidance: React.FC<AudioGuidanceProps> = ({
         aria-label={isPlaying ? stopLabel : playLabel}
       >
         <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-          {isPlaying ? <Square className="w-4 h-4 fill-white" /> : <Volume2 className="w-5 h-5" />}
+          {isPlaying ? <Square className="w-4 h-4 fill-white" aria-hidden="true" /> : <Volume2 className="w-5 h-5" aria-hidden="true" />}
         </div>
         <span className="leading-snug">{isPlaying ? stopLabel : playLabel}</span>
       </button>

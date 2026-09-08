@@ -181,15 +181,22 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale, isOnline }) 
   };
 
   const handleSimulateQrVerification = () => {
+    const isIndic = locale !== 'en';
     setNoticeModal({
-      title: 'Feed Bag QR Verification',
-      message:
-        'DEMO SIMULATION:\n\n' +
-        'Simulated BIS / NDDB Feed Bag QR Scan.\n\n' +
-        'License: BIS/CM/L-7819202 (Compliant Type II Compound Cattle Feed).\n' +
-        'Manufacturer: Anand Regional Cooperative Milk Producers Union.\n' +
-        'Validity: Up to 12/2026.\n\n' +
-        '(Note: In production, this directly queries the BIS Manakonline verification portal).',
+      title: isIndic ? 'बोरी QR सत्यापन (डेमो)' : 'Feed Bag QR Verification',
+      message: isIndic
+        ? 'डेमो सिमुलेशन:\n\n' +
+          'BIS / NDDB पशु आहार बोरी QR कोड सत्यापित किया गया।\n\n' +
+          'लाइसेंस: BIS/CM/L-7819202 (प्रमाणित BIS टाइप II कंपाउंड पशु आहार)।\n' +
+          'निर्माता: आनंद क्षेत्रीय सहकारी दुग्ध उत्पादक संघ।\n' +
+          'वैधता: 12/2026 तक।\n\n' +
+          '(नोट: उत्पादन में यह सीधे आधिकारिक BIS मानकऑनलाइन पोर्टल से पुष्टि करता है)।'
+        : 'DEMO SIMULATION:\n\n' +
+          'Simulated BIS / NDDB Feed Bag QR Scan.\n\n' +
+          'License: BIS/CM/L-7819202 (Compliant Type II Compound Cattle Feed).\n' +
+          'Manufacturer: Anand Regional Cooperative Milk Producers Union.\n' +
+          'Validity: Up to 12/2026.\n\n' +
+          '(Note: In production, this directly queries the official BIS Manakonline verification portal).',
     });
   };
 

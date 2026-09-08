@@ -7,9 +7,15 @@ const DB_NAME = 'pashuposhan_images_db';
 const STORE_NAME = 'feed_images';
 const DB_VERSION = 1;
 
+let cachedDbPromise: Promise<IDBDatabase> | null = null;
+
 function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    if (!('indexedDB' in window)) {
+  if (cachedDbPromise) {
+    return cachedDbPromise;
+  }
+
+  cachedDbPromise = new Promise((resolve, reject) => {
+    if (typeof window === 'undefined' || !('indexedDB' in window)) {
       reject(new Error('IndexedDB not supported'));
       return;
     }
@@ -20,9 +26,24 @@ function openDb(): Promise<IDBDatabase> {
         db.createObjectStore(STORE_NAME, { keyPath: 'id' });
       }
     };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const db = request.result;
+      db.onclose = () => {
+        cachedDbPromise = null;
+      };
+      db.onversionchange = () => {
+        db.close();
+        cachedDbPromise = null;
+      };
+      resolve(db);
+    };
+    request.onerror = () => {
+      cachedDbPromise = null;
+      reject(request.error);
+    };
   });
+
+  return cachedDbPromise;
 }
 
 /**
@@ -109,6 +130,21 @@ export async function deleteImageFromIndexedDb(id: string): Promise<void> {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
       const req = store.delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch (e) {
+    // Ignore error if IndexedDB is not available
+  }
+}
+
+export async function clearAllImagesFromIndexedDb(): Promise<void> {
+  try {
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.clear();
       req.onsuccess = () => resolve();
       req.onerror = () => reject(req.error);
     });

@@ -511,6 +511,14 @@ export default async function handler(req: any, res: any) {
       });
     }
 
+    // Max 10MB base64 string (~7.5MB raw image binary) to protect serverless memory
+    if (cleanBase64.length > 10 * 1024 * 1024) {
+      return res.status(400).json({
+        error: 'Photo is too large to process. Please capture or upload an image under 7MB.',
+        code: 'IMAGE_TOO_LARGE',
+      });
+    }
+
     // Check API Key for Gemini or NVIDIA
     const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
     const resolvedNvidiaKey = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_01 || process.env.NVIDIA_KEY;

@@ -288,6 +288,15 @@ export default async function handler(req: any, res: any) {
         alertType,
       } = body;
 
+      const sanitizeString = (str: unknown, maxLen = 200): string => {
+        if (typeof str !== 'string') return '';
+        // Strip HTML tags and control characters to prevent XSS
+        return str
+          .replace(/<[^>]*>?/gm, '')
+          .trim()
+          .substring(0, maxLen);
+      };
+
       // Validate required fields
       if (!district || typeof district !== 'string' || !district.trim()) {
         return res.status(400).json({ error: 'Missing required field: "district"' });
@@ -303,22 +312,27 @@ export default async function handler(req: any, res: any) {
         return res.status(400).json({ error: 'Missing required field: "description"' });
       }
 
+      // Check field length limits
+      if (district.length > 200 || effectiveFeed.length > 200 || effectiveDescription.length > 2000) {
+        return res.status(400).json({ error: 'Field length exceeds permitted limits.' });
+      }
+
       const now = new Date();
       const newAlert: AlertPayload = {
         id: body.id || `alert_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        title: title || `Suspected Contamination: ${effectiveFeed}`,
-        taluka: taluka || district,
-        district: district.trim(),
-        state: state || 'India',
+        title: sanitizeString(title || `Suspected Contamination: ${effectiveFeed}`, 200),
+        taluka: sanitizeString(taluka || district, 100),
+        district: sanitizeString(district, 100),
+        state: sanitizeString(state || 'India', 100),
         date: 'Just now',
-        alertType: alertType || 'adulterated_batch',
+        alertType: alertType === 'adulterated_batch' || alertType === 'mold_outbreak' || alertType === 'general_notice' ? alertType : 'adulterated_batch',
         severity: severity === 'info' || severity === 'medium' ? severity : 'high',
-        brandOrCrop: effectiveFeed.trim(),
-        feedType: feedType || effectiveFeed.trim(),
-        contaminant: contaminant || 'Suspected Adulterant',
-        description: effectiveDescription.trim(),
-        advisory: advisory || 'Isolate batch and arrange certified laboratory analysis.',
-        reportedBy: reportedBy || 'Local Dairy Farmer (PashuPoshan Crowd Radar)',
+        brandOrCrop: sanitizeString(effectiveFeed, 150),
+        feedType: sanitizeString(feedType || effectiveFeed, 150),
+        contaminant: sanitizeString(contaminant || 'Suspected Adulterant', 150),
+        description: sanitizeString(effectiveDescription, 2000),
+        advisory: sanitizeString(advisory || 'Isolate batch and arrange certified laboratory analysis.', 1000),
+        reportedBy: sanitizeString(reportedBy || 'Local Dairy Farmer (PashuPoshan Crowd Radar)', 150),
         verifiedByCoop: Boolean(body.verifiedByCoop),
         timestamp: now.toISOString(),
       };

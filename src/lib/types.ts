@@ -271,11 +271,21 @@ export interface CommunityFeedAlert {
   timestamp?: string;
 }
 
+export type OfflineSyncPayload =
+  | CowProfile
+  | FeedSample
+  | SilageBunker
+  | CommunityFeedAlert
+  | CowYieldLogEntry
+  | { id: string }
+  | { pitId: string; log: SilagePitLog }
+  | Record<string, unknown>;
+
 export interface OfflineSyncItem {
   id: string;
   entityType: 'cow' | 'scan' | 'silage_pit' | 'community_alert' | 'yield_log';
   action: 'create' | 'update' | 'delete';
-  payload: any;
+  payload: OfflineSyncPayload;
   timestamp: string;
   synced: boolean;
 }

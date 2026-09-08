@@ -211,22 +211,24 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
 
             {/* Pashu Seva AI / Veterinary Expert Chat Trigger */}
             <button
+              type="button"
               onClick={() => setShowChatModal(true)}
               className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl bg-black/20 hover:bg-black/30 dark:bg-slate-800 border border-emerald-400/40 dark:border-emerald-500/40 flex items-center justify-center text-white transition-all shrink-0 active:scale-95 shadow-inner"
               title="Pashu Seva AI (Veterinary Expert Chat)"
               aria-label="Pashu Seva AI Chat"
             >
-              <Bot className="w-4 h-4 text-emerald-300" />
+              <Bot className="w-4 h-4 text-emerald-300" aria-hidden="true" />
             </button>
 
             {/* Secondary Info / Status Icon Button */}
             <button
+              type="button"
               onClick={() => setShowInfoModal(true)}
               className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl bg-black/20 hover:bg-black/30 dark:bg-slate-800 border border-white/20 dark:border-slate-700 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
               title="System Information & Offline Sync"
               aria-label="App info and sync status"
             >
-              <Info className="w-4 h-4 text-emerald-200" />
+              <Info className="w-4 h-4 text-emerald-200" aria-hidden="true" />
             </button>
           </div>
         </div>

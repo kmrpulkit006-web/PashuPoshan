@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { FeedSample, FeedCategory, VisualAnalysisResult, OfflineMoldHeuristicResult, Locale } from '../lib/types';
 import {
   PRESET_FEED_SCENARIOS,
@@ -59,6 +59,14 @@ export function useScanEngine({ onScanComplete, locale = 'hi' }: UseScanEnginePr
   const [qrVerifiedData, setQrVerifiedData] = useState<string | null>(null);
   const [scanNotice, setScanNotice] = useState<ScanNotice | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const closeScanNotice = () => setScanNotice(null);
 
@@ -66,6 +74,7 @@ export function useScanEngine({ onScanComplete, locale = 'hi' }: UseScanEnginePr
     setIsProcessing(true);
     setProcessingMessage('Loading reference lab control dataset...');
     setTimeout(() => {
+      if (!isMountedRef.current) return;
       setIsProcessing(false);
       saveLocalScan(scenario);
       if (scenario.overallGrade.includes('Tier A')) {
@@ -262,6 +271,7 @@ export function useScanEngine({ onScanComplete, locale = 'hi' }: UseScanEnginePr
         }
 
         setTimeout(() => {
+          if (!isMountedRef.current) return;
           setIsProcessing(false);
           const analyzed = analyzeCanvasImageData(
             category,
@@ -329,6 +339,7 @@ export function useScanEngine({ onScanComplete, locale = 'hi' }: UseScanEnginePr
   const handleSimulateQrScan = () => {
     setShowQrScanner(true);
     setTimeout(() => {
+      if (!isMountedRef.current) return;
       setQrVerifiedData(
         'DEMO SIMULATION: Sample BIS License Verified (BIS/CM/L-8819202). In production, this queries the official BIS Manakonline database.'
       );
