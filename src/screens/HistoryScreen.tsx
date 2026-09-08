@@ -216,7 +216,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
               aria-label={t('history.newTest', locale)}
             >
               <Plus className="w-4 h-4" />
-              <span>{t('history.newTest', locale)}</span>
+              <span>{t('history.newTest', locale).replace(/^\+\s*/, '')}</span>
             </button>
           </div>
         </div>

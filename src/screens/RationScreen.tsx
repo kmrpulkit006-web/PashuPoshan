@@ -128,7 +128,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
             aria-label={t('ration.addCow', locale)}
           >
             <Plus className="w-4 h-4" />
-            <span>{t('ration.addCow', locale)}</span>
+            <span>{t('ration.addCow', locale).replace(/^\+\s*/, '')}</span>
           </button>
         </div>
         <p className="text-xs text-[#5A5243] dark:text-slate-300 font-semibold leading-relaxed">
@@ -156,7 +156,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                   title={`Link this tested feed sample to ${getCowDisplayName(activeCow, locale) || 'selected cow'}`}
                 >
                   <Plus className="w-3 h-3" />
-                  <span>{t('ration.linkToCow', locale, { cow: getCowDisplayName(activeCow, locale) || 'Cow' })}</span>
+                  <span>{t('ration.linkToCow', locale, { cow: getCowDisplayName(activeCow, locale) || 'Cow' }).replace(/^\+\s*/, '')}</span>
                 </button>
               ) : currentSample.linkedCowId === selectedCowId ? (
                 <span className="text-[10px] text-[#1F5D3B] dark:text-emerald-300 font-black">

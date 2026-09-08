@@ -205,7 +205,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   aria-label={`${t('silage.logReadingBtn', locale)} for ${getSilagePitDisplayName(pit.pitName, locale)}`}
                 >
                   <Thermometer className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400 shrink-0" aria-hidden="true" />
-                  <span>{t('silage.logReadingBtn', locale)}</span>
+                  <span>{t('silage.logReadingBtn', locale).replace(/^\+\s*/, '')}</span>
                 </button>
               </div>
 

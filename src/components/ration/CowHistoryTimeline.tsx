@@ -230,7 +230,7 @@ export const CowHistoryTimeline: React.FC<CowHistoryTimelineProps> = ({
               aria-label={t('ration.logYieldBtn', locale)}
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>{t('ration.logYieldBtn', locale)}</span>
+              <span>{t('ration.logYieldBtn', locale).replace(/^\+\s*/, '')}</span>
             </button>
           )}
           <button
