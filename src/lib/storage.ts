@@ -222,6 +222,9 @@ export function saveLocalScan(sample: FeedSample): FeedSample[] {
   const updated = [sample, ...current.filter(s => s.id !== sample.id)];
   safeSetItem(SCANS_KEY, JSON.stringify(updated));
   queueOfflineAction('scan', 'create', { ...sample, imageUrl: '' }); // Queue lightweight metadata
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('pashuposhan_scans_updated', { detail: { count: updated.length } }));
+  }
   return updated;
 }
 
@@ -231,6 +234,9 @@ export function deleteLocalScan(id: string): FeedSample[] {
   safeSetItem(SCANS_KEY, JSON.stringify(updated));
   deleteImageFromIndexedDb(id).catch(() => {});
   queueOfflineAction('scan', 'delete', { id });
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('pashuposhan_scans_updated', { detail: { count: updated.length } }));
+  }
   return updated;
 }
 
@@ -240,6 +246,9 @@ export function clearAllLocalScans(): FeedSample[] {
     deleteImageFromIndexedDb(s.id).catch(() => {});
   });
   safeSetItem(SCANS_KEY, JSON.stringify([]));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('pashuposhan_scans_updated', { detail: { count: 0 } }));
+  }
   return [];
 }
 

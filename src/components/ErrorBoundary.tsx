@@ -25,7 +25,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleReset = () => {
     this.setState({ hasError: false, error: undefined });
-    window.location.reload();
+    try {
+      window.history.replaceState({ tab: 'scan' }, '', '/scan');
+    } catch {}
+    window.location.href = '/scan';
   };
 
   public render() {

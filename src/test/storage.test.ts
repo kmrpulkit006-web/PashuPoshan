@@ -54,6 +54,8 @@ import {
   saveYieldLogEntry,
   getSamplesForCow,
   saveLocalScan,
+  deleteLocalScan,
+  clearAllLocalScans,
 } from '../lib/storage';
 
 describe('Storage Operations & Offline Syncing (storage.ts)', () => {
@@ -328,6 +330,36 @@ describe('Storage Operations & Offline Syncing (storage.ts)', () => {
       // Test filtering for nonexistent cow returns empty array without crashing
       const emptyScans = getSamplesForCow('cow_unassigned');
       expect(emptyScans).toEqual([]);
+    });
+
+    it('deletes a scan by id and dispatches pashuposhan_scans_updated event', () => {
+      const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+      const sampleToDelete: any = {
+        id: 'scan_to_delete_99',
+        name: 'Spoiled Silage',
+        category: 'silage',
+        overallGrade: 'Tier C: Hazardous/Reject',
+        timestamp: '2026-09-08',
+      };
+      saveLocalScan(sampleToDelete);
+
+      const beforeScans = getLocalScans();
+      expect(beforeScans.some(s => s.id === 'scan_to_delete_99')).toBe(true);
+
+      const afterScans = deleteLocalScan('scan_to_delete_99');
+      expect(afterScans.some(s => s.id === 'scan_to_delete_99')).toBe(false);
+      expect(dispatchSpy).toHaveBeenCalled();
+    });
+
+    it('clears all scans and resets storage to empty array', () => {
+      const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+      const sample1: any = { id: 's1', name: 'Sample 1', category: 'silage' };
+      saveLocalScan(sample1);
+
+      const cleared = clearAllLocalScans();
+      expect(cleared).toEqual([]);
+      expect(getLocalScans()).toEqual([]);
+      expect(dispatchSpy).toHaveBeenCalled();
     });
   });
 });

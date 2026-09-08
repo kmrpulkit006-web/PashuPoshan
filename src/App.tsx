@@ -62,9 +62,9 @@ export const App: React.FC = () => {
     }
   }, [locale]);
   const [activeTab, setActiveTab] = useState<ActiveTab>(parseTabFromUrl);
-  const [activeSample, setActiveSample] = useState<FeedSample>(() => {
+  const [activeSample, setActiveSample] = useState<FeedSample | undefined>(() => {
     const loaded = getLocalScans();
-    return loaded[0];
+    return loaded && loaded.length > 0 ? loaded[0] : undefined;
   });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [pendingScansCount, setPendingScansCount] = useState<number>(() => {
@@ -143,6 +143,22 @@ export const App: React.FC = () => {
     };
   }, []);
 
+  // Synchronize activeSample if storage changes or activeSample was deleted
+  useEffect(() => {
+    const syncActiveSample = () => {
+      const scans = getLocalScans();
+      if (!activeSample && scans.length > 0) {
+        setActiveSample(scans[0]);
+      } else if (activeSample && !scans.some((s) => s.id === activeSample.id)) {
+        setActiveSample(scans.length > 0 ? scans[0] : undefined);
+      }
+    };
+
+    syncActiveSample();
+    window.addEventListener('pashuposhan_scans_updated', syncActiveSample);
+    return () => window.removeEventListener('pashuposhan_scans_updated', syncActiveSample);
+  }, [activeSample, activeTab]);
+
   const handleScanComplete = (sample: FeedSample) => {
     setActiveSample(sample);
     navigateTo('scorecard');
@@ -208,6 +224,7 @@ export const App: React.FC = () => {
                   locale={locale}
                   onNavigateToRation={() => navigateTo('ration')}
                   onRetest={() => navigateTo('scan')}
+                  onNavigateToHistory={() => navigateTo('history')}
                 />
               )}
 

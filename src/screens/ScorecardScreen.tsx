@@ -22,13 +22,16 @@ import {
   Sparkles,
   RefreshCw,
   MapPin,
+  Camera,
+  History,
 } from 'lucide-react';
 
 interface ScorecardScreenProps {
-  sample: FeedSample;
+  sample?: FeedSample | null;
   locale: Locale;
   onNavigateToRation: () => void;
   onRetest: () => void;
+  onNavigateToHistory?: () => void;
 }
 
 export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
@@ -36,13 +39,53 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
   locale,
   onNavigateToRation,
   onRetest,
+  onNavigateToHistory,
 }) => {
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
   const [showLabModal, setShowLabModal] = useState(false);
   const [isRequestingClinicalReview, setIsRequestingClinicalReview] = useState(false);
   const [clinicalReview, setClinicalReview] = useState<string | null>(null);
   const [clinicalReviewError, setClinicalReviewError] = useState<string | null>(null);
-  const isTierC = sample.overallGrade.includes('Tier C');
+
+  if (!sample) {
+    return (
+      <div className="p-6 flex flex-col items-center justify-center min-h-[65vh] text-center space-y-4">
+        <div className="w-16 h-16 rounded-3xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 flex items-center justify-center text-3xl shadow-sm">
+          📋
+        </div>
+        <div className="space-y-1.5 max-w-xs">
+          <h3 className="text-base sm:text-lg font-black text-[#1A1A1A] dark:text-white">
+            {t('score.noSampleTitle', locale)}
+          </h3>
+          <p className="text-xs text-[#5A5243] dark:text-slate-300 leading-relaxed font-medium">
+            {t('score.noSampleMsg', locale)}
+          </p>
+        </div>
+        <div className="pt-2 w-full max-w-xs space-y-2.5">
+          <button
+            type="button"
+            onClick={onRetest}
+            className="w-full py-3.5 px-4 bg-[#1F5D3B] hover:bg-[#184a2f] text-white font-black text-sm rounded-2xl shadow-lg flex items-center justify-center space-x-2 transition-all active:scale-98 min-h-[52px]"
+          >
+            <Camera className="w-5 h-5" />
+            <span>{t('score.scanNewFeed', locale)}</span>
+          </button>
+          {onNavigateToHistory && (
+            <button
+              type="button"
+              onClick={onNavigateToHistory}
+              className="w-full py-3 px-4 bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-slate-700 text-[#1F5D3B] dark:text-emerald-300 border-2 border-[#DCD3BF] dark:border-slate-700 font-bold text-xs rounded-2xl shadow-sm flex items-center justify-center space-x-2 min-h-[48px] transition-all"
+            >
+              <History className="w-4 h-4" />
+              <span>{t('nav.history', locale)}</span>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const isTierC = sample.overallGrade?.includes('Tier C') ?? false;
 
   const handleClinicalReview = async () => {
     setIsRequestingClinicalReview(true);
@@ -70,7 +113,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
   };
 
   const handleShare = async () => {
-    const shareText = `*PashuPoshan Field Screening Report (SIH Prototype)*%0ASample: ${sample.name}%0ABatch: ${sample.batchNumber}%0AGrade: ${sample.overallGrade}%0AEstimated Crude Protein: ${sample.metrics.crudeProtein}%%0AUrea Screening: ${sample.adulteration.ureaAdulterationDetected ? 'ADULTERATION SUSPECTED (' + sample.adulteration.ureaPercentage + '%)' : 'Negative'}%0ABIS Reference: ${sample.bisCompliant ? 'Met Reference Threshold' : 'Threshold Breach Detected'}%0ADisclaimer: Prototype heuristic estimate only. Laboratory confirmation required.`;
+    const shareText = `*PashuPoshan Field Screening Report (SIH Prototype)*%0ASample: ${sample.name}%0ABatch: ${sample.batchNumber || 'N/A'}%0AGrade: ${sample.overallGrade}%0AEstimated Crude Protein: ${sample.metrics?.crudeProtein ?? 'N/A'}%%0AUrea Screening: ${sample.adulteration?.ureaAdulterationDetected ? 'ADULTERATION SUSPECTED (' + (sample.adulteration.ureaPercentage || '') + '%)' : 'Negative'}%0ABIS Reference: ${sample.bisCompliant ? 'Met Reference Threshold' : 'Threshold Breach Detected'}%0ADisclaimer: Prototype heuristic estimate only. Laboratory confirmation required.`;
 
     if (navigator.share) {
       try {
@@ -115,7 +158,8 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
         <AudioGuidance
           textToSpeak={
             sample.actionableSummary ||
-            sample.veterinaryAdvisory + '. ' + sample.correctiveActions.join('. ')
+            ((sample.veterinaryAdvisory ? sample.veterinaryAdvisory + '. ' : '') +
+              (sample.correctiveActions || []).join('. '))
           }
           locale={locale}
           isHazardous={isTierC}
@@ -140,7 +184,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
           </div>
 
           <ul className="space-y-2.5">
-            {sample.correctiveActions.map((action, idx) => (
+            {(sample.correctiveActions || []).map((action, idx) => (
               <li key={idx} className="text-xs sm:text-sm text-[#1A1A1A] dark:text-slate-200 flex items-start space-x-2.5 font-semibold leading-relaxed">
                 <span className="w-2 h-2 rounded-full bg-[#1F5D3B] dark:bg-emerald-400 mt-1.5 shrink-0" />
                 <span>{getActionableAdviceText(action, locale)}</span>

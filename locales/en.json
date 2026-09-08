@@ -437,5 +437,8 @@
   "score.advSuboptimalProtein": "Non-hazardous but sub-optimal. The crude protein content is 19.8%, slightly below the BIS 20.0% minimum standard.",
   "score.advEmergencyHelpline": "In case of acute cattle illness (tremors, bloat, sudden drop in milk yield, refusal to feed), immediately withhold this batch and contact a Registered Veterinary Practitioner or call the National Animal Disease Emergency Helpline: 1962.",
   "chat.welcome": "Namaste! I am your **PashuPoshan Doctor & Feed Nutrition Assistant**, ready to help with livestock care based on **ICAR-NDRI** guidelines.\n\nHow can I help you with your cattle's feed, milk yield, or health today?",
-  "chat.offlineMsg": "### Offline Advisory Notice\nCurrently offline or live doctor service is unreachable.\n\n**Standard Field Guidelines (ICAR-NDRI)**:\n- For cattle showing symptoms of acute bloat or feed toxicity, withdraw the suspected feed batch immediately.\n- Administer sweet soda (sodium bicarbonate, 60-80g in drinking water) if mild rumen acidosis is suspected.\n- Contact your nearest Veterinary Dispensary or call the National Animal Disease Helpline at **1962**."
+  "chat.offlineMsg": "### Offline Advisory Notice\nCurrently offline or live doctor service is unreachable.\n\n**Standard Field Guidelines (ICAR-NDRI)**:\n- For cattle showing symptoms of acute bloat or feed toxicity, withdraw the suspected feed batch immediately.\n- Administer sweet soda (sodium bicarbonate, 60-80g in drinking water) if mild rumen acidosis is suspected.\n- Contact your nearest Veterinary Dispensary or call the National Animal Disease Helpline at **1962**.",
+  "score.noSampleTitle": "No Test Report Selected",
+  "score.noSampleMsg": "Please test a feed sample or select one from history to view its quality scorecard.",
+  "score.scanNewFeed": "Scan New Feed"
 }
