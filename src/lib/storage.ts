@@ -225,6 +225,24 @@ export function saveLocalScan(sample: FeedSample): FeedSample[] {
   return updated;
 }
 
+export function deleteLocalScan(id: string): FeedSample[] {
+  const current = getLocalScans();
+  const updated = current.filter(s => s.id !== id);
+  safeSetItem(SCANS_KEY, JSON.stringify(updated));
+  deleteImageFromIndexedDb(id).catch(() => {});
+  queueOfflineAction('scan', 'delete', { id });
+  return updated;
+}
+
+export function clearAllLocalScans(): FeedSample[] {
+  const current = getLocalScans();
+  current.forEach(s => {
+    deleteImageFromIndexedDb(s.id).catch(() => {});
+  });
+  safeSetItem(SCANS_KEY, JSON.stringify([]));
+  return [];
+}
+
 // Cow Milk Yield Logs Operations
 export function getLocalYieldLogs(cowId?: string): CowYieldLogEntry[] {
   try {

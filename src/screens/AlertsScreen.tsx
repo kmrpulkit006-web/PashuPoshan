@@ -205,10 +205,10 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale, isOnline }) 
               </div>
               <div>
                 <h3 className="text-xs sm:text-sm font-black text-[#1A1A1A] dark:text-white">
-                  Offline Scans Pending Sync ({pendingScans.length})
+                  {t('alerts.offlineQueueTitle', locale, { count: pendingScans.length })}
                 </h3>
                 <span className="text-[10px] text-[#5A5243] dark:text-amber-200 block">
-                  ऑफ़लाइन स्कैन अपलोड कतार
+                  {t('alerts.offlineQueueSubtitle', locale)}
                 </span>
               </div>
             </div>
@@ -430,7 +430,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale, isOnline }) 
               <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-3 border border-[#DCD3BF] dark:border-slate-700 space-y-2 text-xs">
                 <div className="flex flex-wrap items-center justify-between gap-1.5 border-b border-[#DCD3BF]/60 dark:border-slate-800 pb-2">
                   <span className="font-black text-[#1A1A1A] dark:text-slate-200">
-                    Sample / Batch:
+                    {t('alerts.batchLabel', locale)}:
                   </span>
                   <span className="font-bold text-[#C2703D] dark:text-amber-400 bg-white/80 dark:bg-slate-800 px-2 py-0.5 rounded-lg border border-[#DCD3BF] dark:border-slate-700">
                     {alert.brandOrCrop}

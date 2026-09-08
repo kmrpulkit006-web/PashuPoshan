@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FeedSample, FeedCategory, Locale } from '../lib/types';
-import { getLocalScans } from '../lib/storage';
-import { t, getBcp47Locale } from '../lib/i18n';
-import { Camera, ArrowRight, Clock, Plus } from 'lucide-react';
+import { getLocalScans, deleteLocalScan, clearAllLocalScans } from '../lib/storage';
+import { t, getBcp47Locale, getSampleDisplayName } from '../lib/i18n';
+import { getImageFromIndexedDb } from '../lib/imageStorage';
+import { Camera, ArrowRight, Clock, Plus, Trash2, AlertTriangle, X } from 'lucide-react';
 
 interface HistoryScreenProps {
   onSelectSample: (sample: FeedSample) => void;
@@ -101,10 +102,33 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
 }) => {
   const [scans, setScans] = useState<FeedSample[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<'all' | FeedCategory>('all');
+  const [resolvedImages, setResolvedImages] = useState<Record<string, string>>({});
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   useEffect(() => {
     const loaded = getLocalScans();
     setScans(loaded);
+
+    // Resolve images stored in IndexedDB asynchronously for samples that don't have direct data URLs
+    loaded.forEach(async (sample) => {
+      if (sample.imageUrl) {
+        setResolvedImages((prev) => ({ ...prev, [sample.id]: sample.imageUrl }));
+      } else {
+        try {
+          const dbImage = await getImageFromIndexedDb(sample.id);
+          if (dbImage) {
+            setResolvedImages((prev) => ({ ...prev, [sample.id]: dbImage }));
+          }
+        } catch {
+          // ignore error
+        }
+      }
+    });
   }, []);
 
   const filteredScans = scans.filter((s) => {
@@ -127,6 +151,34 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
     }
   };
 
+  const handleDeleteItem = (sample: FeedSample, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const displayName = getSampleDisplayName(sample, locale);
+    setConfirmModal({
+      isOpen: true,
+      title: t('history.deleteConfirmTitle', locale),
+      message: t('history.deleteConfirmMsg', locale, { name: displayName }),
+      onConfirm: () => {
+        const updated = deleteLocalScan(sample.id);
+        setScans(updated);
+        setConfirmModal(null);
+      },
+    });
+  };
+
+  const handleClearAll = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: t('history.clearConfirmTitle', locale),
+      message: t('history.clearConfirmMsg', locale),
+      onConfirm: () => {
+        const updated = clearAllLocalScans();
+        setScans(updated);
+        setConfirmModal(null);
+      },
+    });
+  };
+
   return (
     <div className="p-3 sm:p-4 space-y-4 max-w-lg mx-auto pb-8">
       {/* Header Banner */}
@@ -146,14 +198,27 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={onNavigateToScan}
-            className="flex items-center space-x-1.5 bg-white text-[#1F5D3B] font-black text-xs px-3.5 py-2.5 rounded-xl shadow hover:bg-emerald-50 active:scale-95 transition-all min-h-[44px]"
-            aria-label={t('history.newTest', locale)}
-          >
-            <Plus className="w-4 h-4" />
-            <span>{t('history.newTest', locale)}</span>
-          </button>
+          <div className="flex items-center space-x-2">
+            {scans.length > 0 && (
+              <button
+                type="button"
+                onClick={handleClearAll}
+                className="flex items-center space-x-1 bg-white/15 hover:bg-white/25 text-white font-bold text-xs px-2.5 py-2 rounded-xl transition-all min-h-[44px]"
+                aria-label={t('history.clearAll', locale)}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{t('history.clearAll', locale)}</span>
+              </button>
+            )}
+            <button
+              onClick={onNavigateToScan}
+              className="flex items-center space-x-1.5 bg-white text-[#1F5D3B] font-black text-xs px-3.5 py-2.5 rounded-xl shadow hover:bg-emerald-50 active:scale-95 transition-all min-h-[44px]"
+              aria-label={t('history.newTest', locale)}
+            >
+              <Plus className="w-4 h-4" />
+              <span>{t('history.newTest', locale)}</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -253,43 +318,76 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
             const verdict = getVerdictBadge(sample, locale);
             const friendlyTime = formatFriendlyTimestamp(sample.timestamp, locale);
             const categoryIcon = getCategoryIcon(sample.category);
+            const sampleImage = resolvedImages[sample.id] || sample.imageUrl;
+            const displayName = getSampleDisplayName(sample, locale);
 
             return (
               <div
                 key={sample.id}
                 onClick={() => onSelectSample(sample)}
-                className="bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 hover:border-[#1F5D3B] dark:hover:border-emerald-500 rounded-2xl p-4 shadow-sm transition-all cursor-pointer active:scale-[0.99] space-y-3"
+                className="bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 hover:border-[#1F5D3B] dark:hover:border-emerald-500 rounded-2xl p-3.5 sm:p-4 shadow-sm transition-all cursor-pointer active:scale-[0.99] space-y-3 relative group"
                 role="button"
                 tabIndex={0}
-                aria-label={`View result for ${sample.name}`}
+                aria-label={`View result for ${displayName}`}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     onSelectSample(sample);
                   }
                 }}
               >
-                {/* Top Row: 📷 Feed Test & Category */}
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center space-x-2 min-w-0">
-                    <span className="text-lg shrink-0">📷</span>
-                    <h3 className="font-black text-sm sm:text-base text-[#1A1A1A] dark:text-white truncate">
-                      {sample.name || t('nav.scan', locale)}
-                    </h3>
+                {/* Top Row: Sample Image Thumbnail + Feed Test Name + Delete Action */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center space-x-3 min-w-0 flex-1">
+                    {/* Image Thumbnail */}
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-100 dark:bg-slate-700 border border-[#DCD3BF] dark:border-slate-600 overflow-hidden shrink-0 flex items-center justify-center shadow-xs">
+                      {sampleImage ? (
+                        <img
+                          src={sampleImage}
+                          alt={displayName}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="text-center p-1">
+                          <span className="text-xl block">📷</span>
+                          <span className="text-[8px] font-bold text-slate-400 block leading-none mt-0.5">
+                            {t('history.noImage', locale)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center space-x-1.5 mb-1">
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0">
+                          {categoryIcon} {getLocalizedCategoryName(sample.category)}
+                        </span>
+                      </div>
+                      <h3 className="font-black text-sm sm:text-base text-[#1A1A1A] dark:text-white truncate">
+                        {displayName}
+                      </h3>
+                      {/* Middle Row: Friendly Timestamp */}
+                      <div className="flex items-center space-x-1 text-xs text-[#5A5243] dark:text-slate-400 mt-1">
+                        <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="font-semibold">{friendlyTime}</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0">
-                    {categoryIcon} {getLocalizedCategoryName(sample.category)}
-                  </span>
-                </div>
-
-                {/* Middle Row: Friendly Timestamp */}
-                <div className="flex items-center space-x-1.5 text-xs text-[#5A5243] dark:text-slate-400">
-                  <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="font-semibold">{friendlyTime}</span>
+                  {/* Individual Delete Button */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleDeleteItem(sample, e)}
+                    className="w-11 h-11 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors shrink-0 -mr-1 -mt-1"
+                    title={t('history.deleteTest', locale)}
+                    aria-label={`${t('history.deleteTest', locale)} - ${displayName}`}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
 
                 {/* Bottom Row: Verdict Badge & View Result Action */}
-                <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60">
                   {/* Traffic Light Verdict: 🟢 GOOD / 🟡 FAIR / 🔴 DANGER */}
                   <div
                     className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-xl border font-black text-xs tracking-wide shadow-sm ${verdict.tagColor}`}
@@ -309,6 +407,51 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
           })
         )}
       </div>
+
+      {/* Confirmation Modal for Delete / Clear Operations */}
+      {confirmModal && confirmModal.isOpen && (
+        <div
+          className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-800 pb-2.5">
+              <h3 className="text-sm font-black flex items-center space-x-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+                <span>{confirmModal.title}</span>
+              </h3>
+              <button
+                onClick={() => setConfirmModal(null)}
+                className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"
+                aria-label={t('common.close', locale)}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-xs text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed">
+              {confirmModal.message}
+            </p>
+            <div className="flex space-x-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setConfirmModal(null)}
+                className="flex-1 py-3 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl font-bold text-xs min-h-[48px] text-[#1A1A1A] dark:text-white"
+              >
+                {t('common.cancel', locale)}
+              </button>
+              <button
+                type="button"
+                onClick={confirmModal.onConfirm}
+                className="flex-1 py-3 text-white font-black text-xs rounded-2xl shadow-lg min-h-[48px] bg-rose-600 hover:bg-rose-700 transition-all"
+              >
+                {t('common.confirm', locale)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

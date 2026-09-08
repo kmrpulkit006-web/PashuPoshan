@@ -42,7 +42,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
               <div className="text-base font-black text-[#C2703D] dark:text-amber-400">
                 {sample.silageMetrics.pH}{' '}
                 <span className="text-[10px] font-normal text-[#5A5243] dark:text-slate-400">
-                  (Optimum 3.8-4.2)
+                  ({t('score.optimumSilagePh', locale)})
                 </span>
               </div>
             </div>

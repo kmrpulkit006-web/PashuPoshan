@@ -134,7 +134,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
           <div className="mt-3 bg-[#edf7f0] dark:bg-emerald-950/60 border border-[#b0dec0] dark:border-emerald-500/40 rounded-2xl p-2.5 flex items-center justify-between text-xs flex-wrap gap-2">
             <div className="flex items-center space-x-2">
               <span className="text-[10px] uppercase font-black text-[#1F5D3B] dark:text-emerald-300 bg-white/90 dark:bg-black/40 px-2 py-0.5 rounded-lg border border-[#b0dec0] dark:border-emerald-500/30">
-                {currentSample.category.replace('_', ' ')} Slot
+                {t('ration.feedSlot', locale, { category: currentSample.category.replace('_', ' ') })}
               </span>
               <span className="font-bold text-[#1A1A1A] dark:text-white text-xs truncate max-w-[170px]">
                 {currentSample.name} (CP {currentSample.metrics.crudeProtein}%)
@@ -149,15 +149,15 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                   title={`Link this tested feed sample to ${activeCow?.name || 'selected cow'}`}
                 >
                   <Plus className="w-3 h-3" />
-                  <span>Link to {activeCow?.name?.split(' ')[0] || 'Cow'}</span>
+                  <span>{t('ration.linkToCow', locale, { cow: activeCow?.name?.split(' ')[0] || 'Cow' })}</span>
                 </button>
               ) : currentSample.linkedCowId === selectedCowId ? (
                 <span className="text-[10px] text-[#1F5D3B] dark:text-emerald-300 font-black">
-                  Linked to {activeCow?.name?.split(' ')[0]} ✓
+                  {t('ration.linkedToCow', locale, { cow: activeCow?.name?.split(' ')[0] || '' })} ✓
                 </span>
               ) : (
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
-                  Linked to {cows.find((c) => c.id === currentSample.linkedCowId)?.name?.split(' ')[0] || 'Other Cattle'}
+                  {t('ration.linkedToCow', locale, { cow: cows.find((c) => c.id === currentSample.linkedCowId)?.name?.split(' ')[0] || 'Other Cattle' })}
                 </span>
               )}
             </div>
@@ -217,7 +217,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
             <div className="flex items-center justify-between text-xs font-bold text-[#5A5243] dark:text-slate-300">
               <span>{t('ration.dailyYield', locale)}</span>
               <span className="text-[11px] text-[#1F5D3B] dark:text-emerald-400 font-black">
-                (दैनिक दूध उत्पादन)
+                {t('ration.litresPerDay', locale)}
               </span>
             </div>
 
@@ -236,7 +236,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                   {dailyYield}
                 </div>
                 <div className="text-xs font-bold text-[#5A5243] dark:text-slate-400 mt-1 uppercase tracking-wider">
-                  Litres / Day (लीटर प्रतिदिन)
+                  {t('ration.litresPerDay', locale)}
                 </div>
               </div>
 
@@ -256,7 +256,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
             <div className="flex items-center justify-between text-xs font-bold text-[#5A5243] dark:text-slate-300">
               <span>{t('ration.cowWeight', locale)}</span>
               <span className="text-[11px] text-[#C2703D] dark:text-amber-400 font-black">
-                (पशु का वजन)
+                {t('ration.kilograms', locale)}
               </span>
             </div>
 
@@ -275,7 +275,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                   {cowWeight}
                 </div>
                 <div className="text-xs font-bold text-[#5A5243] dark:text-slate-400 mt-1 uppercase tracking-wider">
-                  Kilograms (किलोग्राम)
+                  {t('ration.kilograms', locale)}
                 </div>
               </div>
 

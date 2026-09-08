@@ -185,10 +185,10 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   </h3>
                   <div className="flex items-center space-x-2 mt-1">
                     <span className="text-[11px] font-bold text-[#5A5243] dark:text-slate-300 bg-[#F3EEE1] dark:bg-slate-700/80 px-2.5 py-0.5 rounded-lg border border-[#DCD3BF] dark:border-slate-600">
-                      Crop: {pit.cropType}
+                      {t('silage.crop', locale)}: {pit.cropType}
                     </span>
                     <span className="text-[11px] text-[#5A5243] dark:text-slate-400 font-medium">
-                      Ensiled: {pit.ensilingDate}
+                      {t('silage.ensiled', locale)}: {pit.ensilingDate}
                     </span>
                   </div>
                 </div>
@@ -202,7 +202,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   title="Log new temperature and inspection observation"
                 >
                   <Thermometer className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400" />
-                  <span>+ Log Reading</span>
+                  <span>{t('silage.logReadingBtn', locale)}</span>
                 </button>
               </div>
 
@@ -236,10 +236,10 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                     {t('silage.daysEnsiled', locale)}
                   </div>
                   <div className="text-lg sm:text-xl font-black text-[#1A1A1A] dark:text-white mt-0.5">
-                    {pit.daysFermented} Days
+                    {pit.daysFermented} {t('common.days', locale) || 'Days'}
                   </div>
                   <div className="text-[9px] text-[#1F5D3B] dark:text-emerald-400 font-bold mt-0.5">
-                    Fermenting
+                    {t('silage.status.fermenting', locale)}
                   </div>
                 </div>
 
@@ -260,7 +260,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                     {pit.coreTemperature}°C
                   </div>
                   <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-bold mt-0.5">
-                    &lt; 38°C Target
+                    {t('silage.targetTemp', locale)}
                   </div>
                 </div>
 
@@ -291,7 +291,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                       {t('silage.heatingWarning', locale)}
                     </div>
                     <p className="text-[11px] text-[#1A1A1A] dark:text-slate-300 font-semibold mt-0.5">
-                      Temperature ({pit.coreTemperature}°C) exceeds safe 38°C limit. Inspect for puncture tears or loose cover sheets to prevent fungal spoilage.
+                      {t('silage.heatingDetail', locale, { temp: pit.coreTemperature })}
                     </p>
                   </div>
                 </div>
@@ -301,8 +301,8 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               {pit.logs && pit.logs.length > 0 && (
                 <div className="pt-3 border-t border-[#DCD3BF] dark:border-slate-700 text-xs space-y-1.5">
                   <div className="font-black text-[#5A5243] dark:text-slate-400 flex items-center justify-between">
-                    <span>Recent Inspection History:</span>
-                    <span className="text-[10px] font-medium">{pit.logs.length} logged</span>
+                    <span>{t('silage.recentHistory', locale)}:</span>
+                    <span className="text-[10px] font-medium">{t('silage.loggedCount', locale, { count: pit.logs.length })}</span>
                   </div>
                   {pit.logs.slice(0, 2).map((lg) => (
                     <div

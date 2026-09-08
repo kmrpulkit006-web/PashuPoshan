@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckCircle2, AlertTriangle, AlertOctagon } from 'lucide-react';
 import { FeedSample, Locale } from '../../lib/types';
-import { t } from '../../lib/i18n';
+import { t, getSampleDisplayName } from '../../lib/i18n';
 
 interface VerdictBandProps {
   sample: FeedSample;
@@ -11,6 +11,7 @@ interface VerdictBandProps {
 export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
   const isTierA = sample.overallGrade.includes('Tier A');
   const isTierC = sample.overallGrade.includes('Tier C');
+  const sampleDisplayName = getSampleDisplayName(sample, locale);
 
   if (sample.isNonFeedSample) {
     return (
@@ -47,7 +48,7 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
             {t('score.verdictSafe', locale)}
           </h2>
           <p className="text-xs text-emerald-100/90 mt-1 font-semibold">
-            {sample.name} - {t('score.verdictSubSafe', locale)}
+            {sampleDisplayName} - {t('score.verdictSubSafe', locale)}
           </p>
         </div>
       </div>
@@ -68,7 +69,7 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
             {t('score.verdictDanger', locale)}
           </h2>
           <p className="text-xs text-rose-100 font-bold mt-1">
-            {sample.name} - {t('score.verdictSubDanger', locale)}
+            {sampleDisplayName} - {t('score.verdictSubDanger', locale)}
           </p>
         </div>
       </div>
@@ -89,7 +90,7 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
           {t('score.verdictFair', locale)}
         </h2>
         <p className="text-xs text-amber-100 font-semibold mt-1">
-          {sample.name} - {t('score.verdictSubFair', locale)}
+          {sampleDisplayName} - {t('score.verdictSubFair', locale)}
         </p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FeedSample, Locale } from '../lib/types';
-import { t } from '../lib/i18n';
+import { t, getActionableAdviceText } from '../lib/i18n';
 import { AudioGuidance } from '../components/AudioGuidance';
 import { PrintableReport } from '../components/PrintableReport';
 import { VerdictBand } from '../components/scorecard/VerdictBand';
@@ -143,7 +143,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
             {sample.correctiveActions.map((action, idx) => (
               <li key={idx} className="text-xs sm:text-sm text-[#1A1A1A] dark:text-slate-200 flex items-start space-x-2.5 font-semibold leading-relaxed">
                 <span className="w-2 h-2 rounded-full bg-[#1F5D3B] dark:bg-emerald-400 mt-1.5 shrink-0" />
-                <span>{action}</span>
+                <span>{getActionableAdviceText(action, locale)}</span>
               </li>
             ))}
           </ul>
@@ -159,7 +159,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
               </span>
             </div>
             <p className="text-[#1A1A1A] dark:text-slate-200 leading-relaxed font-medium">
-              {sample.veterinaryAdvisory}
+              {getActionableAdviceText(sample.veterinaryAdvisory, locale)}
             </p>
 
             {/* Deep Clinical Veterinary Review */}
@@ -241,7 +241,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
           {showTechnicalDetails && (
             <div className="p-4 space-y-4 bg-[#FBF8F1] dark:bg-slate-900 border-t border-[#DCD3BF] dark:border-slate-700">
               {/* Heuristic Disclaimer Alert */}
-              <HeuristicDisclaimerBanner sample={sample} />
+              <HeuristicDisclaimerBanner sample={sample} locale={locale} />
 
               {/* Certificate & Batch Metadata */}
               <CertificateBanner sample={sample} locale={locale} />
