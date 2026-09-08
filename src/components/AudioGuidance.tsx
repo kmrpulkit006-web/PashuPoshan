@@ -33,13 +33,31 @@ export const AudioGuidance: React.FC<AudioGuidanceProps> = ({
       window.speechSynthesis.cancel(); // clear previous
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
 
-      // Select appropriate language tag
+      // Select appropriate BCP-47 language tag for Indian regional languages
       const langMap: Record<Locale, string> = {
-        en: 'en-IN',
         hi: 'hi-IN',
+        en: 'en-IN',
+        bn: 'bn-IN',
+        te: 'te-IN',
         mr: 'mr-IN',
+        ta: 'ta-IN',
         gu: 'gu-IN',
+        kn: 'kn-IN',
+        ml: 'ml-IN',
         pa: 'pa-IN',
+        or: 'or-IN',
+        as: 'as-IN',
+        ur: 'ur-IN',
+        sa: 'sa-IN',
+        kok: 'kok-IN',
+        mai: 'mai-IN',
+        ne: 'ne-NP',
+        ks: 'ks-IN',
+        mni: 'mni-IN',
+        sd: 'sd-IN',
+        doi: 'doi-IN',
+        brx: 'brx-IN',
+        sat: 'sat-IN',
       };
       utterance.lang = langMap[locale] || 'en-IN';
       utterance.rate = 0.92; // Slower cadence for clarity in rural cowsheds
@@ -54,35 +72,11 @@ export const AudioGuidance: React.FC<AudioGuidanceProps> = ({
 
   if (!supported) return null;
 
-  const audioLabels: Record<Locale, { play: string; stop: string; hint: string }> = {
-    hi: {
-      play: 'आवाज़ में सलाह सुनें (ऑडियो गाइड)',
-      stop: 'ऑडियो रोकें (Stop)',
-      hint: isHazardous ? '⚠️ महत्वपूर्ण: तुरंत ऑडियो सलाह सुनें!' : 'अपनी भाषा में पूरी सलाह सुनें',
-    },
-    en: {
-      play: 'Listen to Audio Advisory (Voice)',
-      stop: 'Stop Audio Advisory',
-      hint: isHazardous ? '⚠️ Critical Warning: Listen to voice instructions now!' : 'Listen to full advisory in spoken language',
-    },
-    mr: {
-      play: 'ऑडिओ सल्ला ऐका (स्थानिक भाषेत)',
-      stop: 'ऑडिओ थांबवा',
-      hint: isHazardous ? '⚠️ तातडीचा इशारा: कृपया ऑडिओ सल्ला ऐका!' : 'आपल्या भाषेत संपूर्ण सल्ला ऐका',
-    },
-    gu: {
-      play: 'ઓડિયો માર્ગદર્શન સાંભળો (સ્થાનિક ભાષા)',
-      stop: 'ઓડિયો બંધ કરો',
-      hint: isHazardous ? '⚠️ અગત્યની ચેતવણી: હમણાં જ સાંભળો!' : 'તમારી ભાષામાં સાંભળો',
-    },
-    pa: {
-      play: 'ਆਵਾਜ਼ ਵਿੱਚ ਸਲਾਹ ਸੁਣੋ (ਆਡੀਓ ਗਾਈਡ)',
-      stop: 'ਆਡੀਓ ਰੋਕੋ',
-      hint: isHazardous ? '⚠️ ਜ਼ਰੂਰੀ ਚੇਤਾਵਨੀ: ਹੁਣੇ ਆਡੀਓ ਸੁਣੋ!' : 'ਆਪਣੀ ਬੋਲੀ ਵਿੱਚ ਸਲਾਹ ਸੁਣੋ',
-    },
-  };
-
-  const labels = audioLabels[locale] || audioLabels.en;
+  const playLabel = t('audio.play', locale);
+  const stopLabel = t('audio.stop', locale);
+  const hintLabel = isHazardous
+    ? t('audio.hintHazardous', locale)
+    : t('audio.hint', locale);
 
   return (
     <div
@@ -101,16 +95,16 @@ export const AudioGuidance: React.FC<AudioGuidanceProps> = ({
             ? 'bg-[#B3261E] hover:bg-red-700 text-white'
             : 'bg-[#1F5D3B] hover:bg-[#194a30] text-white'
         }`}
-        aria-label={isPlaying ? labels.stop : labels.play}
+        aria-label={isPlaying ? stopLabel : playLabel}
       >
         <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
           {isPlaying ? <Square className="w-4 h-4 fill-white" /> : <Volume2 className="w-5 h-5" />}
         </div>
-        <span className="leading-snug">{isPlaying ? labels.stop : labels.play}</span>
+        <span className="leading-snug">{isPlaying ? stopLabel : playLabel}</span>
       </button>
 
       <div className="mt-2 text-center text-xs font-semibold text-[#5A5243] dark:text-slate-300">
-        {labels.hint}
+        {hintLabel}
       </div>
     </div>
   );

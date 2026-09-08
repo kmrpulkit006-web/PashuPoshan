@@ -11,7 +11,7 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
   const isTierA = sample.overallGrade.includes('Tier A');
   const isTierC = sample.overallGrade.includes('Tier C');
 
-  const plainVerdicts: Record<Locale, { safe: string; caution: string; danger: string }> = {
+  const plainVerdicts: Partial<Record<Locale, { safe: string; caution: string; danger: string }>> = {
     hi: {
       safe: 'पशुओं को खिलाने के लिए पूरी तरह सुरक्षित',
       caution: 'सावधानी से खिलाएं — अतिरिक्त प्रोटीन मिलाएं',
@@ -39,7 +39,7 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
     },
   };
 
-  const texts = plainVerdicts[locale] || plainVerdicts.en;
+  const texts = plainVerdicts[locale] || plainVerdicts.hi || plainVerdicts.en!;
 
   if (sample.isNonFeedSample) {
     return (

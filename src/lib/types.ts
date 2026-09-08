@@ -1,5 +1,66 @@
-export type Locale = 'en' | 'hi' | 'mr' | 'gu' | 'pa';
-export const SUPPORTED_LOCALES: readonly Locale[] = ['en', 'hi', 'mr', 'gu', 'pa'] as const;
+export type Locale =
+  | 'hi'
+  | 'en'
+  | 'bn'
+  | 'te'
+  | 'mr'
+  | 'ta'
+  | 'gu'
+  | 'kn'
+  | 'ml'
+  | 'pa'
+  | 'or'
+  | 'as'
+  | 'ur'
+  | 'sa'
+  | 'kok'
+  | 'mai'
+  | 'ne'
+  | 'ks'
+  | 'mni'
+  | 'sd'
+  | 'doi'
+  | 'brx'
+  | 'sat';
+
+export interface LanguageMeta {
+  code: string;
+  nativeName: string;
+  englishName: string;
+  direction?: 'ltr' | 'rtl';
+}
+
+export const SUPPORTED_LANGUAGES: readonly LanguageMeta[] = [
+  { code: 'hi', nativeName: 'हिंदी', englishName: 'Hindi', direction: 'ltr' },
+  { code: 'en', nativeName: 'English', englishName: 'English', direction: 'ltr' },
+  { code: 'bn', nativeName: 'বাংলা', englishName: 'Bengali', direction: 'ltr' },
+  { code: 'te', nativeName: 'తెలుగు', englishName: 'Telugu', direction: 'ltr' },
+  { code: 'mr', nativeName: 'मराठी', englishName: 'Marathi', direction: 'ltr' },
+  { code: 'ta', nativeName: 'தமிழ்', englishName: 'Tamil', direction: 'ltr' },
+  { code: 'gu', nativeName: 'ગુજરાતી', englishName: 'Gujarati', direction: 'ltr' },
+  { code: 'kn', nativeName: 'ಕನ್ನಡ', englishName: 'Kannada', direction: 'ltr' },
+  { code: 'ml', nativeName: 'മലയാളം', englishName: 'Malayalam', direction: 'ltr' },
+  { code: 'pa', nativeName: 'ਪੰਜਾਬੀ', englishName: 'Punjabi', direction: 'ltr' },
+  { code: 'or', nativeName: 'ଓଡ଼ିଆ', englishName: 'Odia', direction: 'ltr' },
+  { code: 'as', nativeName: 'অসমীয়া', englishName: 'Assamese', direction: 'ltr' },
+  { code: 'ur', nativeName: 'اردو', englishName: 'Urdu', direction: 'rtl' },
+  { code: 'sa', nativeName: 'संस्कृतम्', englishName: 'Sanskrit', direction: 'ltr' },
+  { code: 'kok', nativeName: 'कोंकणी', englishName: 'Konkani', direction: 'ltr' },
+  { code: 'mai', nativeName: 'मैथिली', englishName: 'Maithili', direction: 'ltr' },
+  { code: 'ne', nativeName: 'नेपाली', englishName: 'Nepali', direction: 'ltr' },
+  { code: 'ks', nativeName: 'کٲشُر / कश्मीरी', englishName: 'Kashmiri', direction: 'rtl' },
+  { code: 'mni', nativeName: 'মৈতৈলোন্', englishName: 'Manipuri', direction: 'ltr' },
+  { code: 'sd', nativeName: 'سنڌي / सिंधी', englishName: 'Sindhi', direction: 'rtl' },
+  { code: 'doi', nativeName: 'डोगरी', englishName: 'Dogri', direction: 'ltr' },
+  { code: 'brx', nativeName: 'बड़ो', englishName: 'Bodo', direction: 'ltr' },
+  { code: 'sat', nativeName: 'ᱥᱟᱱᱛᱟᱲᱤ', englishName: 'Santali', direction: 'ltr' },
+] as const;
+
+export const SUPPORTED_LOCALES: readonly Locale[] = [
+  'hi', 'en', 'bn', 'te', 'mr', 'ta', 'gu', 'kn', 'ml',
+  'pa', 'or', 'as', 'ur', 'sa', 'kok', 'mai', 'ne', 'ks',
+  'mni', 'sd', 'doi', 'brx', 'sat'
+] as const;
 
 export function isSupportedLocale(value: unknown): value is Locale {
   return typeof value === 'string' && (SUPPORTED_LOCALES as readonly string[]).includes(value);

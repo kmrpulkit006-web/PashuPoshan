@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Locale, FeedSample, isSupportedLocale } from './lib/types';
+import { getLanguageInfo } from './lib/i18n';
 import { getLocalScans, getPendingOfflineScans, syncPendingScans } from './lib/storage';
 import { MobileHeader } from './components/MobileHeader';
 import { BottomNav, ActiveTab } from './components/BottomNav';
@@ -53,6 +54,11 @@ export const App: React.FC = () => {
     try {
       localStorage.setItem('pashuposhan_locale', locale);
     } catch (e) {}
+    if (typeof document !== 'undefined') {
+      const info = getLanguageInfo(locale);
+      document.documentElement.lang = locale;
+      document.documentElement.dir = info.direction || 'ltr';
+    }
   }, [locale]);
   const [activeTab, setActiveTab] = useState<ActiveTab>(parseTabFromUrl);
   const [activeSample, setActiveSample] = useState<FeedSample>(() => {

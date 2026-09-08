@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Locale } from '../lib/types';
-import { t } from '../lib/i18n';
+import { Locale, SUPPORTED_LANGUAGES } from '../lib/types';
+import { t, getLanguageInfo } from '../lib/i18n';
 import { Globe, Sun, Moon, Info, X, DownloadCloud, Wifi, WifiOff, Layers, Trash2, RefreshCw, Bot } from 'lucide-react';
 import { getPendingSyncQueue, getPendingOfflineScans, syncPendingScans, clearDemoQueue, clearPendingOfflineScans } from '../lib/storage';
 import { VeterinaryChatModal } from './VeterinaryChatModal';
@@ -146,26 +146,30 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
 
           {/* Right: Language Switcher, Theme Toggle & Info Modal Trigger */}
           <div className="flex items-center space-x-1.5 shrink-0">
-            {/* Prominent Fixed-Width Language Switcher (Clean badge, never truncates to En...) */}
-            <div className="relative flex items-center justify-between bg-black/25 dark:bg-slate-800/90 border border-white/25 dark:border-slate-700 rounded-xl px-2.5 py-1 min-h-[38px] w-[72px] sm:w-[76px] shrink-0">
-              <div className="flex items-center space-x-1 pointer-events-none">
+            {/* Prominent Language Switcher (Displays native script like 🌐 हिंदी ▾) */}
+            <div className="relative flex items-center justify-between bg-black/25 dark:bg-slate-800/90 hover:bg-black/35 border border-white/25 dark:border-slate-700 rounded-xl px-2 py-1 min-h-[38px] max-w-[105px] sm:max-w-[125px] shrink-0 transition-colors shadow-sm">
+              <div className="flex items-center space-x-1 pointer-events-none min-w-0 pr-1">
                 <Globe className="w-3.5 h-3.5 text-emerald-200 shrink-0" aria-hidden="true" />
-                <span className="text-xs font-black text-white uppercase tracking-wider">
-                  {locale}
+                <span className="text-xs font-bold text-white truncate">
+                  {getLanguageInfo(locale).nativeName}
                 </span>
               </div>
-              <span className="text-[10px] text-white/70 pointer-events-none ml-1">▾</span>
+              <span className="text-[10px] text-white/70 pointer-events-none shrink-0">▾</span>
               <select
                 value={locale}
                 onChange={(e) => setLocale(e.target.value as Locale)}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-slate-900"
                 aria-label="Select Application Language"
               >
-                <option value="hi" className="text-slate-900 bg-white">हिंदी (HI)</option>
-                <option value="en" className="text-slate-900 bg-white">English (EN)</option>
-                <option value="mr" className="text-slate-900 bg-white">मराठी (MR)</option>
-                <option value="gu" className="text-slate-900 bg-white">ગુજરાતી (GU)</option>
-                <option value="pa" className="text-slate-900 bg-white">ਪੰਜਾਬੀ (PA)</option>
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <option
+                    key={lang.code}
+                    value={lang.code}
+                    className="text-slate-900 bg-white dark:bg-slate-800 dark:text-white"
+                  >
+                    {lang.nativeName} ({lang.englishName})
+                  </option>
+                ))}
               </select>
             </div>
 
