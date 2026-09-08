@@ -116,5 +116,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "పశువుల ఆరోగ్యం లేదా దాణా గురించి అడగండి...",
   "chat.send": "పంపు",
-  "chat.emergencyNotice": "అత్యవసర పరిస్థితుల్లో వెంటనే 1962 కి కాల్ చేయండి."
+  "chat.emergencyNotice": "అత్యవసర పరిస్థితుల్లో వెంటనే 1962 కి కాల్ చేయండి.",
+  "nav.history": "గత పరీక్షలు",
+  "history.title": "గత పరీక్షలు (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

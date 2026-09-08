@@ -345,12 +345,12 @@ export default async function handler(req: any, res: any) {
       try {
         body = JSON.parse(body);
       } catch {
-        return res.status(400).json({ error: 'Malformed JSON payload.' });
+        return res.status(400).json({ error: 'Something went wrong. Please try again.' });
       }
     }
 
     if (!body || typeof body !== 'object') {
-      return res.status(400).json({ error: 'Request body must be a valid JSON object.' });
+      return res.status(400).json({ error: 'Something went wrong. Please try again.' });
     }
 
     const apiKey = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_01 || process.env.NVIDIA_KEY;
@@ -465,7 +465,7 @@ export default async function handler(req: any, res: any) {
   } catch (error: any) {
     console.error('Veterinary Expert Handler Exception:', error);
     return res.status(500).json({
-      error: error.message || 'Internal server error in veterinary advisory handler.',
+      error: 'Something went wrong. Please try again.',
     });
   }
 }

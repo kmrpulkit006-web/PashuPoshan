@@ -13,6 +13,7 @@ import {
   syncPendingAlerts,
 } from '../lib/storage';
 import { AlertTriangle, ShieldCheck, MapPin, Send, QrCode, CheckCircle2, Clock, Plus, X, RefreshCw, Cloud, Layers } from 'lucide-react';
+import { toHumanErrorMessage } from '../lib/humanErrors';
 
 interface AlertsScreenProps {
   locale: Locale;
@@ -102,7 +103,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
       }
     } catch (err: any) {
       setIsSyncing(false);
-      alert('Sync failed: ' + (err.message || 'Network error'));
+      alert(toHumanErrorMessage(err, locale));
     }
   };
 

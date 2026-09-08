@@ -1,9 +1,9 @@
 import React from 'react';
 import { Locale } from '../lib/types';
 import { t } from '../lib/i18n';
-import { ScanLine, Award, Scale, Layers, AlertTriangle } from 'lucide-react';
+import { ScanLine, History, Award, Scale, Layers, AlertTriangle } from 'lucide-react';
 
-export type ActiveTab = 'scan' | 'scorecard' | 'ration' | 'silage' | 'alerts';
+export type ActiveTab = 'scan' | 'history' | 'scorecard' | 'ration' | 'silage' | 'alerts';
 
 interface BottomNavProps {
   activeTab: ActiveTab;
@@ -33,6 +33,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       badge: pendingScansCount > 0 ? `${pendingScansCount}` : undefined,
     },
     {
+      id: 'history',
+      labelKey: 'nav.history',
+      icon: <History className="w-5 h-5" />,
+    },
+    {
       id: 'scorecard',
       labelKey: 'nav.scorecard',
       icon: <Award className="w-5 h-5" />,
@@ -58,14 +63,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 backdrop-blur-md border-t px-2 py-2 shadow-2xl transition-colors select-none"
+      className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 backdrop-blur-md border-t px-1.5 py-2 shadow-2xl transition-colors select-none"
       style={{
         backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(243, 238, 225, 0.95)',
         borderColor: isDark ? '#1e293b' : '#DCD3BF',
         paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
       }}
     >
-      <div className="grid grid-cols-5 gap-1.5">
+      <div className="grid grid-cols-6 gap-1">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (

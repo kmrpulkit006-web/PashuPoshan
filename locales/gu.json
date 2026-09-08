@@ -118,5 +118,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "પશુ આહાર, પોષણ કે સ્વાસ્થ્ય વિશે પૂછો...",
   "chat.send": "મોકલો",
-  "chat.emergencyNotice": "તાત્કાલિક કટોકટીમાં 1962 પર કૉલ કરો."
+  "chat.emergencyNotice": "તાત્કાલિક કટોકટીમાં 1962 પર કૉલ કરો.",
+  "nav.history": "અગાઉની તપાસ",
+  "history.title": "અગાઉની તપાસ (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

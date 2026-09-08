@@ -118,5 +118,12 @@
   "chat.subtitle": "पशु आहार, स्वास्थ्य व दूध से जुड़े सवाल अपनी भाषा में पूछें",
   "chat.placeholder": "पशुखाद्य, पोषण किंवा आरोग्याविषयी विचारा...",
   "chat.send": "पाठवा",
-  "chat.emergencyNotice": "तातडीच्या वेळी लगेच 1962 वर संपर्क साधा."
+  "chat.emergencyNotice": "तातडीच्या वेळी लगेच 1962 वर संपर्क साधा.",
+  "nav.history": "मागील चाचण्या",
+  "history.title": "मागील चाचण्या (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

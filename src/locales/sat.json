@@ -116,5 +116,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "ᱜᱟᱹᱭ ᱡᱚᱢᱟᱜ ᱵᱟᱵᱚᱛ ᱠᱩᱞᱤ ᱢᱮ...",
   "chat.send": "ᱠᱩᱞ ᱢᱮ",
-  "chat.emergencyNotice": "ᱟᱹᱰᱤ ᱡᱟᱹᱨᱩᱲ ᱨᱮ 1962 ᱨᱮ ᱯᱷᱳᱱ ᱢᱮ᱾"
+  "chat.emergencyNotice": "ᱟᱹᱰᱤ ᱡᱟᱹᱨᱩᱲ ᱨᱮ 1962 ᱨᱮ ᱯᱷᱳᱱ ᱢᱮ᱾",
+  "nav.history": "ᱢᱟᱬᱟᱝ ᱵᱤᱰᱟᱹᱣ",
+  "history.title": "ᱢᱟᱬᱟᱝ ᱵᱤᱰᱟᱹᱣ (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

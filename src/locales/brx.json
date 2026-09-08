@@ -116,5 +116,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "मखौ दाना एबा सास्थनि सायाव सों...",
   "chat.send": "थिनहर",
-  "chat.emergencyNotice": "गोनांथार समाव थाबैनो 1962 आव कल खालाम।"
+  "chat.emergencyNotice": "गोनांथार समाव थाबैनो 1962 आव कल खालाम।",
+  "nav.history": "सिगांनि आनजाद",
+  "history.title": "सिगांनि आनजाद (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

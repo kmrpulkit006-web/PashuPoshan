@@ -14,6 +14,7 @@ import {
 } from '../lib/storage';
 import { compressImage } from '../lib/imageStorage';
 import { classifyFeedTypeOnDevice } from '../lib/onDeviceVision';
+import { toHumanErrorMessage } from '../lib/humanErrors';
 import confetti from 'canvas-confetti';
 
 let isFirstOnDeviceClassification = true;
@@ -111,8 +112,8 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
         });
 
         if (!res.ok) {
-          const errData = await res.json().catch(() => ({ error: 'AI visual triage service unavailable' }));
-          throw new Error(errData.error || `Server responded with ${res.status}`);
+          const errData = await res.json().catch(() => ({ error: 'Something went wrong. Please try again.' }));
+          throw new Error(toHumanErrorMessage(errData.error || res.status));
         }
 
         const visualResult: VisualAnalysisResult = await res.json();
@@ -165,7 +166,7 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
 
         setIsProcessing(false);
         alert(
-          'Notice (सूचना): You are currently offline or the AI server is unavailable. Your scan photo has been securely saved to the Offline Sync Queue and will analyze automatically when online.'
+          'Notice (सूचना): You are currently offline or connection is weak. Your scan has been saved safely on your phone and will check automatically when online.'
         );
         onScanComplete(fallbackSample);
       }
@@ -179,7 +180,7 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
 
       img.onerror = () => {
         setIsProcessing(false);
-        alert('Failed to decode image data. Please ensure the file is not corrupt.');
+        alert(toHumanErrorMessage('Failed to decode image data.'));
       };
 
       img.onload = () => {
@@ -189,7 +190,7 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           setIsProcessing(false);
-          alert('Canvas context unavailable on this device.');
+          alert(toHumanErrorMessage('Canvas context unavailable on this device.'));
           return;
         }
 
@@ -262,7 +263,7 @@ export function useScanEngine({ onScanComplete }: UseScanEngineProps) {
     };
     reader.onerror = () => {
       setIsProcessing(false);
-      alert('Unable to read selected file. Please select a valid JPEG or PNG file.');
+      alert(toHumanErrorMessage('Unable to read selected file.'));
     };
     reader.readAsDataURL(file);
   };

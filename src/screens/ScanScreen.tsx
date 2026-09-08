@@ -13,6 +13,7 @@ import {
   RefreshCw,
   QrCode,
   AlertTriangle,
+  Clock,
 } from 'lucide-react';
 
 interface ScanScreenProps {
@@ -110,14 +111,29 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
               {t('scan.title', locale)}
             </h2>
           </div>
-          <button
-            onClick={handleSimulateQrScan}
-            className="flex items-center space-x-1.5 text-xs font-black text-[#1F5D3B] dark:text-emerald-300 bg-[#edf7f0] dark:bg-emerald-950/80 border border-[#b0dec0] dark:border-emerald-500/40 px-3 py-2 rounded-xl hover:bg-[#d6eddc] transition-all min-h-[44px]"
-            aria-label="Scan Feed Bag QR (Demo)"
-          >
-            <QrCode className="w-4 h-4" />
-            <span>{t('scan.qrScan', locale)}</span>
-          </button>
+          <div className="flex items-center space-x-1.5">
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.history.pushState({ tab: 'history' }, '', '/history');
+                  window.dispatchEvent(new PopStateEvent('popstate', { state: { tab: 'history' } }));
+                }
+              }}
+              className="flex items-center space-x-1 text-xs font-black text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-[#DCD3BF] dark:border-slate-700 px-2.5 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all min-h-[44px]"
+              aria-label="View Past Tests"
+            >
+              <Clock className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400" />
+              <span className="hidden xs:inline">{locale === 'hi' ? 'पिछली जांचें' : 'Past Tests'}</span>
+            </button>
+            <button
+              onClick={handleSimulateQrScan}
+              className="flex items-center space-x-1.5 text-xs font-black text-[#1F5D3B] dark:text-emerald-300 bg-[#edf7f0] dark:bg-emerald-950/80 border border-[#b0dec0] dark:border-emerald-500/40 px-3 py-2 rounded-xl hover:bg-[#d6eddc] transition-all min-h-[44px]"
+              aria-label="Scan Feed Bag QR (Demo)"
+            >
+              <QrCode className="w-4 h-4" />
+              <span>{t('scan.qrScan', locale)}</span>
+            </button>
+          </div>
         </div>
 
         {/* Dual Mode Switcher Tabs */}

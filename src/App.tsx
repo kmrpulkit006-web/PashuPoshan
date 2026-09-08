@@ -5,13 +5,14 @@ import { getLocalScans, getPendingOfflineScans, syncPendingScans } from './lib/s
 import { MobileHeader } from './components/MobileHeader';
 import { BottomNav, ActiveTab } from './components/BottomNav';
 import { ScanScreen } from './screens/ScanScreen';
+import { HistoryScreen } from './screens/HistoryScreen';
 import { ScorecardScreen } from './screens/ScorecardScreen';
 import { RationScreen } from './screens/RationScreen';
 import { SilageScreen } from './screens/SilageScreen';
 import { AlertsScreen } from './screens/AlertsScreen';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
-const VALID_TABS: ActiveTab[] = ['scan', 'scorecard', 'ration', 'silage', 'alerts'];
+const VALID_TABS: ActiveTab[] = ['scan', 'history', 'scorecard', 'ration', 'silage', 'alerts'];
 
 function parseTabFromUrl(): ActiveTab {
   if (typeof window === 'undefined') return 'scan';
@@ -187,6 +188,18 @@ export const App: React.FC = () => {
             >
               {activeTab === 'scan' && (
                 <ScanScreen onScanComplete={handleScanComplete} locale={locale} theme={theme} />
+              )}
+
+              {activeTab === 'history' && (
+                <HistoryScreen
+                  onSelectSample={(sample) => {
+                    setActiveSample(sample);
+                    navigateTo('scorecard');
+                  }}
+                  onNavigateToScan={() => navigateTo('scan')}
+                  locale={locale}
+                  theme={theme}
+                />
               )}
 
               {activeTab === 'scorecard' && (

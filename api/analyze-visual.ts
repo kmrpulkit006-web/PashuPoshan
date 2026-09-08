@@ -465,7 +465,7 @@ export default async function handler(req: any, res: any) {
 
   if (req.method !== 'POST') {
     return res.status(405).json({
-      error: 'Method Not Allowed. Use POST with imageBase64 payload.',
+      error: 'Something went wrong. Please try again.',
       code: 'METHOD_NOT_ALLOWED',
     });
   }
@@ -475,7 +475,7 @@ export default async function handler(req: any, res: any) {
   const isAllowed = await checkRateLimit(clientIp);
   if (!isAllowed) {
     return res.status(429).json({
-      error: 'Rate limit exceeded. Please try again later.',
+      error: 'Please wait a moment and try again.',
     });
   }
 
@@ -486,7 +486,7 @@ export default async function handler(req: any, res: any) {
         body = JSON.parse(body);
       } catch (err) {
         return res.status(400).json({
-          error: 'Malformed JSON in request body.',
+          error: 'Something went wrong. Please try again.',
           code: 'MALFORMED_JSON',
         });
       }
@@ -496,7 +496,7 @@ export default async function handler(req: any, res: any) {
 
     if (!imageBase64 || typeof imageBase64 !== 'string') {
       return res.status(400).json({
-        error: 'Missing or invalid "imageBase64" in request body.',
+        error: "We couldn't read this photo. Please take another clear photo.",
         code: 'MISSING_IMAGE',
       });
     }
@@ -506,7 +506,7 @@ export default async function handler(req: any, res: any) {
 
     if (cleanBase64.length < 50) {
       return res.status(400).json({
-        error: 'Image payload is too small or truncated.',
+        error: "We couldn't read this photo. Please take another clear photo.",
         code: 'TRUNCATED_IMAGE',
       });
     }
@@ -519,7 +519,7 @@ export default async function handler(req: any, res: any) {
 
     if (!hasGeminiKey && !hasNvidiaKey) {
       return res.status(503).json({
-        error: 'Vision AI service is unconfigured on the server (neither GEMINI_API_KEY nor NVIDIA_API_KEY is present). Fallback to offline queuing is advised.',
+        error: 'Service is temporarily unavailable. Your test was saved offline.',
         code: 'API_KEY_UNCONFIGURED',
       });
     }
@@ -534,7 +534,7 @@ export default async function handler(req: any, res: any) {
   } catch (error: any) {
     console.error('API /api/analyze-visual failure:', error);
     return res.status(500).json({
-      error: error.message || 'Internal server error during visual analysis.',
+      error: 'Something went wrong. Please try again.',
       code: 'ANALYSIS_FAILED',
     });
   }

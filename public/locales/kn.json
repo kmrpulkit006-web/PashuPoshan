@@ -116,5 +116,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "ಪಶು ಆಹಾರ ಅಥವಾ ಆರೋಗ್ಯದ ಬಗ್ಗೆ ಕೇಳಿ...",
   "chat.send": "ಕಳುಹಿಸಿ",
-  "chat.emergencyNotice": "ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ ತಕ್ಷಣ 1962 ಗೆ ಕರೆ ಮಾಡಿ."
+  "chat.emergencyNotice": "ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ ತಕ್ಷಣ 1962 ಗೆ ಕರೆ ಮಾಡಿ.",
+  "nav.history": "ಹಿಂದಿನ ಪರೀಕ್ಷೆಗಳು",
+  "history.title": "ಹಿಂದಿನ ಪರೀಕ್ಷೆಗಳು (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

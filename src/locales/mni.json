@@ -116,5 +116,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "শন-ইরোই চানবা নত্রগা হকশেলগী হংবীয়ু...",
   "chat.send": "থাগৎলকউ",
-  "chat.emergencyNotice": "খুদোংথীবা তারগদি থবক ওইনা 1962 দা কোল তৌবীয়ু।"
+  "chat.emergencyNotice": "খুদোংথীবা তারগদি থবক ওইনা 1962 দা কোল তৌবীয়ু।",
+  "nav.history": "মমাংগী চাংয়েং",
+  "history.title": "মমাংগী চাংয়েং (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

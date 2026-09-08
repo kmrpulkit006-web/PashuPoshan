@@ -265,12 +265,12 @@ export default async function handler(req: any, res: any) {
         try {
           body = JSON.parse(body);
         } catch {
-          return res.status(400).json({ error: 'Malformed JSON payload.' });
+          return res.status(400).json({ error: 'Malformed JSON payload. Something went wrong. Please try again.' });
         }
       }
 
       if (!body || typeof body !== 'object') {
-        return res.status(400).json({ error: 'Request body must be a valid JSON object.' });
+        return res.status(400).json({ error: 'Something went wrong. Please try again.' });
       }
 
       const {
@@ -333,7 +333,7 @@ export default async function handler(req: any, res: any) {
       });
     } catch (error: any) {
       console.error('POST /api/alerts error:', error);
-      return res.status(500).json({ error: error.message || 'Failed to save alert.' });
+      return res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   }
 

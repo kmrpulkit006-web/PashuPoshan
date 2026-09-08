@@ -515,17 +515,17 @@ export function createFeedSampleFromVisualAnalysis(
   if (isInvalid) {
     const rejectionMsg =
       visualResult.rejectionMessage ||
-      'The uploaded image does not appear to be cattle feed, silage, or fodder. Cannot evaluate nutritional safety. Please capture a clear, well-lit photo of animal feed.';
+      "We couldn't read this photo. Please take another clear photo of animal feed or fodder (हम इस फोटो को पढ़ नहीं सके। कृपया चारे की दूसरी साफ फोटो लें).";
 
     return {
       id: `invalid_scan_${Date.now()}`,
-      name: 'Unrecognized Sample (अमान्य नमूना)',
+      name: 'Unrecognized Sample (अमान्य चारा नमूना)',
       category,
       batchNumber: `INVALID-${Math.floor(1000 + Math.random() * 9000)}`,
-      sourceOrBrand: 'Non-Feed Image Rejection',
+      sourceOrBrand: 'Please Retake Photo',
       timestamp: new Date().toLocaleString('en-IN'),
       imageUrl,
-      testedMethod: 'AI Vision Triage',
+      testedMethod: 'Live Mobile Sensor Analysis',
       isSimulated: false,
       isPrototypeHeuristic: true,
       isNonFeedSample: true,

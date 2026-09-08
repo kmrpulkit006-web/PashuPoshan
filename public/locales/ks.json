@@ -116,5 +116,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "کھؠن یا صحت متعلق پرژھیو...",
   "chat.send": "سوزیو",
-  "chat.emergencyNotice": "ہنگامی حالژس منٛز فورا 1962 پؠٹھ کال کریو۔"
+  "chat.emergencyNotice": "ہنگامی حالژس منٛز فورا 1962 پؠٹھ کال کریو۔",
+  "nav.history": "پٔتمٕچ جانچ",
+  "history.title": "پٔتمٕچ جانچ (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

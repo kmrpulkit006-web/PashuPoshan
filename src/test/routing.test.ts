@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-const VALID_TABS = ['scan', 'scorecard', 'ration', 'silage', 'alerts'];
+const VALID_TABS = ['scan', 'history', 'scorecard', 'ration', 'silage', 'alerts'];
 
 function parseTabFromUrl(pathname: string, hash: string): string {
   const path = pathname.replace(/^\/+/, '').split('/')[0].toLowerCase();
@@ -17,6 +17,7 @@ function parseTabFromUrl(pathname: string, hash: string): string {
 describe('PWA Routing & URL Synchronization', () => {
   it('parses pathname routes directly', () => {
     expect(parseTabFromUrl('/scan', '')).toBe('scan');
+    expect(parseTabFromUrl('/history', '')).toBe('history');
     expect(parseTabFromUrl('/scorecard', '')).toBe('scorecard');
     expect(parseTabFromUrl('/ration', '')).toBe('ration');
     expect(parseTabFromUrl('/silage', '')).toBe('silage');
@@ -24,6 +25,7 @@ describe('PWA Routing & URL Synchronization', () => {
   });
 
   it('parses hash routes for static fallback compatibility', () => {
+    expect(parseTabFromUrl('/', '#/history')).toBe('history');
     expect(parseTabFromUrl('/', '#/scorecard')).toBe('scorecard');
     expect(parseTabFromUrl('/', '#ration')).toBe('ration');
     expect(parseTabFromUrl('/', '#/alerts')).toBe('alerts');

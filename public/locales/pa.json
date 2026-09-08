@@ -118,5 +118,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "ਪਸ਼ੂ ਖੁਰਾਕ, ਪੋਸ਼ਣ ਜਾਂ ਸਿਹਤ ਸੰਬੰਧੀ ਪੁੱਛੋ...",
   "chat.send": "ਭੇਜੋ",
-  "chat.emergencyNotice": "ਐਮਰਜੈਂਸੀ ਵਿੱਚ ਤੁਰੰਤ 1962 ਤੇ ਕਾਲ ਕਰੋ।"
+  "chat.emergencyNotice": "ਐਮਰਜੈਂਸੀ ਵਿੱਚ ਤੁਰੰਤ 1962 ਤੇ ਕਾਲ ਕਰੋ।",
+  "nav.history": "ਪਿਛਲੀ ਪਰਖ",
+  "history.title": "ਪਿਛਲੀ ਪਰਖ (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

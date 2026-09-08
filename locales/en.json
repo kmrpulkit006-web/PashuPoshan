@@ -116,5 +116,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "Type or ask your question about cattle feed or illness...",
   "chat.send": "Ask",
-  "chat.emergencyNotice": "If your animal is very sick, call 1962 helpline immediately."
+  "chat.emergencyNotice": "If your animal is very sick, call 1962 helpline immediately.",
+  "nav.history": "Past Tests",
+  "history.title": "Previous Feed Tests",
+  "history.viewResult": "View Result →",
+  "history.good": "GOOD",
+  "history.fair": "FAIR",
+  "history.danger": "DANGER",
+  "history.empty": "No feed tests yet"
 }

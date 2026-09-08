@@ -116,5 +116,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "গো-খাদ্য বা স্বাস্থ্য বিষয়ে সোধক...",
   "chat.send": "পঠাওক",
-  "chat.emergencyNotice": "জৰুৰী অৱস্থাত তৎক্ষণাত ১৯৬২ নম্বৰত কল কৰক।"
+  "chat.emergencyNotice": "জৰুৰী অৱস্থাত তৎক্ষণাত ১৯৬২ নম্বৰত কল কৰক।",
+  "nav.history": "পূৰ্বৰ পৰীক্ষা",
+  "history.title": "পূৰ্বৰ পৰীক্ষা (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

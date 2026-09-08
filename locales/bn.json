@@ -116,5 +116,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "গো-খাদ্য বা স্বাস্থ্য বিষয়ে প্রশ্ন করুন...",
   "chat.send": "পাঠান",
-  "chat.emergencyNotice": "জরুরী অবস্থায় অবিলম্বে ১৯৬২ নম্বরে কল করুন।"
+  "chat.emergencyNotice": "জরুরী অবস্থায় অবিলম্বে ১৯৬২ নম্বরে কল করুন।",
+  "nav.history": "পূর্বের পরীক্ষা",
+  "history.title": "পূর্বের পরীক্ষা (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

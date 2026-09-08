@@ -116,5 +116,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "مال جي خوراڪ يا صحت بابت پڇو...",
   "chat.send": "موڪليو",
-  "chat.emergencyNotice": "ايمرجنسي ۾ ترت 1962 تي ڪال ڪريو."
+  "chat.emergencyNotice": "ايمرجنسي ۾ ترت 1962 تي ڪال ڪريو.",
+  "nav.history": "پوئين چڪاس",
+  "history.title": "پوئين چڪاس (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

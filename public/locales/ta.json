@@ -116,5 +116,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "தீவனம் அல்லது மாடுகளின் நலம் குறித்து கேளுங்கள்...",
   "chat.send": "அனுப்பு",
-  "chat.emergencyNotice": "அவசர உதவிக்கு உடனடியாக 1962 என்ற எண்ணை அழைக்கவும்."
+  "chat.emergencyNotice": "அவசர உதவிக்கு உடனடியாக 1962 என்ற எண்ணை அழைக்கவும்.",
+  "nav.history": "முந்தைய சோதனைகள்",
+  "history.title": "முந்தைய சோதனைகள் (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

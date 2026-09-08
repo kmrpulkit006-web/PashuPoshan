@@ -4,6 +4,7 @@ import { t, getLanguageInfo } from '../lib/i18n';
 import { Globe, Sun, Moon, Info, X, DownloadCloud, Wifi, WifiOff, Layers, Trash2, RefreshCw, Bot } from 'lucide-react';
 import { getPendingSyncQueue, getPendingOfflineScans, syncPendingScans, clearDemoQueue, clearPendingOfflineScans } from '../lib/storage';
 import { VeterinaryChatModal } from './VeterinaryChatModal';
+import { toHumanErrorMessage } from '../lib/humanErrors';
 
 interface MobileHeaderProps {
   locale: Locale;
@@ -55,7 +56,11 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
 
   const handleManualSync = async () => {
     if (!isOnline) {
-      alert('Cannot sync while offline. Please connect to internet first.');
+      alert(
+        locale === 'hi'
+          ? 'आप अभी ऑफ़लाइन हैं। सिंक करने के लिए इंटरनेट से जुड़ें।'
+          : 'You are currently offline. Please connect to the internet to sync.'
+      );
       return;
     }
     setIsSyncing(true);
@@ -68,7 +73,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
       alert(`Sync Complete: ${successful} scan(s) synchronized.`);
     } catch (e: any) {
       setIsSyncing(false);
-      alert('Sync failed: ' + (e.message || 'Unknown network error'));
+      alert(toHumanErrorMessage(e, locale));
     }
   };
 

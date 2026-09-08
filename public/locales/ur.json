@@ -116,5 +116,12 @@
   "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "مویشیوں کی خوراک یا صحت سے متعلق سوال پوچھیں...",
   "chat.send": "بھیجیں",
-  "chat.emergencyNotice": "ہنگامی صورت حال میں فوری طور پر 1962 پر کال کریں۔"
+  "chat.emergencyNotice": "ہنگامی صورت حال میں فوری طور پر 1962 پر کال کریں۔",
+  "nav.history": "پچھلی جانچ",
+  "history.title": "پچھلی جانچ (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }

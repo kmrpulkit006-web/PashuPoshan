@@ -116,5 +116,12 @@
   "chat.subtitle": "पशु आहार, स्वास्थ्य व दूध से जुड़े सवाल अपनी भाषा में पूछें",
   "chat.placeholder": "पशुखाण वा भलायके संबंदी विचारात...",
   "chat.send": "धाडा",
-  "chat.emergencyNotice": "तात्काळ वेळार रोकडेंच 1962 फोन करात."
+  "chat.emergencyNotice": "तात्काळ वेळार रोकडेंच 1962 फोन करात.",
+  "nav.history": "फाटली तपासणी",
+  "history.title": "फाटली तपासणी (इतिहास)",
+  "history.viewResult": "जांच परिणाम देखें →",
+  "history.good": "उत्तम",
+  "history.fair": "सामान्य",
+  "history.danger": "खतरा",
+  "history.empty": "अभी तक कोई जांच नहीं हुई है"
 }
