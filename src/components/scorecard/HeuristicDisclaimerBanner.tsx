@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Sparkles } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { FeedSample, Locale } from '../../lib/types';
 import { t } from '../../lib/i18n';
 

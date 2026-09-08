@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FeedSample, Locale } from '../lib/types';
-import { t, getActionableAdviceText } from '../lib/i18n';
+import { t, getActionableAdviceText, getSampleDisplayName } from '../lib/i18n';
 import { AudioGuidance } from '../components/AudioGuidance';
 import { PrintableReport } from '../components/PrintableReport';
 import { VerdictBand } from '../components/scorecard/VerdictBand';
@@ -113,21 +113,40 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
   };
 
   const handleShare = async () => {
-    const shareText = `*PashuPoshan Field Screening Report (SIH Prototype)*%0ASample: ${sample.name}%0ABatch: ${sample.batchNumber || 'N/A'}%0AGrade: ${sample.overallGrade}%0AEstimated Crude Protein: ${sample.metrics?.crudeProtein ?? 'N/A'}%%0AUrea Screening: ${sample.adulteration?.ureaAdulterationDetected ? 'ADULTERATION SUSPECTED (' + (sample.adulteration.ureaPercentage || '') + '%)' : 'Negative'}%0ABIS Reference: ${sample.bisCompliant ? 'Met Reference Threshold' : 'Threshold Breach Detected'}%0ADisclaimer: Prototype heuristic estimate only. Laboratory confirmation required.`;
+    const sampleDisplayName = getSampleDisplayName(sample, locale);
+    const ureaResult = sample.adulteration?.ureaAdulterationDetected
+      ? `ADULTERATION SUSPECTED (${sample.adulteration.ureaPercentage || ''}%)`
+      : 'Negative';
+    const bisStatus = sample.bisCompliant ? 'Met Reference Threshold' : 'Threshold Breach Detected';
+
+    const fullReportText = [
+      `🐄 *PashuPoshan Field Screening Certificate* (SIH 2026 PS 26111)`,
+      `📋 Sample: ${sampleDisplayName}`,
+      `🏷️ Batch: ${sample.batchNumber || 'N/A'}`,
+      `⭐ Grade: ${sample.overallGrade}`,
+      `🧪 Est. Crude Protein: ${sample.metrics?.crudeProtein !== undefined ? `${sample.metrics.crudeProtein}%` : 'Pending Lab Assay'}`,
+      `⚠️ Urea Screening: ${ureaResult}`,
+      `📜 BIS IS:2052 Status: ${bisStatus}`,
+      ``,
+      `⚖️ Disclaimer: Optical proxy / rapid field triage estimate only. Certified laboratory confirmation required.`,
+    ].join('\n');
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Field Screening: ${sample.name}`,
-          text: `PashuPoshan Field Screening Report: ${sample.name} - Grade: ${sample.overallGrade}. Note: Prototype heuristic estimate only; laboratory confirmation required.`,
+          title: `PashuPoshan Report: ${sampleDisplayName}`,
+          text: fullReportText,
         });
         return;
-      } catch (e) {
-        // Fallback
+      } catch (err: any) {
+        if (err?.name === 'AbortError') {
+          return;
+        }
       }
     }
 
-    window.open(`https://api.whatsapp.com/send?text=${shareText}`, '_blank');
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(fullReportText)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   const handlePrint = () => {

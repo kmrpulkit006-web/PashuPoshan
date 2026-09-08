@@ -15,9 +15,9 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
 
   if (sample.isNonFeedSample) {
     return (
-      <div className="rounded-3xl p-5 bg-[#B3261E] text-white shadow-2xl border-4 border-amber-400 space-y-2 text-center animate-pulse-slow">
+      <div role="alert" className="rounded-3xl p-5 bg-[#B3261E] text-white shadow-2xl border-4 border-amber-400 space-y-2 text-center animate-pulse-slow">
         <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto shadow-inner">
-          <AlertOctagon className="w-11 h-11 text-white" />
+          <AlertOctagon className="w-11 h-11 text-white" aria-hidden="true" />
         </div>
         <div>
           <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/40 text-amber-200">
@@ -36,9 +36,9 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
 
   if (isTierA) {
     return (
-      <div className="rounded-3xl p-5 bg-[#1F5D3B] text-white shadow-xl border-2 border-emerald-400/40 space-y-2 text-center">
+      <div role="status" className="rounded-3xl p-5 bg-[#1F5D3B] text-white shadow-xl border-2 border-emerald-400/40 space-y-2 text-center">
         <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto shadow-inner">
-          <CheckCircle2 className="w-10 h-10 text-white" />
+          <CheckCircle2 className="w-10 h-10 text-white" aria-hidden="true" />
         </div>
         <div>
           <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/25 text-emerald-100">
@@ -57,9 +57,9 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
 
   if (isTierC) {
     return (
-      <div className="rounded-3xl p-5 bg-[#B3261E] text-white shadow-2xl border-4 border-rose-300 space-y-2 text-center animate-pulse-slow">
+      <div role="alert" className="rounded-3xl p-5 bg-[#B3261E] text-white shadow-2xl border-4 border-rose-300 space-y-2 text-center animate-pulse-slow">
         <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto shadow-inner">
-          <AlertOctagon className="w-11 h-11 text-white" />
+          <AlertOctagon className="w-11 h-11 text-white" aria-hidden="true" />
         </div>
         <div>
           <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/30 text-rose-100">
@@ -78,9 +78,9 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
 
   // Tier B
   return (
-    <div className="rounded-3xl p-5 bg-[#C2703D] text-white shadow-xl border-2 border-amber-300/50 space-y-2 text-center">
+    <div role="status" className="rounded-3xl p-5 bg-[#C2703D] text-white shadow-xl border-2 border-amber-300/50 space-y-2 text-center">
       <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto shadow-inner">
-        <AlertTriangle className="w-10 h-10 text-white" />
+        <AlertTriangle className="w-10 h-10 text-white" aria-hidden="true" />
       </div>
       <div>
         <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/25 text-amber-100">

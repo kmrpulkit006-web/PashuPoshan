@@ -89,10 +89,10 @@ export function calculatePrecisionRation(
       feedName: active.name,
       feedCategory: active.category,
       freshKg: greenFreshKg,
-      dryMatterPct: active.metrics.dryMatter ?? defaultGreen.dmPct,
-      crudeProteinPct: active.metrics.crudeProtein ?? defaultGreen.cpPct,
-      tdnPct: active.metrics.totalDigestibleNutrients ?? defaultGreen.tdnPct,
-      isCustomOrTested: !active.metrics.requiresLabTest,
+      dryMatterPct: active.metrics?.dryMatter ?? defaultGreen.dmPct,
+      crudeProteinPct: active.metrics?.crudeProtein ?? defaultGreen.cpPct,
+      tdnPct: active.metrics?.totalDigestibleNutrients ?? defaultGreen.tdnPct,
+      isCustomOrTested: !active.metrics?.requiresLabTest,
     };
   }
 
@@ -113,10 +113,10 @@ export function calculatePrecisionRation(
       feedName: active.name,
       feedCategory: 'dry_fodder',
       freshKg: dryFreshKg,
-      dryMatterPct: active.metrics.dryMatter ?? DEFAULT_FEED_LIBRARY.wheat_bhusa.dmPct,
-      crudeProteinPct: active.metrics.crudeProtein ?? DEFAULT_FEED_LIBRARY.wheat_bhusa.cpPct,
-      tdnPct: active.metrics.totalDigestibleNutrients ?? DEFAULT_FEED_LIBRARY.wheat_bhusa.tdnPct,
-      isCustomOrTested: !active.metrics.requiresLabTest,
+      dryMatterPct: active.metrics?.dryMatter ?? DEFAULT_FEED_LIBRARY.wheat_bhusa.dmPct,
+      crudeProteinPct: active.metrics?.crudeProtein ?? DEFAULT_FEED_LIBRARY.wheat_bhusa.cpPct,
+      tdnPct: active.metrics?.totalDigestibleNutrients ?? DEFAULT_FEED_LIBRARY.wheat_bhusa.tdnPct,
+      isCustomOrTested: !active.metrics?.requiresLabTest,
     };
   }
 
@@ -137,10 +137,10 @@ export function calculatePrecisionRation(
       feedName: active.name,
       feedCategory: 'concentrate',
       freshKg: concFreshKg,
-      dryMatterPct: active.metrics.dryMatter ?? DEFAULT_FEED_LIBRARY.standard_pellets.dmPct,
-      crudeProteinPct: active.metrics.crudeProtein ?? DEFAULT_FEED_LIBRARY.standard_pellets.cpPct,
-      tdnPct: active.metrics.totalDigestibleNutrients ?? DEFAULT_FEED_LIBRARY.standard_pellets.tdnPct,
-      isCustomOrTested: !active.metrics.requiresLabTest,
+      dryMatterPct: active.metrics?.dryMatter ?? DEFAULT_FEED_LIBRARY.standard_pellets.dmPct,
+      crudeProteinPct: active.metrics?.crudeProtein ?? DEFAULT_FEED_LIBRARY.standard_pellets.cpPct,
+      tdnPct: active.metrics?.totalDigestibleNutrients ?? DEFAULT_FEED_LIBRARY.standard_pellets.tdnPct,
+      isCustomOrTested: !active.metrics?.requiresLabTest,
     };
   }
 
