@@ -78,6 +78,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Never cache or intercept serverless API endpoints (/api/*)
+  if (url.pathname.startsWith('/api/')) {
+    return;
+  }
+
   // Strategy 1: Stale-While-Revalidate for bundled assets (/assets/)
   // Immediate load in remote sheds with zero signal or spotty 2G
   if (url.pathname.startsWith('/assets/')) {
@@ -92,7 +97,8 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         }).catch(() => {
-          // Offline fallback handled by cachedResponse
+          // Offline fallback handled by cachedResponse, or return Response.error()
+          return cachedResponse || Response.error();
         });
 
         return cachedResponse || fetchPromise;

@@ -153,23 +153,23 @@ export const AdulterationAlertBox: React.FC<AdulterationAlertBoxProps> = ({
           <span className="text-[10px] font-bold text-[#1F5D3B] dark:text-emerald-400">
             District Dairy Lab / NDDB Network
           </span>
-          <div className="flex items-center space-x-1.5">
+          <div className="flex items-center space-x-2">
             {onOpenLabModal && (
               <button
                 type="button"
                 onClick={onOpenLabModal}
-                className="inline-flex items-center space-x-1 text-[10px] font-black px-2 py-1 rounded-lg bg-white dark:bg-slate-800 border border-[#1F5D3B] dark:border-emerald-500 text-[#1F5D3B] dark:text-emerald-300 hover:bg-emerald-50 transition-all shadow-sm"
+                className="inline-flex items-center space-x-1.5 text-xs font-black px-3 py-2 min-h-[44px] rounded-xl bg-white dark:bg-slate-800 border border-[#1F5D3B] dark:border-emerald-500 text-[#1F5D3B] dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-all shadow-sm active:scale-95"
               >
-                <MapPin className="w-3 h-3" />
-                <span>Find Lab</span>
+                <MapPin className="w-3.5 h-3.5" />
+                <span>{t('score.findLab', locale)}</span>
               </button>
             )}
             <a
               href="tel:1962"
-              className="inline-flex items-center space-x-1 text-[10px] font-black px-2 py-1 rounded-lg bg-[#1F5D3B] text-white hover:bg-[#194a30] transition-all shadow-sm"
+              className="inline-flex items-center space-x-1.5 text-xs font-black px-3 py-2 min-h-[44px] rounded-xl bg-[#1F5D3B] text-white hover:bg-[#194a30] transition-all shadow-sm active:scale-95"
             >
-              <PhoneCall className="w-3 h-3" />
-              <span>Call 1962</span>
+              <PhoneCall className="w-3.5 h-3.5" />
+              <span>{t('score.call1962', locale)}</span>
             </a>
           </div>
         </div>

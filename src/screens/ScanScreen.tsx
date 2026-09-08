@@ -14,6 +14,7 @@ import {
   QrCode,
   AlertTriangle,
   Clock,
+  X,
 } from 'lucide-react';
 
 interface ScanScreenProps {
@@ -21,13 +22,6 @@ interface ScanScreenProps {
   locale: Locale;
   theme?: 'light' | 'dark';
 }
-
-const CATEGORY_NAMES: Record<FeedCategory, { en: string; hi: string }> = {
-  silage: { en: '🌾 Silage (Achar)', hi: '🌾 साइलेज (अचार)' },
-  concentrate: { en: '🥣 Feed / Khal', hi: '🥣 दाना / खल' },
-  green_fodder: { en: '🌱 Green Grass', hi: '🌱 हरा चारा' },
-  dry_fodder: { en: '🌾 Dry Straw / Bhusa', hi: '🌾 सूखा भूसा' },
-};
 
 export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, theme = 'light' }) => {
   const isDark = theme === 'dark';
@@ -48,7 +42,33 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
     handleFileUpload,
     handleSimulateQrScan,
     closeQrScanner,
-  } = useScanEngine({ onScanComplete });
+    scanNotice,
+    closeScanNotice,
+  } = useScanEngine({ onScanComplete, locale });
+
+  React.useEffect(() => {
+    if (!scanNotice) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeScanNotice();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [scanNotice, closeScanNotice]);
+
+  const getCategoryLabel = (cat: FeedCategory): string => {
+    switch (cat) {
+      case 'silage':
+        return `🌾 ${t('history.silage', locale)}`;
+      case 'concentrate':
+        return `🥣 ${t('history.concentrate', locale)}`;
+      case 'green_fodder':
+        return `🌱 ${t('history.greenFodder', locale)}`;
+      case 'dry_fodder':
+        return `🌾 ${t('history.dryFodder', locale)}`;
+      default:
+        return cat;
+    }
+  };
 
   return (
     <div className="p-4 space-y-4 pb-28 print:hidden text-[#1A1A1A] dark:text-white">
@@ -174,16 +194,21 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
         </div>
 
         {/* Category Selector with Large Touch Targets */}
-        <div className="flex items-center space-x-2 overflow-x-auto py-1 pr-4 text-xs">
+        <div
+          className="flex items-center space-x-2 overflow-x-auto py-1 pr-4 text-xs"
+          role="tablist"
+          aria-label="Feed category selection"
+        >
           <span className="text-xs font-bold whitespace-nowrap shrink-0 opacity-80">
             {t('scan.feedType', locale)}
           </span>
           {(['silage', 'concentrate', 'green_fodder', 'dry_fodder'] as FeedCategory[]).map((cat) => {
             const isSelected = category === cat;
-            const catLabel = CATEGORY_NAMES[cat] ? (locale === 'hi' ? CATEGORY_NAMES[cat].hi : CATEGORY_NAMES[cat].en) : cat.replace('_', ' ');
             return (
               <button
                 key={cat}
+                role="tab"
+                aria-selected={isSelected}
                 type="button"
                 onClick={() => setCategory(cat)}
                 className="px-3.5 py-2.5 rounded-2xl font-black whitespace-nowrap text-xs sm:text-sm border-2 transition-all min-h-[46px] shrink-0 shadow-xs"
@@ -193,7 +218,7 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
                   color: isSelected ? (isDark ? '#ffffff' : '#1F5D3B') : (isDark ? '#94a3b8' : '#5A5243'),
                 }}
               >
-                {catLabel}
+                {getCategoryLabel(cat)}
               </button>
             );
           })}
@@ -208,19 +233,20 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
             
             {/* Captured Image Header Overlay Bar */}
             <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-auto">
-              <span className="bg-[#1F5D3B]/90 backdrop-blur-xs text-white text-xs font-black px-3 py-1 rounded-full border border-emerald-400/50 flex items-center space-x-1.5 shadow-md">
+              <span className="bg-[#1F5D3B]/90 backdrop-blur-xs text-white text-xs font-black px-3 py-1.5 rounded-full border border-emerald-400/50 flex items-center space-x-1.5 shadow-md">
                 <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
-                <span>{locale === 'hi' ? 'फोटो तैयार है' : 'Photo Ready'}</span>
+                <span>{t('app.synced', locale)}</span>
               </span>
 
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-black/70 hover:bg-black/90 backdrop-blur-xs text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/30 flex items-center space-x-1 shadow-md active:scale-95 transition-all"
-                title="Retake or choose another photo"
+                className="bg-black/70 hover:bg-black/90 backdrop-blur-xs text-white text-xs font-bold px-3.5 py-2 rounded-full border border-white/30 flex items-center space-x-1.5 shadow-md active:scale-95 transition-all min-h-[44px]"
+                title={t('scan.retake', locale)}
+                aria-label={t('scan.retake', locale)}
               >
                 <RefreshCw className="w-3.5 h-3.5 text-emerald-300" />
-                <span>{locale === 'hi' ? 'पुनः लें' : 'Retake'}</span>
+                <span>{t('scan.retake', locale)}</span>
               </button>
             </div>
           </>
@@ -340,7 +366,66 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
         showQrScanner={showQrScanner}
         qrVerifiedData={qrVerifiedData}
         onClose={closeQrScanner}
+        locale={locale}
       />
+
+      {/* In-app Scan Notice Modal */}
+      {scanNotice && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="scan-notice-title"
+          className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 animate-fade-in"
+          onClick={closeScanNotice}
+        >
+          <div
+            className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-800 pb-2.5">
+              <h3 id="scan-notice-title" className="text-sm font-black flex items-center space-x-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+                <span>{scanNotice.title}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={closeScanNotice}
+                className="text-slate-500 hover:text-slate-900 dark:hover:text-white w-11 h-11 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-2xl hover:bg-black/5 dark:hover:bg-white/10"
+                aria-label={t('common.close', locale)}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-xs text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed">
+              {scanNotice.message}
+            </p>
+            <div className="flex space-x-2 pt-1">
+              {scanNotice.isConfirm && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (scanNotice.onCancel) scanNotice.onCancel();
+                    closeScanNotice();
+                  }}
+                  className="flex-1 py-3 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl font-bold text-xs min-h-[48px] text-[#1A1A1A] dark:text-white"
+                >
+                  {t('common.cancel', locale)}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (scanNotice.onConfirm) scanNotice.onConfirm();
+                  closeScanNotice();
+                }}
+                className="flex-1 py-3 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs rounded-2xl shadow-lg min-h-[48px] transition-all"
+              >
+                {scanNotice.isConfirm ? t('common.confirm', locale) : t('common.understood', locale)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Locale, SUPPORTED_LANGUAGES } from '../lib/types';
 import { t, getLanguageInfo } from '../lib/i18n';
-import { Globe, Sun, Moon, Info, X, DownloadCloud, Wifi, WifiOff, Layers, Trash2, RefreshCw, Bot } from 'lucide-react';
+import { Globe, Sun, Moon, Info, X, DownloadCloud, Layers, Trash2, RefreshCw, Bot, AlertTriangle } from 'lucide-react';
 import { getPendingSyncQueue, getPendingOfflineScans, syncPendingScans, clearDemoQueue, clearPendingOfflineScans } from '../lib/storage';
 import { VeterinaryChatModal } from './VeterinaryChatModal';
 import { toHumanErrorMessage } from '../lib/humanErrors';
@@ -13,6 +13,15 @@ interface MobileHeaderProps {
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
   pendingScansCount?: number;
+}
+
+interface HeaderNotice {
+  title?: string;
+  message: string;
+  isConfirm?: boolean;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onConfirm?: () => void;
 }
 
 export const MobileHeader: React.FC<MobileHeaderProps> = ({
@@ -28,6 +37,19 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   const [pendingCount, setPendingCount] = useState(pendingScansCount);
   const [isSyncing, setIsSyncing] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [headerNotice, setHeaderNotice] = useState<HeaderNotice | null>(null);
+
+  useEffect(() => {
+    if (!showInfoModal && !headerNotice) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowInfoModal(false);
+        setHeaderNotice(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showInfoModal, headerNotice]);
 
   useEffect(() => {
     const checkQueue = () => {
@@ -36,7 +58,6 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
       setPendingCount(q1.length + q2.length);
     };
     checkQueue();
-    const interval = setInterval(checkQueue, 2500);
 
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
@@ -48,7 +69,6 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
     window.addEventListener('pashuposhan_pending_sync_changed', handleSyncChange);
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
       window.removeEventListener('pashuposhan_pending_sync_changed', handleSyncChange);
     };
@@ -56,11 +76,13 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
 
   const handleManualSync = async () => {
     if (!isOnline) {
-      alert(
-        locale === 'hi'
-          ? 'आप अभी ऑफ़लाइन हैं। सिंक करने के लिए इंटरनेट से जुड़ें।'
-          : 'You are currently offline. Please connect to the internet to sync.'
-      );
+      setHeaderNotice({
+        title: locale === 'hi' ? 'ऑफ़लाइन सूचना' : 'Offline Notice',
+        message:
+          locale === 'hi'
+            ? 'आप अभी ऑफ़लाइन हैं। सिंक करने के लिए इंटरनेट से जुड़ें।'
+            : 'You are currently offline. Please connect to the internet to sync.',
+      });
       return;
     }
     setIsSyncing(true);
@@ -70,18 +92,29 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
       const q1 = getPendingSyncQueue();
       const q2 = getPendingOfflineScans();
       setPendingCount(q1.length + q2.length);
-      alert(`Sync Complete: ${successful} scan(s) synchronized.`);
+      setHeaderNotice({
+        title: locale === 'hi' ? 'सिंक संपन्न' : 'Sync Complete',
+        message:
+          locale === 'hi'
+            ? `सिंक संपन्न: ${successful} स्कैन सफलतापूर्वक अपलोड हुए।`
+            : `Sync Complete: ${successful} scan(s) synchronized.`,
+      });
     } catch (e: any) {
       setIsSyncing(false);
-      alert(toHumanErrorMessage(e, locale));
+      setHeaderNotice({
+        title: locale === 'hi' ? 'सिंक त्रुटि' : 'Sync Notice',
+        message: toHumanErrorMessage(e, locale),
+      });
     }
   };
 
   const handleInstallClick = async () => {
     if (!installPrompt) {
-      alert(
-        'PashuPoshan AI can be installed directly by tapping "Add to Home Screen" in your mobile browser settings.'
-      );
+      setHeaderNotice({
+        title: 'Install PashuPoshan AI',
+        message:
+          'PashuPoshan AI can be installed directly by tapping "Add to Home Screen" in your mobile browser settings.',
+      });
       return;
     }
     installPrompt.prompt();
@@ -92,14 +125,21 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   };
 
   const handleClearQueue = () => {
-    const confirmClear = window.confirm(
-      'Are you sure you want to clear the local test queue of pending offline records?'
-    );
-    if (confirmClear) {
-      clearDemoQueue();
-      clearPendingOfflineScans();
-      setPendingCount(0);
-    }
+    setHeaderNotice({
+      title: locale === 'hi' ? 'कतार साफ़ करें?' : 'Clear Queue?',
+      message:
+        locale === 'hi'
+          ? 'क्या आप वाकई लंबित ऑफ़लाइन रिकॉर्ड की स्थानीय कतार को साफ़ करना चाहते हैं?'
+          : 'Are you sure you want to clear the local test queue of pending offline records?',
+      isConfirm: true,
+      confirmLabel: locale === 'hi' ? 'हाँ, साफ़ करें' : 'Clear Queue',
+      cancelLabel: locale === 'hi' ? 'रद्द करें' : 'Cancel',
+      onConfirm: () => {
+        clearDemoQueue();
+        clearPendingOfflineScans();
+        setPendingCount(0);
+      },
+    });
   };
 
   const toggleTheme = () => {
@@ -149,10 +189,10 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
             </div>
           </div>
 
-          {/* Right: Language Switcher, Theme Toggle & Info Modal Trigger */}
+          {/* Right: Language Switcher, AI Chat & Info Modal Trigger */}
           <div className="flex items-center space-x-1.5 shrink-0">
             {/* Prominent Language Switcher (Displays native script like 🌐 हिंदी ▾) */}
-            <div className="relative flex items-center justify-between bg-black/25 dark:bg-slate-800/90 hover:bg-black/35 border border-white/25 dark:border-slate-700 rounded-xl px-2 py-1 min-h-[38px] max-w-[105px] sm:max-w-[125px] shrink-0 transition-colors shadow-sm">
+            <div className="relative flex items-center justify-between bg-black/25 dark:bg-slate-800/90 hover:bg-black/35 border border-white/25 dark:border-slate-700 rounded-xl px-2.5 py-1.5 min-h-[44px] max-w-[105px] sm:max-w-[135px] shrink-0 transition-colors shadow-sm">
               <div className="flex items-center space-x-1 pointer-events-none min-w-0 pr-1">
                 <Globe className="w-3.5 h-3.5 text-emerald-200 shrink-0" aria-hidden="true" />
                 <span className="text-xs font-bold text-white truncate">
@@ -181,31 +221,17 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
             {/* Pashu Seva AI / Veterinary Expert Chat Trigger */}
             <button
               onClick={() => setShowChatModal(true)}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-black/20 hover:bg-black/30 dark:bg-slate-800 border border-emerald-400/40 dark:border-emerald-500/40 flex items-center justify-center text-white transition-all shrink-0 active:scale-95 shadow-inner"
+              className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl bg-black/20 hover:bg-black/30 dark:bg-slate-800 border border-emerald-400/40 dark:border-emerald-500/40 flex items-center justify-center text-white transition-all shrink-0 active:scale-95 shadow-inner"
               title="Pashu Seva AI (Veterinary Expert Chat)"
               aria-label="Pashu Seva AI Chat"
             >
               <Bot className="w-4 h-4 text-emerald-300" />
             </button>
 
-            {/* Manual Light/Dark Theme Toggle Icon Button */}
-            <button
-              onClick={toggleTheme}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-black/20 hover:bg-black/30 dark:bg-slate-800 border border-white/20 dark:border-slate-700 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
-              title={theme === 'light' ? 'Switch to Dark Mode (Night)' : 'Switch to Field Mode (Day)'}
-              aria-label="Toggle display theme"
-            >
-              {theme === 'light' ? (
-                <Moon className="w-4 h-4 text-amber-200" />
-              ) : (
-                <Sun className="w-4 h-4 text-amber-300" />
-              )}
-            </button>
-
             {/* Secondary Info / Status Icon Button */}
             <button
               onClick={() => setShowInfoModal(true)}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-black/20 hover:bg-black/30 dark:bg-slate-800 border border-white/20 dark:border-slate-700 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
+              className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl bg-black/20 hover:bg-black/30 dark:bg-slate-800 border border-white/20 dark:border-slate-700 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
               title="System Information & Offline Sync"
               aria-label="App info and sync status"
             >
@@ -217,20 +243,24 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
 
       {/* Secondary Info & Offline Status Modal (Keeps Header Clean) */}
       {showInfoModal && (
-        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="info-modal-title"
+        >
           <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-800 pb-3">
               <div className="flex items-center space-x-2">
                 <span className="text-xl">🌾</span>
-                <h3 className="text-base font-black">System Info & Sync</h3>
+                <h3 id="info-modal-title" className="text-base font-black">System Info & Sync</h3>
               </div>
               <button
                 onClick={() => setShowInfoModal(false)}
-                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center space-x-1"
-                aria-label="Close dialog"
+                className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"
+                aria-label={t('common.close', locale)}
               >
                 <X className="w-5 h-5" />
-                <span className="text-xs font-bold">Close</span>
               </button>
             </div>
 
@@ -327,7 +357,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
 
                   <button
                     onClick={handleClearQueue}
-                    className="w-full py-2 px-3 bg-rose-100 hover:bg-rose-200 dark:bg-rose-950 dark:hover:bg-rose-900 text-[#B3261E] dark:text-rose-200 text-xs font-bold rounded-xl border border-rose-300 dark:border-rose-800 flex items-center justify-center space-x-1.5 transition-all min-h-[40px]"
+                    className="w-full py-2.5 px-3 bg-rose-100 hover:bg-rose-200 dark:bg-rose-950 dark:hover:bg-rose-900 text-[#B3261E] dark:text-rose-200 text-xs font-bold rounded-xl border border-rose-300 dark:border-rose-800 flex items-center justify-center space-x-1.5 transition-all min-h-[44px]"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Clear Local Queue</span>
@@ -354,6 +384,59 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
         onClose={() => setShowChatModal(false)}
         locale={locale}
       />
+
+      {/* In-app Notice / Confirm Modal */}
+      {headerNotice && (
+        <div
+          className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-800 pb-2.5">
+              <h3 className="text-sm font-black flex items-center space-x-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+                <span>{headerNotice.title || 'Notice'}</span>
+              </h3>
+              <button
+                onClick={() => setHeaderNotice(null)}
+                className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"
+                aria-label={t('common.close', locale)}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-xs text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed">
+              {headerNotice.message}
+            </p>
+            <div className="flex space-x-2 pt-1">
+              {headerNotice.isConfirm && (
+                <button
+                  type="button"
+                  onClick={() => setHeaderNotice(null)}
+                  className="flex-1 py-3 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl font-bold text-xs min-h-[48px] text-[#1A1A1A] dark:text-white"
+                >
+                  {headerNotice.cancelLabel || t('common.cancel', locale)}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (headerNotice.onConfirm) headerNotice.onConfirm();
+                  setHeaderNotice(null);
+                }}
+                className={`flex-1 py-3 text-white font-black text-xs rounded-2xl shadow-lg min-h-[48px] transition-all ${
+                  headerNotice.isConfirm
+                    ? 'bg-rose-600 hover:bg-rose-700'
+                    : 'bg-[#1F5D3B] hover:bg-[#194a30]'
+                }`}
+              >
+                {headerNotice.isConfirm ? (headerNotice.confirmLabel || t('common.confirm', locale)) : t('common.understood', locale)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

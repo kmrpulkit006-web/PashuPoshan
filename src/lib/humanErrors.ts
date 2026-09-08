@@ -1,8 +1,9 @@
 import { Locale } from './types';
+import { t } from './i18n';
 
 /**
  * Maps technical errors, HTTP status codes, API payloads, and exceptions
- * into empathetic, farmer-friendly human language.
+ * into empathetic, farmer-friendly human language across all 23 supported Indian languages.
  *
  * Examples:
  * BAD:  "HTTP 500: Internal Server Error"
@@ -12,12 +13,8 @@ import { Locale } from './types';
  * GOOD: "We couldn't read this photo. Please take another clear photo."
  */
 export function toHumanErrorMessage(error: unknown, locale: Locale = 'en'): string {
-  const isHindi = locale === 'hi';
-  
   if (!error) {
-    return isHindi
-      ? 'कुछ गलत हो गया। कृपया पुनः प्रयास करें।'
-      : 'Something went wrong. Please try again.';
+    return t('error.somethingWrong', locale);
   }
 
   const rawMsg = (
@@ -28,7 +25,15 @@ export function toHumanErrorMessage(error: unknown, locale: Locale = 'en'): stri
 
   const lower = rawMsg.toLowerCase();
 
-  // 1. Image and photo reading issues
+  // 1. File size & invalid file type
+  if (lower.includes('file too large') || lower.includes('too large') || lower.includes('15mb')) {
+    return t('error.fileTooLarge', locale);
+  }
+  if (lower.includes('invalid_image_type') || lower.includes('not an image') || lower.includes('invalid image file')) {
+    return t('error.invalidImageFile', locale);
+  }
+
+  // 2. Image and photo reading issues
   if (
     lower.includes('payload') ||
     lower.includes('invalid image') ||
@@ -42,9 +47,7 @@ export function toHumanErrorMessage(error: unknown, locale: Locale = 'en'): stri
     lower.includes('missing or invalid "imagebase64"') ||
     lower.includes('not_feed_or_fodder')
   ) {
-    return isHindi
-      ? 'हम इस फोटो को पढ़ नहीं सके। कृपया चारे की दूसरी साफ फोटो लें।'
-      : "We couldn't read this photo. Please take another clear photo.";
+    return t('error.photoUnclear', locale);
   }
 
   // 2. Camera access and permissions
@@ -53,9 +56,7 @@ export function toHumanErrorMessage(error: unknown, locale: Locale = 'en'): stri
     lower.includes('notallowederror') ||
     lower.includes('denied')
   ) {
-    return isHindi
-      ? 'चारे की फोटो खींचने के लिए कैमरे की अनुमति आवश्यक है। कृपया कैमरा चालू करें।'
-      : 'Camera permission is needed to take a photo of your feed. Please allow camera access.';
+    return t('error.cameraPermission', locale);
   }
 
   if (
@@ -63,15 +64,11 @@ export function toHumanErrorMessage(error: unknown, locale: Locale = 'en'): stri
     lower.includes('devicesnotfound') ||
     lower.includes('no camera')
   ) {
-    return isHindi
-      ? 'फोन का कैमरा नहीं मिला। आप गैलरी से भी फोटो चुन सकते हैं।'
-      : 'No camera found on this device. You can select a photo from your gallery.';
+    return t('error.noCamera', locale);
   }
 
   if (lower.includes('notreadableerror') || lower.includes('busy')) {
-    return isHindi
-      ? 'कैमरा किसी अन्य ऐप में व्यस्त है। कृपया बाकी ऐप बंद करके पुनः प्रयास करें।'
-      : 'Camera is currently busy in another app. Please close other apps and try again.';
+    return t('error.cameraPermission', locale);
   }
 
   // 3. Network and offline connectivity
@@ -85,16 +82,12 @@ export function toHumanErrorMessage(error: unknown, locale: Locale = 'en'): stri
     lower.includes('timed out') ||
     lower.includes('timeout')
   ) {
-    return isHindi
-      ? 'इंटरनेट धीमा है या बंद है। आपकी जांच फ़ोन में सुरक्षित सहेज ली गई है।'
-      : 'Internet connection is weak or unavailable. Your test has been saved safely on your phone.';
+    return t('error.networkOffline', locale);
   }
 
   // 4. Rate limiting / Too many requests
   if (lower.includes('rate limit') || lower.includes('429') || lower.includes('too many requests')) {
-    return isHindi
-      ? 'कृपया कुछ पल रुककर दोबारा कोशिश करें।'
-      : 'Please wait a moment and try again.';
+    return t('error.serverBusy', locale);
   }
 
   // 5. Server errors (500, 502, 503, Internal Server Error, etc.)
@@ -110,13 +103,9 @@ export function toHumanErrorMessage(error: unknown, locale: Locale = 'en'): stri
     lower.includes('json') ||
     lower.includes('syntaxerror')
   ) {
-    return isHindi
-      ? 'कुछ गलत हो गया। कृपया पुनः प्रयास करें।'
-      : 'Something went wrong. Please try again.';
+    return t('error.somethingWrong', locale);
   }
 
   // Default friendly fallback
-  return isHindi
-    ? 'कुछ गलत हो गया। कृपया पुनः प्रयास करें।'
-    : 'Something went wrong. Please try again.';
+  return t('error.somethingWrong', locale);
 }

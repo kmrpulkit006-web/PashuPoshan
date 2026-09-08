@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Locale } from '../lib/types';
 import { t } from '../lib/i18n';
+import { getLocalAlerts } from '../lib/storage';
 import { ScanLine, History, Award, Scale, Layers, AlertTriangle } from 'lucide-react';
 
 export type ActiveTab = 'scan' | 'history' | 'scorecard' | 'ration' | 'silage' | 'alerts';
@@ -13,6 +14,7 @@ interface BottomNavProps {
   activeGrade?: string;
   theme?: 'light' | 'dark';
   pendingScansCount?: number;
+  alertsCount?: number;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({
@@ -23,8 +25,29 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   activeGrade,
   theme = 'light',
   pendingScansCount = 0,
+  alertsCount,
 }) => {
   const isDark = theme === 'dark';
+  const [localAlertCount, setLocalAlertCount] = useState<number>(() => {
+    try {
+      return getLocalAlerts().length;
+    } catch {
+      return 0;
+    }
+  });
+
+  useEffect(() => {
+    const handleAlertsChanged = () => {
+      try {
+        setLocalAlertCount(getLocalAlerts().length);
+      } catch {}
+    };
+    window.addEventListener('pashuposhan_pending_alerts_changed', handleAlertsChanged);
+    return () => window.removeEventListener('pashuposhan_pending_alerts_changed', handleAlertsChanged);
+  }, []);
+
+  const effectiveAlerts = alertsCount !== undefined ? alertsCount : localAlertCount;
+
   const tabs: { id: ActiveTab; labelKey: string; icon: React.ReactNode; badge?: string }[] = [
     {
       id: 'scan',
@@ -41,7 +64,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       id: 'scorecard',
       labelKey: 'nav.scorecard',
       icon: <Award className="w-5 h-5" />,
-      badge: activeGrade ? (activeGrade.includes('Tier A') ? 'Tier A' : 'Alert') : undefined,
+      badge: activeGrade
+        ? (activeGrade.includes('Tier A') ? 'Tier A' : 'Alert')
+        : (hasScanResult ? '✓' : undefined),
     },
     {
       id: 'ration',
@@ -57,7 +82,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       id: 'alerts',
       labelKey: 'nav.alerts',
       icon: <AlertTriangle className="w-5 h-5" />,
-      badge: '3',
+      badge: effectiveAlerts > 0 ? `${effectiveAlerts}` : undefined,
     },
   ];
 
@@ -77,6 +102,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
+              aria-label={t(tab.labelKey, locale)}
+              aria-current={isActive ? 'page' : undefined}
               className="relative flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl transition-all min-h-[56px] border"
               style={{
                 backgroundColor: isActive ? (isDark ? '#022c22' : '#edf7f0') : 'transparent',

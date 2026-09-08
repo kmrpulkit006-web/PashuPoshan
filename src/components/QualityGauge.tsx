@@ -1,5 +1,7 @@
 import React from 'react';
 import { CheckCircle2, AlertTriangle, AlertOctagon } from 'lucide-react';
+import { Locale } from '../lib/types';
+import { t } from '../lib/i18n';
 
 interface QualityGaugeProps {
   label: string;
@@ -11,6 +13,7 @@ interface QualityGaugeProps {
   safeMax?: number;
   bisBenchmark?: string;
   isSilagePh?: boolean;
+  locale?: Locale;
 }
 
 export const QualityGauge: React.FC<QualityGaugeProps> = ({
@@ -23,6 +26,7 @@ export const QualityGauge: React.FC<QualityGaugeProps> = ({
   safeMax,
   bisBenchmark,
   isSilagePh = false,
+  locale = 'hi',
 }) => {
   let status: 'safe' | 'warning' | 'danger' = 'safe';
 
@@ -35,7 +39,10 @@ export const QualityGauge: React.FC<QualityGaugeProps> = ({
     if (safeMax !== undefined && value > safeMax) status = 'danger';
   }
 
-  const pct = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+  const denominator = max - min;
+  const pct = denominator > 0
+    ? Math.min(100, Math.max(0, ((value - min) / denominator) * 100))
+    : 50;
 
   const statusConfig = {
     safe: {
@@ -43,21 +50,21 @@ export const QualityGauge: React.FC<QualityGaugeProps> = ({
       badge: 'bg-[#edf7f0] text-[#1F5D3B] border-[#b0dec0] dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-600',
       text: 'text-[#1F5D3B] dark:text-emerald-400',
       icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#1F5D3B] dark:text-emerald-400" />,
-      label: 'Optimal',
+      label: t('gauge.optimal', locale),
     },
     warning: {
       bar: 'bg-[#C2703D]',
       badge: 'bg-[#fdf8f4] text-[#C2703D] border-[#f3d6c4] dark:bg-amber-950 dark:text-amber-300 dark:border-amber-600',
       text: 'text-[#C2703D] dark:text-amber-400',
       icon: <AlertTriangle className="w-3.5 h-3.5 text-[#C2703D] dark:text-amber-400" />,
-      label: 'Sub-Optimal',
+      label: t('gauge.subOptimal', locale),
     },
     danger: {
       bar: 'bg-[#B3261E]',
       badge: 'bg-[#FDECEA] text-[#B3261E] border-red-300 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-600',
       text: 'text-[#B3261E] dark:text-rose-400',
       icon: <AlertOctagon className="w-3.5 h-3.5 text-[#B3261E] dark:text-rose-400" />,
-      label: 'Critical Alert',
+      label: t('gauge.critical', locale),
     },
   };
 
@@ -102,7 +109,7 @@ export const QualityGauge: React.FC<QualityGaugeProps> = ({
 
       {bisBenchmark && (
         <div className="mt-1.5 flex items-center justify-between text-[11px] text-[#5A5243] dark:text-slate-400 font-semibold">
-          <span>Standard Reference:</span>
+          <span>{t('gauge.reference', locale)}</span>
           <span className="font-bold text-[#1A1A1A] dark:text-slate-300">{bisBenchmark}</span>
         </div>
       )}

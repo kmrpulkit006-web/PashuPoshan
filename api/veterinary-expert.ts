@@ -401,17 +401,17 @@ export default async function handler(req: any, res: any) {
     let activeModel = model;
 
     try {
-      upstreamResponse = await callNvidia(model, 45000);
+      upstreamResponse = await callNvidia(model, 25000);
       if (!upstreamResponse.ok && model !== DEFAULT_NVIDIA_MODEL) {
         console.warn(`Primary model ${model} failed (${upstreamResponse.status}), failing over to ${DEFAULT_NVIDIA_MODEL}...`);
-        upstreamResponse = await callNvidia(DEFAULT_NVIDIA_MODEL, 30000);
+        upstreamResponse = await callNvidia(DEFAULT_NVIDIA_MODEL, 20000);
         activeModel = DEFAULT_NVIDIA_MODEL;
       }
     } catch (primaryErr) {
       if (model !== DEFAULT_NVIDIA_MODEL) {
         console.warn(`Primary model ${model} timed out or failed, failing over to ${DEFAULT_NVIDIA_MODEL}...`);
         try {
-          upstreamResponse = await callNvidia(DEFAULT_NVIDIA_MODEL, 30000);
+          upstreamResponse = await callNvidia(DEFAULT_NVIDIA_MODEL, 20000);
           activeModel = DEFAULT_NVIDIA_MODEL;
         } catch (fallbackErr) {
           // both failed

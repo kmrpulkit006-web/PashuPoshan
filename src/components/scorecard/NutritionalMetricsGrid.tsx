@@ -62,7 +62,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
       <div className="space-y-2.5">
         <div className="flex items-center justify-between px-1">
           <h4 className="text-xs font-black text-[#5A5243] dark:text-slate-300 uppercase tracking-wider">
-            {locale === 'hi' ? 'चारे की गुणवत्ता व पोषक तत्व' : 'Feed Quality & Nutrition'}
+            {t('score.parameters', locale)}
           </h4>
           <span className="text-[10px] text-[#C2703D] dark:text-amber-400 font-bold">
             {sample.metrics.requiresLabTest
@@ -80,6 +80,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
             max={100}
             safeMax={sample.category === 'silage' ? 70.0 : 11.0}
             bisBenchmark={sample.category === 'silage' ? 'Max 68-70%' : 'BIS IS:2052 Max 11.0%'}
+            locale={locale}
           />
         )}
 
@@ -93,6 +94,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
             max={7.0}
             isSilagePh={true}
             bisBenchmark="Optimum 3.8 - 4.2"
+            locale={locale}
           />
         )}
 
@@ -106,6 +108,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
               max={30}
               safeMin={sample.category === 'silage' ? 8.0 : 20.0}
               bisBenchmark={sample.category === 'silage' ? 'Min 8.0%' : 'BIS IS:2052 Min 20.0%'}
+              locale={locale}
             />
 
             {sample.metrics.acidInsolubleAsh !== undefined && (
@@ -116,6 +119,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
                 max={10}
                 safeMax={sample.category === 'silage' ? 2.5 : 3.5}
                 bisBenchmark="Max 2.5% - 3.5%"
+                locale={locale}
               />
             )}
           </>
@@ -155,14 +159,14 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
                 <button
                   type="button"
                   onClick={onOpenLabModal}
-                  className="text-xs font-black text-[#1F5D3B] dark:text-emerald-400 underline hover:no-underline"
+                  className="text-xs font-black text-[#1F5D3B] dark:text-emerald-400 underline hover:no-underline min-h-[44px] px-2 inline-flex items-center"
                 >
                   {locale === 'hi' ? 'नजदीकी लैब खोजें →' : 'Find Nearest Lab →'}
                 </button>
               ) : (
                 <a
                   href="tel:1962"
-                  className="text-xs font-black text-[#1F5D3B] dark:text-emerald-400 underline hover:no-underline"
+                  className="text-xs font-black text-[#1F5D3B] dark:text-emerald-400 underline hover:no-underline min-h-[44px] px-2 inline-flex items-center"
                 >
                   Find Nearest Lab / Call 1962
                 </a>

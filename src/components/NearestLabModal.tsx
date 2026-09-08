@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   X,
   MapPin,
@@ -13,6 +13,7 @@ import {
   PhoneCall,
 } from 'lucide-react';
 import { Locale } from '../lib/types';
+import { t } from '../lib/i18n';
 
 export interface AccreditedLab {
   id: string;
@@ -196,6 +197,17 @@ export const NearestLabModal: React.FC<NearestLabModalProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const filteredLabs = useMemo(() => {
     return ACCREDITED_LABS.filter((lab) => {
       const matchesCategory =
@@ -243,20 +255,18 @@ export const NearestLabModal: React.FC<NearestLabModalProps> = ({
                 id="lab-modal-title"
                 className="text-base sm:text-lg font-black text-[#1A1A1A] dark:text-white leading-tight"
               >
-                {locale === 'hi'
-                  ? 'प्रमाणित पशु चारा एवं साइलेज परीक्षण प्रयोगशालाएं'
-                  : 'Accredited Feed & Silage Testing Laboratories'}
+                {t('lab.title', locale)}
               </h2>
               <p className="text-xs text-[#5A5243] dark:text-slate-400 font-semibold">
-                NABL, ICAR, NDDB (CALF) & BIS Certified Referral Network
+                {t('lab.subtitle', locale)}
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors"
-            aria-label="Close dialog"
+            className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors"
+            aria-label={t('common.close', locale)}
           >
             <X className="w-5 h-5" />
           </button>
@@ -271,18 +281,14 @@ export const NearestLabModal: React.FC<NearestLabModalProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={
-                locale === 'hi'
-                  ? 'राज्य, शहर, प्रयोगशाला या परीक्षण (जैसे Aflatoxin, Protein) खोजें...'
-                  : 'Search by State, City, Lab, or Test (e.g., Aflatoxin, Protein)...'
-              }
-              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-[#DCD3BF] dark:border-slate-700 rounded-xl text-xs sm:text-sm text-[#1A1A1A] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1F5D3B]"
+              placeholder={t('lab.searchPlaceholder', locale)}
+              className="w-full pl-10 pr-4 py-2.5 min-h-[44px] bg-white dark:bg-slate-900 border border-[#DCD3BF] dark:border-slate-700 rounded-xl text-xs sm:text-sm text-[#1A1A1A] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1F5D3B]"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold"
+                className="absolute right-3 top-1/2 -translate-y-1/2 min-h-[44px] px-2 flex items-center text-xs text-slate-400 hover:text-slate-600 font-bold"
               >
                 Clear
               </button>
@@ -296,13 +302,13 @@ export const NearestLabModal: React.FC<NearestLabModalProps> = ({
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all ${
+                className={`px-3.5 py-2 min-h-[44px] inline-flex items-center justify-center rounded-xl font-bold whitespace-nowrap transition-all ${
                   selectedCategory === cat
                     ? 'bg-[#1F5D3B] text-white shadow-sm'
                     : 'bg-white dark:bg-slate-700 text-[#5A5243] dark:text-slate-300 border border-[#DCD3BF] dark:border-slate-600 hover:bg-slate-100'
                 }`}
               >
-                {cat === 'All' ? (locale === 'hi' ? 'सभी प्रयोगशालाएं (All)' : 'All Labs') : cat}
+                {cat === 'All' ? t('lab.allLabs', locale) : cat}
               </button>
             ))}
           </div>
@@ -318,19 +324,19 @@ export const NearestLabModal: React.FC<NearestLabModalProps> = ({
               </div>
               <div>
                 <h4 className="text-xs font-black text-[#1F5D3B] dark:text-emerald-300">
-                  National Animal Health Helpline: 1962
+                  {t('lab.helplineTitle', locale)}
                 </h4>
                 <p className="text-[11px] text-[#5A5243] dark:text-slate-300 font-medium">
-                  24/7 toll-free dispatch for district veterinary polyclinics & sample testing assistance.
+                  {t('lab.helplineDesc', locale)}
                 </p>
               </div>
             </div>
             <a
               href="tel:1962"
-              className="px-3 py-2 bg-[#1F5D3B] hover:bg-[#184a2f] text-white rounded-xl font-black text-xs shadow shrink-0 flex items-center space-x-1 ml-2"
+              className="px-3.5 py-2 min-h-[44px] bg-[#1F5D3B] hover:bg-[#184a2f] text-white rounded-xl font-black text-xs shadow shrink-0 inline-flex items-center space-x-1.5 ml-2"
             >
               <Phone className="w-3.5 h-3.5" />
-              <span>Call 1962</span>
+              <span>{t('lab.call1962', locale)}</span>
             </a>
           </div>
 
@@ -339,10 +345,10 @@ export const NearestLabModal: React.FC<NearestLabModalProps> = ({
             <div className="py-12 text-center space-y-2">
               <FlaskConical className="w-10 h-10 text-slate-400 mx-auto" />
               <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                No accredited laboratories found matching your search.
+                {t('lab.noLabs', locale)}
               </p>
               <p className="text-xs text-slate-500">
-                Try searching for another state or dial <strong>1962</strong> to locate your nearest district facility.
+                {t('lab.noLabsSub', locale)}
               </p>
             </div>
           ) : (
@@ -388,7 +394,7 @@ export const NearestLabModal: React.FC<NearestLabModalProps> = ({
                 {/* Accredited Capabilities Pills */}
                 <div className="space-y-1 pt-1">
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
-                    Accredited Testing Assays:
+                    {t('lab.testingAssays', locale)}
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {lab.capabilities.map((cap) => (
@@ -407,10 +413,10 @@ export const NearestLabModal: React.FC<NearestLabModalProps> = ({
                   <div className="flex items-center space-x-2">
                     <a
                       href={`tel:${lab.phone.replace(/[^0-9+]/g, '')}`}
-                      className="px-3 py-1.5 bg-[#1F5D3B] hover:bg-[#184a2f] text-white rounded-xl text-xs font-black flex items-center space-x-1.5 shadow-sm transition-transform active:scale-95"
+                      className="px-3.5 py-2 min-h-[44px] bg-[#1F5D3B] hover:bg-[#184a2f] text-white rounded-xl text-xs font-black inline-flex items-center space-x-1.5 shadow-sm transition-transform active:scale-95"
                     >
-                      <Phone className="w-3 h-3" />
-                      <span>Call {lab.phone}</span>
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>{t('lab.callLab', locale)}: {lab.phone}</span>
                     </a>
 
                     <a
@@ -419,28 +425,29 @@ export const NearestLabModal: React.FC<NearestLabModalProps> = ({
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1.5 bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-[#DCD3BF] dark:border-slate-600 text-[#1A1A1A] dark:text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm"
+                      className="px-3.5 py-2 min-h-[44px] bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-[#DCD3BF] dark:border-slate-600 text-[#1A1A1A] dark:text-white rounded-xl text-xs font-bold inline-flex items-center space-x-1.5 shadow-sm"
                     >
-                      <ExternalLink className="w-3 h-3" />
-                      <span>Directions (Maps)</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>{t('lab.directions', locale)}</span>
                     </a>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => handleCopy(lab)}
-                    className="p-1.5 text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-bold flex items-center space-x-1"
+                    className="px-3 py-2 min-h-[44px] min-w-[44px] text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-bold inline-flex items-center space-x-1.5"
                     title="Copy lab address and details"
+                    aria-label="Copy lab address and details"
                   >
                     {copiedId === lab.id ? (
                       <>
                         <Check className="w-3.5 h-3.5 text-emerald-600" />
-                        <span className="text-emerald-600 text-[10px]">Copied!</span>
+                        <span className="text-emerald-600 text-xs">{t('lab.copied', locale)}</span>
                       </>
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5" />
-                        <span className="text-[10px]">Copy Info</span>
+                        <span className="text-xs">{t('lab.copyInfo', locale)}</span>
                       </>
                     )}
                   </button>
@@ -453,18 +460,12 @@ export const NearestLabModal: React.FC<NearestLabModalProps> = ({
           <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 rounded-2xl text-xs space-y-1.5 text-[#5A5243] dark:text-slate-300">
             <div className="flex items-center space-x-1.5 font-black text-[#C2703D] dark:text-amber-400">
               <Info className="w-4 h-4 shrink-0" />
-              <span>How to Collect & Ship Feed Samples to an Accredited Lab:</span>
+              <span>{t('lab.samplingTitle', locale)}</span>
             </div>
             <ul className="list-disc pl-4 space-y-1 text-[11px] leading-relaxed">
-              <li>
-                <strong>Sampling (Quartering Method)</strong>: Draw ~500g composite sample from 4 to 5 different depths/spots of the batch or pit face.
-              </li>
-              <li>
-                <strong>Packaging</strong>: Place in an airtight, clean double-seal ziplock pouch. For fermented silage, squeeze out excess air to prevent post-sampling aerobic spoilage.
-              </li>
-              <li>
-                <strong>Labeling</strong>: Clearly label with Sample ID, Date Collected, Farm Location, and Suspected Condition (e.g. Mold / Urea Adulteration).
-              </li>
+              <li>{t('lab.samplingStep1', locale)}</li>
+              <li>{t('lab.samplingStep2', locale)}</li>
+              <li>{t('lab.samplingStep3', locale)}</li>
             </ul>
           </div>
         </div>
@@ -472,14 +473,14 @@ export const NearestLabModal: React.FC<NearestLabModalProps> = ({
         {/* Footer */}
         <div className="p-3 bg-white dark:bg-slate-800 border-t border-[#DCD3BF] dark:border-slate-700 flex items-center justify-between shrink-0">
           <span className="text-[11px] text-slate-500 font-medium">
-            DAHD / ICAR / NDDB Accredited Laboratory Referral
+            {t('lab.footer', locale)}
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs rounded-xl transition-colors"
+            className="px-4 py-2 min-h-[44px] inline-flex items-center justify-center bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-xs rounded-xl transition-colors"
           >
-            Close
+            {t('common.close', locale)}
           </button>
         </div>
       </div>

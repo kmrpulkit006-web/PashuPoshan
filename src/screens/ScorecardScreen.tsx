@@ -107,7 +107,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
             className="w-full py-4 px-5 rounded-2xl bg-[#1F5D3B] hover:bg-[#184a2f] text-white font-black text-base flex items-center justify-center space-x-2 shadow-lg min-h-[56px] transition-all transform active:scale-98"
           >
             <RotateCcw className="w-5 h-5 text-white" />
-            <span>{locale === 'hi' ? 'चारे की नई तस्वीर लें (पुनः स्कैन)' : 'Retake / Scan Feed Photo'}</span>
+            <span>{t('score.feedPhotoRetake', locale)}</span>
           </button>
         )}
 
@@ -134,7 +134,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
                 className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#B3261E] hover:bg-red-700 text-white font-black text-xs shadow min-h-[44px]"
               >
                 <PhoneCall className="w-4 h-4" />
-                <span>Call 1962</span>
+                <span>{t('score.call1962', locale)}</span>
               </a>
             )}
           </div>
@@ -162,7 +162,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
               {sample.veterinaryAdvisory}
             </p>
 
-            {/* Deep Clinical Veterinary Review powered by NVIDIA Nemotron-3-Ultra */}
+            {/* Deep Clinical Veterinary Review */}
             <div className="pt-1.5 border-t border-[#DCD3BF]/60 dark:border-slate-700/60">
               {!clinicalReview ? (
                 <button
@@ -174,12 +174,12 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
                   {isRequestingClinicalReview ? (
                     <>
                       <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-200" />
-                      <span>{locale === 'hi' ? 'विशेषज्ञ डॉक्टर की सलाह ले रहे हैं...' : 'Consulting Veterinary Doctor...'}</span>
+                      <span>{t('score.consultDoctor', locale)}</span>
                     </>
                   ) : (
                     <>
                       <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                      <span>{locale === 'hi' ? '🩺 विस्तृत डॉक्टर सलाह प्राप्त करें' : '🩺 Get Detailed Doctor\'s Advice'}</span>
+                      <span>{t('score.getDoctorAdvice', locale)}</span>
                     </>
                   )}
                 </button>
@@ -189,7 +189,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
                     <div className="flex items-center space-x-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       <span className="font-extrabold text-[#1F5D3B] dark:text-emerald-300">
-                        {locale === 'hi' ? 'पशु चिकित्सक विशेषज्ञ सलाह' : 'Veterinary Expert Advice'}
+                        {t('score.doctorAdvice', locale)}
                       </span>
                     </div>
                     <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200">
@@ -200,13 +200,13 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
                     {clinicalReview}
                   </div>
                   <div className="flex items-center justify-between pt-1 text-[10px] text-slate-500 dark:text-slate-400">
-                    <span>{locale === 'hi' ? 'ICAR-NDRI पशु पोषण मानक अनुसार' : 'ICAR-NDRI Nutrition Guidelines'}</span>
+                    <span>{t('score.ndriStandard', locale)}</span>
                     <button
                       type="button"
                       onClick={() => setClinicalReview(null)}
                       className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-bold underline"
                     >
-                      {locale === 'hi' ? 'बंद करें' : 'Collapse'}
+                      {t('common.close', locale)}
                     </button>
                   </div>
                 </div>
@@ -220,7 +220,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
           </div>
         </div>
 
-        {/* 4. Collapsible Technical Details (Collapsed by Default for Simplicity) */}
+        {/* 4. Collapsible Technical Details */}
         <div className="border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm transition-all bg-[#F3EEE1] dark:bg-slate-800">
           <button
             type="button"
@@ -230,10 +230,10 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
           >
             <div className="flex items-center space-x-2">
               <FlaskConical className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400" />
-              <span>{locale === 'hi' ? 'विस्तृत जांच व लैब रिपोर्ट' : 'Full Test & Lab Report Details'}</span>
+              <span>{t('score.techDetails', locale)}</span>
             </div>
             <div className="flex items-center space-x-1 text-xs text-[#5A5243] dark:text-slate-300">
-              <span>{showTechnicalDetails ? (locale === 'hi' ? 'छिपाएं' : 'Hide') : (locale === 'hi' ? 'देखें' : 'View')}</span>
+              <span>{showTechnicalDetails ? t('score.hide', locale) : t('score.view', locale)}</span>
               {showTechnicalDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>
           </button>
@@ -274,7 +274,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
             <div className="flex items-center space-x-2">
               <FlaskConical className="w-5 h-5 text-[#1F5D3B] dark:text-emerald-400" />
               <span className="text-xs font-black text-[#1F5D3B] dark:text-emerald-300 uppercase tracking-wide">
-                {locale === 'hi' ? 'सरकारी व सहकारी डेयरी लैब' : 'Accredited Dairy Testing Labs'}
+                {t('lab.title', locale)}
               </span>
             </div>
             <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#1F5D3B] text-white">
@@ -282,29 +282,27 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
             </span>
           </div>
           <p className="text-xs text-[#5A5243] dark:text-slate-300 leading-relaxed font-semibold">
-            {locale === 'hi'
-              ? 'विवाद निपटारे या सरकारी प्रमाण पत्र के लिए नजदीकी अधिकृत डेयरी लैब से जांच कराई जा सकती है।'
-              : 'For dispute resolution or certified trade reports, testing at an accredited dairy lab is recommended.'}
+            {t('score.labReferralSub', locale)}
           </p>
           <div className="pt-1 flex items-center justify-between flex-wrap gap-2">
             <span className="text-xs font-bold text-[#1A1A1A] dark:text-slate-200">
-              {locale === 'hi' ? 'राष्ट्रीय पशु हेल्पलाइन:' : 'National Animal Helpline:'} <strong>1962</strong>
+              {t('lab.helplineTitle', locale)}
             </span>
             <div className="flex items-center space-x-2">
               <button
                 type="button"
                 onClick={() => setShowLabModal(true)}
-                className="px-3 py-2 bg-white dark:bg-slate-800 border-2 border-[#1F5D3B] dark:border-emerald-500 text-[#1F5D3B] dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 font-black text-xs rounded-xl shadow-sm min-h-[44px] flex items-center space-x-1.5 active:scale-98 transition-all"
+                className="px-3.5 py-2 bg-white dark:bg-slate-800 border-2 border-[#1F5D3B] dark:border-emerald-500 text-[#1F5D3B] dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 font-black text-xs rounded-xl shadow-sm min-h-[44px] flex items-center space-x-1.5 active:scale-98 transition-all"
               >
                 <MapPin className="w-3.5 h-3.5" />
-                <span>{locale === 'hi' ? 'नजदीकी लैब खोजें' : 'Find Nearest Lab'}</span>
+                <span>{t('score.findLab', locale)}</span>
               </button>
               <a
                 href="tel:1962"
-                className="px-3 py-2 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs rounded-xl shadow min-h-[44px] flex items-center space-x-1.5 active:scale-98 transition-all"
+                className="px-3.5 py-2 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs rounded-xl shadow min-h-[44px] flex items-center space-x-1.5 active:scale-98 transition-all"
               >
                 <PhoneCall className="w-3.5 h-3.5" />
-                <span>{locale === 'hi' ? '1962 पर कॉल करें' : 'Call 1962'}</span>
+                <span>{t('score.call1962', locale)}</span>
               </a>
             </div>
           </div>
@@ -317,7 +315,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
             className="flex items-center justify-center space-x-1.5 py-3.5 px-2 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs sm:text-sm rounded-2xl shadow-md active:scale-98 transition-all min-h-[56px]"
           >
             <Share2 className="w-4 h-4 shrink-0" />
-            <span>{locale === 'hi' ? 'शेयर करें' : 'Share'}</span>
+            <span>{t('common.share', locale)}</span>
           </button>
 
           <button
@@ -325,7 +323,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
             className="flex items-center justify-center space-x-1.5 py-3.5 px-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-[#1A1A1A] dark:text-slate-200 font-black text-xs sm:text-sm rounded-2xl border-2 border-[#DCD3BF] dark:border-slate-700 shadow-md active:scale-98 transition-all min-h-[56px]"
           >
             <Printer className="w-4 h-4 shrink-0" />
-            <span>{locale === 'hi' ? 'प्रिंट करें' : 'Print'}</span>
+            <span>{t('common.print', locale)}</span>
           </button>
 
           <button
@@ -333,7 +331,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
             className="flex items-center justify-center space-x-1.5 py-3.5 px-2 bg-white dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-slate-700 text-[#C2703D] dark:text-amber-300 font-black text-xs sm:text-sm rounded-2xl border-2 border-[#C2703D]/60 dark:border-amber-500/40 shadow-md active:scale-98 transition-all min-h-[56px]"
           >
             <RotateCcw className="w-4 h-4 shrink-0" />
-            <span>{locale === 'hi' ? 'पुनः जांचें' : 'Retest'}</span>
+            <span>{t('common.retest', locale)}</span>
           </button>
         </div>
 
@@ -342,7 +340,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
           onClick={onNavigateToRation}
           className="w-full py-4 px-4 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-sm sm:text-base rounded-2xl shadow-xl active:scale-98 transition-all flex items-center justify-center space-x-2 min-h-[56px]"
         >
-          <span>{locale === 'hi' ? '🌾 गाय-भैंस की दैनिक खुराक में जोड़ें →' : '🌾 Add Feed to Cow\'s Daily Diet →'}</span>
+          <span>{t('ration.addToDiet', locale)}</span>
         </button>
       </div>
 

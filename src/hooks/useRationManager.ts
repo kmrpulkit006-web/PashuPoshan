@@ -1,7 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { CowProfile, FeedSample } from '../lib/types';
 import { calculatePrecisionRation } from '../lib/rationBalancing';
 import { getLocalCows, saveLocalCow, deleteLocalCow } from '../lib/storage';
+
+export interface RationNotice {
+  title: string;
+  message: string;
+  isConfirm?: boolean;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+}
 
 interface UseRationManagerProps {
   activeSample?: FeedSample;
@@ -12,6 +20,7 @@ export function useRationManager({ activeSample }: UseRationManagerProps) {
   const [selectedCowId, setSelectedCowId] = useState<string>('');
   const [dailyYield, setDailyYield] = useState<number>(12);
   const [cowWeight, setCowWeight] = useState<number>(380);
+  const [rationNotice, setRationNotice] = useState<RationNotice | null>(null);
 
   // Custom ingredient fresh weights
   const [greenFreshKg, setGreenFreshKg] = useState<number | undefined>(undefined);
@@ -30,58 +39,78 @@ export function useRationManager({ activeSample }: UseRationManagerProps) {
 
   const activeCow = cows.find((c) => c.id === selectedCowId) || cows[0];
 
-  const currentCowProfile: CowProfile = activeCow
-    ? {
-        ...activeCow,
-        weightKg: cowWeight,
-        dailyMilkYieldLiters: dailyYield,
-      }
-    : {
-        id: 'default_cow',
-        tagNumber: 'INAPH-0000',
-        name: 'Sample Cow',
-        breed: 'Gir',
-        weightKg: cowWeight,
-        lactationStage: 'Early (0-90 days)',
-        dailyMilkYieldLiters: dailyYield,
-        milkFatPct: 4.5,
-      };
+  const currentCowProfile: CowProfile = useMemo(() => {
+    return activeCow
+      ? {
+          ...activeCow,
+          weightKg: cowWeight,
+          dailyMilkYieldLiters: dailyYield,
+        }
+      : {
+          id: 'default_cow',
+          tagNumber: 'INAPH-0000',
+          name: 'Sample Cow',
+          breed: 'Gir',
+          weightKg: cowWeight,
+          lactationStage: 'Early (0-90 days)',
+          dailyMilkYieldLiters: dailyYield,
+          milkFatPct: 4.5,
+        };
+  }, [activeCow, cowWeight, dailyYield]);
 
-  const rationPlan = calculatePrecisionRation(currentCowProfile, {
-    greenFreshKg,
-    dryFreshKg,
-    concFreshKg,
-    activeSample,
-  });
+  const rationPlan = useMemo(() => {
+    return calculatePrecisionRation(currentCowProfile, {
+      greenFreshKg,
+      dryFreshKg,
+      concFreshKg,
+      activeSample,
+    });
+  }, [currentCowProfile, greenFreshKg, dryFreshKg, concFreshKg, activeSample]);
 
-  const handleSelectCow = (cow: CowProfile) => {
+  const handleSelectCow = useCallback((cow: CowProfile) => {
     setSelectedCowId(cow.id);
     setDailyYield(cow.dailyMilkYieldLiters);
     setCowWeight(cow.weightKg);
-  };
+  }, []);
 
-  const handleSaveCow = (newCow: CowProfile) => {
+  const handleSaveCow = useCallback((newCow: CowProfile) => {
     const updated = saveLocalCow(newCow);
     setCows(updated);
     setSelectedCowId(newCow.id);
     setDailyYield(newCow.dailyMilkYieldLiters);
     setCowWeight(newCow.weightKg);
-  };
+  }, []);
 
-  const handleDeleteCow = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (cows.length <= 1) {
-      alert('You must have at least one cattle profile in your herd.');
-      return;
-    }
+  const confirmDelete = useCallback((id: string) => {
     const updated = deleteLocalCow(id);
     setCows(updated);
-    if (selectedCowId === id) {
+    if (selectedCowId === id && updated.length > 0) {
       setSelectedCowId(updated[0].id);
       setDailyYield(updated[0].dailyMilkYieldLiters);
       setCowWeight(updated[0].weightKg);
     }
-  };
+    setRationNotice(null);
+  }, [selectedCowId]);
+
+  const handleDeleteCow = useCallback((id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (cows.length <= 1) {
+      setRationNotice({
+        title: 'Notice',
+        message: 'You must have at least one cattle profile in your herd.',
+      });
+      return;
+    }
+    const targetCow = cows.find(c => c.id === id);
+    const cowName = targetCow ? targetCow.name : 'this cattle profile';
+    setRationNotice({
+      title: 'Remove Cattle Profile',
+      message: `Are you sure you want to remove ${cowName} from your herd?`,
+      isConfirm: true,
+      onConfirm: () => confirmDelete(id),
+      onCancel: () => setRationNotice(null),
+    });
+  }, [cows, confirmDelete]);
 
   return {
     cows,
@@ -98,6 +127,8 @@ export function useRationManager({ activeSample }: UseRationManagerProps) {
     setConcFreshKg,
     currentCowProfile,
     rationPlan,
+    rationNotice,
+    setRationNotice,
     handleSelectCow,
     handleSaveCow,
     handleDeleteCow,

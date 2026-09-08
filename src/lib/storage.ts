@@ -1,6 +1,6 @@
 import { CowProfile, FeedSample, SilageBunker, SilagePitLog, CommunityFeedAlert, OfflineSyncItem, FeedCategory, OfflineMoldHeuristicResult, CowYieldLogEntry } from './types';
 import { PRESET_FEED_SCENARIOS, createFeedSampleFromVisualAnalysis } from './feedAnalysisEngine';
-import { storeImageInIndexedDb } from './imageStorage';
+import { storeImageInIndexedDb, getImageFromIndexedDb, deleteImageFromIndexedDb } from './imageStorage';
 
 const COWS_KEY = 'pashuposhan_cows_v1';
 const SCANS_KEY = 'pashuposhan_scans_v1';
@@ -305,7 +305,7 @@ export function addPitLogEntry(pitId: string, log: SilagePitLog): SilageBunker[]
         ...pit,
         coreTemperature: log.temperatureC,
         compactionRating: log.compactionRating,
-        status: (log.temperatureC > 40 ? 'Aerobic Heating Risk' : 'Ready to Feed') as any,
+        status: (log.temperatureC > 40 ? 'Aerobic Heating Risk' : (pit.daysFermented >= 45 ? 'Ready to Feed' : 'Fermenting')) as any,
         logs
       };
     }
@@ -507,6 +507,7 @@ export interface PendingOfflineScan {
   scanMode: 'vision' | 'strip';
   stripColor?: 'yellow' | 'magenta' | 'green';
   syncStatus: 'pending' | 'syncing' | 'failed';
+  failureReason?: 'offline' | 'api_error';
   errorMessage?: string;
   retryCount?: number;
 }
@@ -529,6 +530,7 @@ export function queuePendingOfflineScan(
     ...scan,
     id,
     syncStatus: 'pending',
+    failureReason: scan.failureReason || 'offline',
     retryCount: 0,
   };
 
@@ -538,7 +540,14 @@ export function queuePendingOfflineScan(
     });
   }
 
-  const updated = [newItem, ...current];
+  // To prevent LocalStorage QuotaExceededError (5MB limit), do not serialize large base64 data URIs into localStorage.
+  // The full image is safely persisted in IndexedDB under the item id.
+  const storageItem: PendingOfflineScan = {
+    ...newItem,
+    photoBase64: scan.photoBase64 && scan.photoBase64.length > 500 ? '' : (scan.photoBase64 || ''),
+  };
+
+  const updated = [storageItem, ...current];
   safeSetItem(PENDING_SCANS_KEY, JSON.stringify(updated));
   if (typeof window !== 'undefined') {
     window.dispatchEvent(
@@ -566,6 +575,7 @@ export function removePendingOfflineScan(id: string): void {
   const current = getPendingOfflineScans();
   const updated = current.filter(s => s.id !== id);
   safeSetItem(PENDING_SCANS_KEY, JSON.stringify(updated));
+  deleteImageFromIndexedDb(id).catch(() => {});
   if (typeof window !== 'undefined') {
     window.dispatchEvent(
       new CustomEvent('pashuposhan_pending_sync_changed', { detail: { count: updated.length } })
@@ -574,6 +584,10 @@ export function removePendingOfflineScan(id: string): void {
 }
 
 export function clearPendingOfflineScans(): void {
+  const current = getPendingOfflineScans();
+  current.forEach(item => {
+    deleteImageFromIndexedDb(item.id).catch(() => {});
+  });
   safeSetItem(PENDING_SCANS_KEY, JSON.stringify([]));
   if (typeof window !== 'undefined') {
     window.dispatchEvent(
@@ -582,12 +596,23 @@ export function clearPendingOfflineScans(): void {
   }
 }
 
+let isSyncInProgress = false;
+
+export function getIsSyncInProgress(): boolean {
+  return isSyncInProgress;
+}
+
 /**
  * Retries all pending offline scans against the Vercel serverless /api/analyze-visual endpoint.
+ * Protected by an in-flight guard to prevent concurrent double-processing.
  */
 export async function syncPendingScans(
   onProgress?: (current: number, total: number) => void
 ): Promise<{ successful: number; failed: number }> {
+  if (isSyncInProgress) {
+    return { successful: 0, failed: 0 };
+  }
+
   if (typeof window !== 'undefined' && !navigator.onLine) {
     return { successful: 0, failed: 0 };
   }
@@ -595,47 +620,79 @@ export async function syncPendingScans(
   const pending = getPendingOfflineScans();
   if (pending.length === 0) return { successful: 0, failed: 0 };
 
+  isSyncInProgress = true;
   let successful = 0;
   let failed = 0;
 
-  for (let i = 0; i < pending.length; i++) {
-    const item = pending[i];
-    if (onProgress) onProgress(i + 1, pending.length);
+  try {
+    for (let i = 0; i < pending.length; i++) {
+      const item = pending[i];
+      if (onProgress) onProgress(i + 1, pending.length);
 
-    try {
-      if (item.scanMode === 'vision') {
-        const res = await fetch('/api/analyze-visual', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            imageBase64: item.photoBase64,
-            category: item.category,
-          }),
-        });
+      updatePendingOfflineScan(item.id, { syncStatus: 'syncing' });
 
-        if (!res.ok) {
-          throw new Error(`API responded with ${res.status}`);
+      try {
+        if (item.scanMode === 'vision') {
+          let photoData = item.photoBase64;
+          if (!photoData || photoData.length < 50) {
+            try {
+              photoData = (await getImageFromIndexedDb(item.id)) || '';
+            } catch (e) {
+              photoData = '';
+            }
+          }
+
+          const res = await fetch('/api/analyze-visual', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageBase64: photoData,
+              category: item.category,
+            }),
+          });
+
+          if (!res.ok) {
+            throw new Error(`API responded with ${res.status}`);
+          }
+
+          const visualResult = await res.json();
+          const sample = createFeedSampleFromVisualAnalysis(item.category, visualResult, photoData);
+          
+          // Remove offline placeholder and save real sample to prevent duplicate cards
+          const placeholderId = `offline_pending_${item.id}`;
+          const currentScans = getLocalScans().filter(s => s.id !== placeholderId && s.id !== sample.id);
+          safeSetItem(SCANS_KEY, JSON.stringify([sample, ...currentScans]));
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('pashuposhan_scans_updated'));
+          }
+
+          removePendingOfflineScan(item.id);
+          successful++;
+        } else {
+          // Strip scan fallback: remove placeholder if present, mark resolved and clear
+          const placeholderId = `offline_pending_${item.id}`;
+          const currentScans = getLocalScans().filter(s => s.id !== placeholderId);
+          safeSetItem(SCANS_KEY, JSON.stringify(currentScans));
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('pashuposhan_scans_updated'));
+          }
+          removePendingOfflineScan(item.id);
+          successful++;
         }
-
-        const visualResult = await res.json();
-        const sample = createFeedSampleFromVisualAnalysis(item.category, visualResult, item.photoBase64);
-        saveLocalScan(sample);
-        removePendingOfflineScan(item.id);
-        successful++;
-      } else {
-        // Strip scan fallback: mark resolved and clear
-        removePendingOfflineScan(item.id);
-        successful++;
+      } catch (err: any) {
+        console.warn(`Failed to sync item ${item.id}:`, err);
+        const isOfflineNow = typeof navigator !== 'undefined' && !navigator.onLine;
+        updatePendingOfflineScan(item.id, {
+          syncStatus: 'failed',
+          failureReason: isOfflineNow ? 'offline' : 'api_error',
+          retryCount: (item.retryCount || 0) + 1,
+          errorMessage: err.message || 'Sync failed',
+        });
+        failed++;
       }
-    } catch (err: any) {
-      console.warn(`Failed to sync item ${item.id}:`, err);
-      updatePendingOfflineScan(item.id, {
-        syncStatus: 'failed',
-        retryCount: (item.retryCount || 0) + 1,
-        errorMessage: err.message || 'Sync failed',
-      });
-      failed++;
     }
+  } finally {
+    isSyncInProgress = false;
   }
 
   return { successful, failed };
@@ -695,7 +752,7 @@ export function createOfflinePlaceholderSample(
     category,
     batchNumber: 'OFFLINE-QUEUE',
     sourceOrBrand: 'Field Camera (Saved Locally)',
-    timestamp: new Date().toLocaleString('en-IN'),
+    timestamp: new Date().toISOString(),
     imageUrl: photoUri,
     testedMethod: 'AI Vision Triage',
     isSimulated: false,

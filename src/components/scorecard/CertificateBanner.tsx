@@ -69,7 +69,7 @@ export const CertificateBanner: React.FC<CertificateBannerProps> = ({ sample, lo
 
         <div className="text-right">
           <div className="text-[10px] uppercase font-bold text-[#5A5243] dark:text-slate-400">
-            Standard Reference
+            {t('gauge.reference', locale)}
           </div>
           <div className="text-xs font-bold text-[#1A1A1A] dark:text-slate-200">
             {sample.regulatoryCitation.standardCode}

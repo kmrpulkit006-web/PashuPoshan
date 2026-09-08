@@ -6,7 +6,7 @@ import { AddCowModal } from '../components/ration/AddCowModal';
 import { RationNutrientCards } from '../components/ration/RationNutrientCards';
 import { CowHistoryTimeline } from '../components/ration/CowHistoryTimeline';
 import { saveLocalScan } from '../lib/storage';
-import { Scale, Plus, Trash2, Minus, Sparkles, RefreshCw, Bot } from 'lucide-react';
+import { Scale, Plus, Trash2, Minus, Sparkles, RefreshCw, Bot, X, AlertCircle } from 'lucide-react';
 
 interface RationScreenProps {
   activeSample?: FeedSample;
@@ -32,10 +32,27 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
     cowWeight,
     setCowWeight,
     rationPlan,
+    rationNotice,
+    setRationNotice,
     handleSelectCow,
     handleSaveCow,
     handleDeleteCow,
   } = useRationManager({ activeSample: currentSample });
+
+  useEffect(() => {
+    if (!rationNotice) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (rationNotice.onCancel) {
+          rationNotice.onCancel();
+        } else {
+          setRationNotice(null);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [rationNotice, setRationNotice]);
 
   const activeCow = cows.find((c) => c.id === selectedCowId) || cows[0];
 
@@ -157,8 +174,16 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
           {cows.map((cow) => (
             <div
               key={cow.id}
+              role="button"
+              tabIndex={0}
               onClick={() => handleSelectCow(cow)}
-              className={`relative p-3 rounded-2xl border-2 text-center transition-all cursor-pointer min-h-[72px] flex flex-col justify-center ${
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleSelectCow(cow);
+                }
+              }}
+              className={`relative p-3 rounded-2xl border-2 text-center transition-all cursor-pointer min-h-[76px] flex flex-col justify-center ${
                 selectedCowId === cow.id
                   ? 'bg-[#edf7f0] dark:bg-emerald-950 border-[#1F5D3B] dark:border-emerald-400 text-[#1F5D3B] dark:text-white shadow-md'
                   : 'bg-white dark:bg-slate-900 border-[#DCD3BF] dark:border-slate-700 text-[#5A5243] dark:text-slate-300 hover:border-[#1F5D3B]'
@@ -166,12 +191,15 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
             >
               <button
                 type="button"
-                onClick={(e) => handleDeleteCow(cow.id, e)}
-                className="absolute top-1.5 right-1.5 text-slate-400 hover:text-[#B3261E] p-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteCow(cow.id, e);
+                }}
+                className="absolute top-0.5 right-0.5 text-slate-400 hover:text-[#B3261E] dark:hover:text-red-400 w-11 h-11 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl"
                 title="Remove cattle"
                 aria-label={`Remove ${cow.name}`}
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-4 h-4" />
               </button>
               <div className="text-xl mb-0.5" aria-hidden="true">🐄</div>
               <div className="text-xs font-black truncate">{cow.name.split(' ')[0]}</div>
@@ -363,6 +391,88 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
         onSaveCow={handleSaveCow}
         locale={locale}
       />
+
+      {/* In-App Notice / Confirmation Modal */}
+      {rationNotice && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ration-notice-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+          onClick={() => {
+            if (rationNotice.onCancel) rationNotice.onCancel();
+            else setRationNotice(null);
+          }}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl border-2 shadow-2xl p-6 space-y-4 bg-field-surface dark:bg-slate-900 border-field-border dark:border-slate-700 animate-scale-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                  <AlertCircle className="w-5 h-5" />
+                </div>
+                <h3
+                  id="ration-notice-title"
+                  className="text-base font-extrabold text-field-text dark:text-slate-100"
+                >
+                  {rationNotice.title}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (rationNotice.onCancel) rationNotice.onCancel();
+                  else setRationNotice(null);
+                }}
+                className="w-11 h-11 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-2xl hover:bg-black/5 dark:hover:bg-white/10 text-field-muted dark:text-slate-400"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm font-medium leading-relaxed text-field-text/80 dark:text-slate-300">
+              {rationNotice.message}
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              {rationNotice.isConfirm ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (rationNotice.onCancel) rationNotice.onCancel();
+                      else setRationNotice(null);
+                    }}
+                    className="flex-1 min-h-[44px] px-4 py-2.5 rounded-2xl border-2 font-bold text-sm bg-white dark:bg-slate-800 border-field-border dark:border-slate-700 text-field-text dark:text-slate-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (rationNotice.onConfirm) rationNotice.onConfirm();
+                    }}
+                    className="flex-1 min-h-[44px] px-4 py-2.5 rounded-2xl font-bold text-sm bg-[#B3261E] text-white hover:bg-red-700"
+                  >
+                    Remove
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setRationNotice(null)}
+                  className="w-full min-h-[44px] px-4 py-2.5 rounded-2xl font-bold text-sm bg-[#1F5D3B] dark:bg-emerald-600 text-white"
+                >
+                  Understood
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

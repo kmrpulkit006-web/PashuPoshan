@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Locale, SilageBunker, SilagePitLog } from '../lib/types';
 import { t } from '../lib/i18n';
 import { getLocalPits, saveLocalPit, addPitLogEntry } from '../lib/storage';
-import { Layers, Thermometer, ShieldAlert, CheckCircle2, AlertTriangle, Sparkles, Plus, X, Calendar, Activity } from 'lucide-react';
+import { Layers, Thermometer, CheckCircle2, AlertTriangle, Plus, X, Sparkles } from 'lucide-react';
 
 interface SilageScreenProps {
   locale: Locale;
@@ -25,6 +25,17 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
   const [pits, setPits] = useState<SilageBunker[]>([]);
   const [showAddPitModal, setShowAddPitModal] = useState(false);
   const [showLogModal, setShowLogModal] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowAddPitModal(false);
+        setShowLogModal(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // New Pit Form
   const [newPitName, setNewPitName] = useState('');
@@ -136,30 +147,24 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
 
           const statusConfig = {
             danger: {
-              badge: locale === 'hi' ? 'तुरंत सुधारें - खराब होने का खतरा' : 'Fix Now - Risk of Spoilage',
-              subtext: locale === 'hi'
-                ? 'साइलेज अधिक गर्म हो रहा है या हवा जा रही है। प्लास्टिक सील व वज़न तुरंत जांचें।'
-                : 'Silo is overheating or leaking air. Inspect plastic seal and weights immediately.',
+              badge: t('silage.status.heatingRisk', locale),
+              subtext: t('silage.heatingWarning', locale),
               badgeBg: 'bg-[#B3261E] text-white border-red-400',
               containerBg: 'bg-[#FDECEA] dark:bg-rose-950/40 border-[#B3261E]/80 dark:border-rose-500/50',
               textColor: 'text-[#B3261E] dark:text-rose-200',
               icon: <AlertTriangle className="w-5 h-5 text-[#B3261E] dark:text-rose-400 shrink-0" />,
             },
             warning: {
-              badge: locale === 'hi' ? 'जल्द जांचें - ध्यान दें' : 'Check Soon',
-              subtext: locale === 'hi'
-                ? 'हल्की गर्मी या मध्यम दबाव। अगले 24 घंटों में पुनः तापमान मापें।'
-                : 'Moderate packing or rising warmth. Re-check core temperature in 24 hours.',
+              badge: t('silage.status.heatingRisk', locale),
+              subtext: t('silage.subtitle', locale),
               badgeBg: 'bg-[#C2703D] text-white border-amber-400',
               containerBg: 'bg-[#fdf8f4] dark:bg-amber-950/40 border-[#C2703D]/80 dark:border-amber-500/50',
               textColor: 'text-[#C2703D] dark:text-amber-200',
               icon: <AlertTriangle className="w-5 h-5 text-[#C2703D] dark:text-amber-400 shrink-0" />,
             },
             safe: {
-              badge: locale === 'hi' ? 'सुरक्षित - उत्तम गुणवत्ता' : 'Safe',
-              subtext: locale === 'hi'
-                ? 'तापमान सामान्य (<38°C) व सील पूर्णतः वायुरोधी है। साइलेज सुरक्षित है।'
-                : 'Normal temperature (<38°C) and airtight seal. High quality fermentation.',
+              badge: pit.daysFermented >= 45 ? t('silage.status.ready', locale) : t('silage.status.fermenting', locale),
+              subtext: `${pit.daysFermented} ${t('silage.daysEnsiled', locale)} • ${pit.coreTemperature}°C ${t('silage.coreTemp', locale)}`,
               badgeBg: 'bg-[#1F5D3B] text-white border-emerald-400',
               containerBg: 'bg-[#edf7f0] dark:bg-emerald-950/40 border-[#1F5D3B]/80 dark:border-emerald-500/50',
               textColor: 'text-[#1F5D3B] dark:text-emerald-200',
@@ -347,13 +352,26 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
 
       {/* Add Pit Modal */}
       {showAddPitModal && (
-        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white max-h-[85vh] overflow-y-auto">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-silage-pit-title"
+          className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setShowAddPitModal(false)}
+        >
+          <div
+            className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-800 pb-2.5">
-              <h3 className="text-base font-black">Create New Silage Pit</h3>
+              <h3 id="create-silage-pit-title" className="text-base font-black">
+                {t('silage.createPit', locale)}
+              </h3>
               <button
+                type="button"
                 onClick={() => setShowAddPitModal(false)}
-                className="text-slate-500 hover:text-slate-900 dark:hover:text-white p-1"
+                className="text-slate-500 hover:text-slate-900 dark:hover:text-white w-11 h-11 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-2xl hover:bg-black/5 dark:hover:bg-white/10"
+                aria-label={t('common.close', locale)}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -361,13 +379,14 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
 
             <form onSubmit={handleCreatePit} className="space-y-3.5 text-xs">
               <div>
-                <label className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
-                  Bunker/Pit Name:
+                <label htmlFor="bunker-name-input" className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
+                  {t('silage.bunkerName', locale)}:
                 </label>
                 <input
+                  id="bunker-name-input"
                   type="text"
                   required
-                  placeholder="e.g. South Bunker #2"
+                  placeholder={t('silage.bunkerPlaceholder', locale)}
                   value={newPitName}
                   onChange={(e) => setNewPitName(e.target.value)}
                   className="w-full px-3.5 py-3 bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl text-[#1A1A1A] dark:text-white font-bold text-sm focus:outline-none focus:border-[#1F5D3B]"
@@ -375,10 +394,11 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               </div>
 
               <div>
-                <label className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
-                  Crop Type:
+                <label htmlFor="crop-type-select" className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
+                  {t('silage.cropType', locale)}:
                 </label>
                 <select
+                  id="crop-type-select"
                   value={newCropType}
                   onChange={(e) => {
                     const sel = e.target.value;
@@ -396,10 +416,11 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               </div>
 
               <div>
-                <label className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
-                  Initial Core Temp (°C):
+                <label htmlFor="core-temp-input" className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
+                  {t('silage.initialTemp', locale)}:
                 </label>
                 <input
+                  id="core-temp-input"
                   type="number"
                   step="0.5"
                   value={newTemp}
@@ -414,13 +435,13 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   onClick={() => setShowAddPitModal(false)}
                   className="w-1/2 py-3.5 bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 font-black rounded-2xl border-2 border-[#DCD3BF] dark:border-slate-700 min-h-[56px] active:scale-98 transition-all"
                 >
-                  Cancel
+                  {t('silage.cancel', locale)}
                 </button>
                 <button
                   type="submit"
                   className="w-1/2 py-3.5 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black rounded-2xl shadow-lg min-h-[56px] active:scale-98 transition-all"
                 >
-                  Create Pit
+                  {t('silage.savePit', locale)}
                 </button>
               </div>
             </form>
@@ -430,13 +451,26 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
 
       {/* Log Reading Modal */}
       {showLogModal && (
-        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white max-h-[85vh] overflow-y-auto">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="log-reading-title"
+          className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setShowLogModal(null)}
+        >
+          <div
+            className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-800 pb-2.5">
-              <h3 className="text-base font-black">Log Temperature Reading</h3>
+              <h3 id="log-reading-title" className="text-base font-black">
+                {t('silage.logTemp', locale)}
+              </h3>
               <button
+                type="button"
                 onClick={() => setShowLogModal(null)}
-                className="text-slate-500 hover:text-slate-900 dark:hover:text-white p-1"
+                className="text-slate-500 hover:text-slate-900 dark:hover:text-white w-11 h-11 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-2xl hover:bg-black/5 dark:hover:bg-white/10"
+                aria-label={t('common.close', locale)}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -444,10 +478,11 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
 
             <form onSubmit={handleAddLog} className="space-y-3.5 text-xs">
               <div>
-                <label className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
-                  Measured Core Temperature (°C):
+                <label htmlFor="log-temp-input" className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
+                  {t('silage.temperature', locale)}:
                 </label>
                 <input
+                  id="log-temp-input"
                   type="number"
                   step="0.5"
                   required
@@ -458,10 +493,11 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               </div>
 
               <div>
-                <label className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
-                  Compaction / Seal:
+                <label htmlFor="log-compaction-select" className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
+                  {t('silage.tightness', locale)}:
                 </label>
                 <select
+                  id="log-compaction-select"
                   value={logCompaction}
                   onChange={(e) => {
                     const sel = e.target.value;
@@ -478,10 +514,11 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               </div>
 
               <div>
-                <label className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
-                  Inspection Observations:
+                <label htmlFor="log-obs-input" className="text-[#5A5243] dark:text-slate-300 font-bold block mb-1">
+                  {t('ration.noteInputLabel', locale)}:
                 </label>
                 <input
+                  id="log-obs-input"
                   type="text"
                   placeholder="e.g. Clean lactic aroma, no surface mold"
                   value={logNotes}
@@ -496,13 +533,13 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   onClick={() => setShowLogModal(null)}
                   className="w-1/2 py-3.5 bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 font-black rounded-2xl border-2 border-[#DCD3BF] dark:border-slate-700 min-h-[56px] active:scale-98 transition-all"
                 >
-                  Cancel
+                  {t('silage.cancel', locale)}
                 </button>
                 <button
                   type="submit"
                   className="w-1/2 py-3.5 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black rounded-2xl shadow-lg min-h-[56px] active:scale-98 transition-all"
                 >
-                  Save Log
+                  {t('silage.saveReading', locale)}
                 </button>
               </div>
             </form>

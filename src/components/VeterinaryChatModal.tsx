@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Bot, Sparkles, Volume2, VolumeX, AlertCircle, CheckCircle2, RotateCcw } from 'lucide-react';
 import { Locale } from '../lib/types';
+import { t } from '../lib/i18n';
 
 interface Message {
   id: string;
@@ -68,7 +69,29 @@ How can I help you with your cattle's feed, milk yield, or health today?`,
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const quickPrompts = PRESET_PROMPTS[locale] || PRESET_PROMPTS['en'];
+  const quickPrompts = PRESET_PROMPTS[locale] || PRESET_PROMPTS['hi'] || PRESET_PROMPTS['en'];
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+        }
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (initialQuery && isOpen) {
@@ -196,30 +219,27 @@ How can I help you with your cattle's feed, milk yield, or health today?`,
         {/* Header */}
         <div className="bg-gradient-to-r from-[#1F5D3B] via-[#164E63] to-[#0F172A] text-white px-4 py-3 flex items-center justify-between shadow-md">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shadow-inner">
+            <div className="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shadow-inner">
               <Bot className="w-5 h-5 text-emerald-300" />
             </div>
             <div>
               <div className="flex items-center space-x-1.5">
                 <h2 id="vet-modal-title" className="text-sm sm:text-base font-bold text-white leading-tight">
-                  Pashu Mitra &bull; Doctor Help
+                  {t('chat.title', locale)}
                 </h2>
-                <span className="hidden sm:inline-block bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                  Doctor Support
-                </span>
               </div>
               <p className="text-[11px] text-emerald-100/80 leading-tight">
-                Cattle Nutrition &amp; Health &bull; ICAR-NDRI Guidelines
+                {t('chat.subtitle', locale)}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-1.5">
+          <div className="flex items-center space-x-1">
             <button
               onClick={handleResetChat}
-              className="p-1.5 text-emerald-100 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
-              title="Reset Conversation"
-              aria-label="Reset Conversation"
+              className="w-11 h-11 min-h-[44px] min-w-[44px] text-emerald-100 hover:text-white rounded-xl hover:bg-white/10 flex items-center justify-center transition-colors"
+              title={t('chat.clear', locale)}
+              aria-label={t('chat.clear', locale)}
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -228,9 +248,9 @@ How can I help you with your cattle's feed, milk yield, or health today?`,
                 if (window.speechSynthesis) window.speechSynthesis.cancel();
                 onClose();
               }}
-              className="p-1.5 text-emerald-100 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
-              title="Close Modal"
-              aria-label="Close"
+              className="w-11 h-11 min-h-[44px] min-w-[44px] text-emerald-100 hover:text-white rounded-xl hover:bg-white/10 flex items-center justify-center transition-colors"
+              title={t('common.close', locale)}
+              aria-label={t('common.close', locale)}
             >
               <X className="w-5 h-5" />
             </button>
@@ -310,13 +330,13 @@ How can I help you with your cattle's feed, milk yield, or health today?`,
 
         {/* Quick Prompts */}
         <div className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-3 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
-          <span className="text-[10px] uppercase font-bold text-slate-400 shrink-0">Suggested:</span>
+          <span className="text-[10px] uppercase font-bold text-slate-400 shrink-0">💡</span>
           {quickPrompts.map((prompt, idx) => (
             <button
               key={idx}
               onClick={() => handleSend(prompt)}
               disabled={isLoading}
-              className="text-[11px] whitespace-nowrap bg-emerald-50 dark:bg-slate-800 text-emerald-900 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-slate-700 px-2.5 py-1 rounded-full border border-emerald-200/80 dark:border-slate-700 transition-colors shrink-0 disabled:opacity-50"
+              className="text-xs whitespace-nowrap bg-emerald-50 dark:bg-slate-800 text-emerald-900 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-slate-700 px-3 py-2 min-h-[38px] rounded-full border border-emerald-200/80 dark:border-slate-700 transition-colors shrink-0 disabled:opacity-50 inline-flex items-center"
             >
               {prompt}
             </button>
@@ -332,23 +352,24 @@ How can I help you with your cattle's feed, milk yield, or health today?`,
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSend();
             }}
-            placeholder="Ask a question about cattle feed, milk yield, or sickness..."
+            placeholder={t('chat.placeholder', locale)}
             disabled={isLoading}
-            className="flex-1 text-xs sm:text-sm bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60"
+            className="flex-1 text-xs sm:text-sm min-h-[44px] bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60"
           />
           <button
             onClick={() => handleSend()}
             disabled={!inputQuery.trim() || isLoading}
-            className="bg-[#1F5D3B] hover:bg-[#184a2f] text-white px-3.5 py-2.5 rounded-xl font-medium text-xs sm:text-sm flex items-center space-x-1.5 transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
+            className="bg-[#1F5D3B] hover:bg-[#184a2f] text-white px-4 py-2.5 min-h-[44px] rounded-xl font-bold text-xs sm:text-sm flex items-center space-x-1.5 transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
+            aria-label={t('chat.send', locale)}
           >
             <Send className="w-4 h-4" />
-            <span className="hidden sm:inline">Ask</span>
+            <span className="hidden sm:inline">{t('chat.send', locale)}</span>
           </button>
         </div>
 
         {/* Bottom Disclaimer */}
-        <div className="bg-slate-100 dark:bg-slate-950 px-3 py-1 text-[10px] text-slate-500 text-center border-t border-slate-200 dark:border-slate-800">
-          Advisory guided by ICAR-NDRI dairy guidelines &bull; For livestock emergencies, dial 1962.
+        <div className="bg-slate-100 dark:bg-slate-950 px-3 py-2 text-[11px] text-[#5A5243] dark:text-slate-400 text-center border-t border-slate-200 dark:border-slate-800 font-medium">
+          {t('chat.disclaimer', locale)}
         </div>
       </div>
     </div>

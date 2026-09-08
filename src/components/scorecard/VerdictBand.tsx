@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle2, AlertTriangle, AlertOctagon } from 'lucide-react';
 import { FeedSample, Locale } from '../../lib/types';
+import { t } from '../../lib/i18n';
 
 interface VerdictBandProps {
   sample: FeedSample;
@@ -10,36 +11,6 @@ interface VerdictBandProps {
 export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
   const isTierA = sample.overallGrade.includes('Tier A');
   const isTierC = sample.overallGrade.includes('Tier C');
-
-  const plainVerdicts: Partial<Record<Locale, { safe: string; caution: string; danger: string }>> = {
-    hi: {
-      safe: 'पशुओं को खिलाने के लिए पूरी तरह सुरक्षित',
-      caution: 'सावधानी से खिलाएं — अतिरिक्त प्रोटीन मिलाएं',
-      danger: 'खतरा! पशुओं को बिल्कुल न खिलाएं',
-    },
-    en: {
-      safe: 'Safe to feed to dairy cattle',
-      caution: 'Feed with caution — supplementary protein needed',
-      danger: 'DO NOT FEED — CRITICAL HAZARD',
-    },
-    mr: {
-      safe: 'जनावरांना खाऊ घालण्यासाठी सुरक्षित',
-      caution: 'सावधगिरीने खाऊ घाला — अतिरिक्त प्रथिने आवश्यक',
-      danger: 'धोका! जनावरांना अजिबात खाऊ घालू नका',
-    },
-    gu: {
-      safe: 'પશુઓને ખવડાવવા માટે સંપૂર્ણ સલામત',
-      caution: 'સાવધાનીપૂર્વક ખવડાવો — પૂરક પ્રોટીન જરૂરી',
-      danger: 'જોખમ! પશુઓને બિલકુલ ન ખવડાવો',
-    },
-    pa: {
-      safe: 'ਪਸ਼ੂਆਂ ਨੂੰ ਖੁਆਉਣ ਲਈ ਬਿਲਕੁਲ ਸੁਰੱਖਿਅਤ',
-      caution: 'ਸਾਵਧਾਨੀ ਨਾਲ ਖੁਆਓ — ਵਾਧੂ ਪ੍ਰੋਟੀਨ ਦੀ ਲੋੜ',
-      danger: 'ਖ਼ਤਰਾ! ਪਸ਼ੂਆਂ ਨੂੰ ਬਿਲਕੁਲ ਨਾ ਖੁਆਓ',
-    },
-  };
-
-  const texts = plainVerdicts[locale] || plainVerdicts.hi || plainVerdicts.en!;
 
   if (sample.isNonFeedSample) {
     return (
@@ -73,13 +44,13 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
         </div>
         <div>
           <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/25 text-emerald-100">
-            🟢 {locale === 'hi' ? 'उत्तम चारा • खिलाने के लिए सुरक्षित' : 'Top Quality • Safe to Feed'}
+            🟢 {t('score.verdictSafe', locale)}
           </span>
           <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white">
-            {texts.safe}
+            {t('score.verdictSafe', locale)}
           </h2>
           <p className="text-xs text-emerald-100/90 mt-1 font-semibold">
-            {sample.name} {locale === 'hi' ? 'शुद्ध, पौष्टिक और दूध बढ़ाने के लिए उत्तम है।' : 'is clean, healthy, and good for milk yield.'}
+            {sample.name} - {t('score.verdictSubSafe', locale)}
           </p>
         </div>
       </div>
@@ -94,13 +65,13 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
         </div>
         <div>
           <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/30 text-rose-100">
-            🔴 {locale === 'hi' ? 'खतरा • पशुओं को बिल्कुल न खिलाएं' : 'Danger • Do Not Feed to Cattle'}
+            🔴 {t('score.verdictDanger', locale)}
           </span>
           <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white uppercase tracking-tight">
-            {texts.danger}
+            {t('score.verdictDanger', locale)}
           </h2>
           <p className="text-xs text-rose-100 font-bold mt-1">
-            {sample.name} {locale === 'hi' ? 'में फफूंद या यूरिया मिलावट का खतरा है। इससे पशु बीमार हो सकते हैं।' : 'has severe mold or chemical risk. Feeding this can make cattle sick.'}
+            {sample.name} - {t('score.verdictSubDanger', locale)}
           </p>
         </div>
       </div>
@@ -115,13 +86,13 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
       </div>
       <div>
         <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/25 text-amber-100">
-          🟡 {locale === 'hi' ? 'सामान्य चारा • अतिरिक्त पोषण जरूरी' : 'Fair Quality • Supplement Needed'}
+          🟡 {t('score.verdictFair', locale)}
         </span>
         <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white">
-          {texts.caution}
+          {t('score.verdictFair', locale)}
         </h2>
         <p className="text-xs text-amber-100 font-semibold mt-1">
-          {sample.name} {locale === 'hi' ? 'खिलाने में सुरक्षित है, लेकिन अच्छे दूध के लिए खल या दाना जरूर मिलाएं।' : 'is safe to feed, but add extra khal or cake for good milk yield.'}
+          {sample.name} - {t('score.verdictSubFair', locale)}
         </p>
       </div>
     </div>

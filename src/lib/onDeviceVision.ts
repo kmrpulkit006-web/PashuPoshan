@@ -276,7 +276,10 @@ export async function loadMobileNetModel(): Promise<any> {
         version: 1,
         alpha: 0.25,
       });
-    })();
+    })().catch((err) => {
+      mobilenetModelPromise = null;
+      throw err;
+    });
   }
   return mobilenetModelPromise;
 }

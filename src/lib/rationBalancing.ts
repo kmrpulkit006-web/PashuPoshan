@@ -83,7 +83,7 @@ export function calculatePrecisionRation(
 
   // If active sample is silage or green fodder, use its real tested metrics (or standard library fallback if pending lab)!
   if (active && (active.category === 'silage' || active.category === 'green_fodder')) {
-    const defaultGreen = active.category === 'silage' ? DEFAULT_FEED_LIBRARY.maize_silage : DEFAULT_FEED_LIBRARY.green_berseem;
+    const defaultGreen = active.category === 'silage' ? DEFAULT_FEED_LIBRARY.maize_silage : DEFAULT_FEED_LIBRARY.berseem_green;
     greenItem = {
       slot: 'green_fodder',
       feedName: active.name,

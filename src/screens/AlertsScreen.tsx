@@ -12,14 +12,15 @@ import {
   queueOfflineAlert,
   syncPendingAlerts,
 } from '../lib/storage';
-import { AlertTriangle, ShieldCheck, MapPin, Send, QrCode, CheckCircle2, Clock, Plus, X, RefreshCw, Cloud, Layers } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, MapPin, QrCode, CheckCircle2, Clock, Plus, X, RefreshCw, Cloud } from 'lucide-react';
 import { toHumanErrorMessage } from '../lib/humanErrors';
 
 interface AlertsScreenProps {
   locale: Locale;
+  isOnline: boolean;
 }
 
-export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
+export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale, isOnline }) => {
   const [alerts, setAlerts] = useState<CommunityFeedAlert[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
   const [batchNo, setBatchNo] = useState('');
@@ -32,6 +33,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
   const [pendingScans, setPendingScans] = useState<PendingOfflineScan[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatusMsg, setSyncStatusMsg] = useState<string>('');
+  const [noticeModal, setNoticeModal] = useState<{ title?: string; message: string } | null>(null);
 
   const refreshPending = () => {
     setPendingScans(getPendingOfflineScans());
@@ -75,9 +77,27 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!showReportModal && !noticeModal) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowReportModal(false);
+        setNoticeModal(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showReportModal, noticeModal]);
+
   const handleManualSync = async () => {
-    if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      alert('You are currently offline. Please connect to Wi-Fi or mobile cellular data to sync pending scans.');
+    if (!isOnline || (typeof navigator !== 'undefined' && !navigator.onLine)) {
+      setNoticeModal({
+        title: locale === 'hi' ? 'ऑफ़लाइन सूचना' : 'Offline Notice',
+        message:
+          locale === 'hi'
+            ? 'आप अभी ऑफ़लाइन हैं। सिंक करने के लिए कृपया इंटरनेट या मोबाइल डेटा से जुड़ें।'
+            : 'You are currently offline. Please connect to Wi-Fi or mobile cellular data to sync pending scans.',
+      });
       return;
     }
 
@@ -97,13 +117,28 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
       refreshPending();
       setIsSyncing(false);
       if (successful > 0) {
-        alert(`Sync Complete (सिंक संपन्न): Successfully processed ${successful} offline scan(s).`);
+        setNoticeModal({
+          title: locale === 'hi' ? 'सिंक संपन्न' : 'Sync Complete',
+          message:
+            locale === 'hi'
+              ? `सिंक संपन्न: ${successful} ऑफ़लाइन स्कैन सफलतापूर्वक अपलोड हुए।`
+              : `Sync Complete: Successfully processed ${successful} offline scan(s).`,
+        });
       } else if (failed > 0) {
-        alert(`Sync notice: ${failed} scan(s) could not be synchronized. Please check network connection.`);
+        setNoticeModal({
+          title: locale === 'hi' ? 'सिंक सूचना' : 'Sync Notice',
+          message:
+            locale === 'hi'
+              ? `${failed} स्कैन सिंक नहीं हो सके। कृपया नेटवर्क कनेक्शन की जाँच करें।`
+              : `Sync notice: ${failed} scan(s) could not be synchronized. Please check network connection.`,
+        });
       }
     } catch (err: any) {
       setIsSyncing(false);
-      alert(toHumanErrorMessage(err, locale));
+      setNoticeModal({
+        title: locale === 'hi' ? 'सिंक त्रुटि' : 'Sync Notice',
+        message: toHumanErrorMessage(err, locale),
+      });
     }
   };
 
@@ -155,14 +190,16 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
   };
 
   const handleSimulateQrVerification = () => {
-    alert(
-      'DEMO SIMULATION:\n\n' +
-      'Simulated BIS / NDDB Feed Bag QR Scan.\n\n' +
-      'License: BIS/CM/L-7819202 (Compliant Type II Compound Cattle Feed).\n' +
-      'Manufacturer: Anand Regional Cooperative Milk Producers Union.\n' +
-      'Validity: Up to 12/2026.\n\n' +
-      '(Note: In production, this directly queries the BIS Manakonline verification portal).'
-    );
+    setNoticeModal({
+      title: 'Feed Bag QR Verification',
+      message:
+        'DEMO SIMULATION:\n\n' +
+        'Simulated BIS / NDDB Feed Bag QR Scan.\n\n' +
+        'License: BIS/CM/L-7819202 (Compliant Type II Compound Cattle Feed).\n' +
+        'Manufacturer: Anand Regional Cooperative Milk Producers Union.\n' +
+        'Validity: Up to 12/2026.\n\n' +
+        '(Note: In production, this directly queries the BIS Manakonline verification portal).',
+    });
   };
 
   return (
@@ -184,35 +221,72 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
                 </span>
               </div>
             </div>
-            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#C2703D] text-white animate-pulse">
-              Waiting for network
-            </span>
+            {/* Header Badge */}
+            {!isOnline ? (
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#C2703D] text-white animate-pulse">
+                {t('sync.waitingNetwork', locale)}
+              </span>
+            ) : pendingScans.some((s) => s.syncStatus === 'failed' || s.failureReason === 'api_error') ? (
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-600 text-white">
+                {t('sync.failedRetry', locale)}
+              </span>
+            ) : (
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-600 text-white">
+                {t('sync.readyToSync', locale)}
+              </span>
+            )}
           </div>
 
           <div className="space-y-1.5 max-h-36 overflow-y-auto">
-            {pendingScans.map((scan) => (
-              <div
-                key={scan.id}
-                className="flex items-center justify-between p-2 rounded-xl bg-white/80 dark:bg-slate-900 border border-[#DCD3BF] dark:border-slate-800 text-xs"
-              >
-                <div className="flex items-center space-x-2 min-w-0">
-                  <span className="text-base shrink-0">
-                    {scan.category === 'silage' ? '🌾' : '🌽'}
-                  </span>
-                  <div className="min-w-0">
-                    <span className="font-bold capitalize truncate block text-[#1A1A1A] dark:text-white">
-                      {scan.category.replace('_', ' ')}
+            {pendingScans.map((scan) => {
+              const scanDate = new Date(scan.timestamp);
+              const now = new Date();
+              const isToday =
+                scanDate.getDate() === now.getDate() &&
+                scanDate.getMonth() === now.getMonth() &&
+                scanDate.getFullYear() === now.getFullYear();
+              const formattedTime = isToday
+                ? scanDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                : `${scanDate.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${scanDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+
+              return (
+                <div
+                  key={scan.id}
+                  className="flex items-center justify-between p-2 rounded-xl bg-white/80 dark:bg-slate-900 border border-[#DCD3BF] dark:border-slate-800 text-xs gap-2"
+                >
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <span className="text-base shrink-0">
+                      {scan.category === 'silage' ? '🌾' : '🌽'}
                     </span>
-                    <span className="text-[9px] text-[#5A5243] dark:text-slate-400">
-                      {new Date(scan.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                    <div className="min-w-0">
+                      <span className="font-bold capitalize truncate block text-[#1A1A1A] dark:text-white">
+                        {scan.category.replace('_', ' ')}
+                      </span>
+                      <span className="text-[9px] text-[#5A5243] dark:text-slate-400">
+                        {formattedTime}
+                      </span>
+                    </div>
                   </div>
+                  {scan.syncStatus === 'syncing' ? (
+                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 flex items-center space-x-1 shrink-0">
+                      <RefreshCw className="w-3 h-3 animate-spin mr-1" />
+                      {t('sync.syncing', locale)}
+                    </span>
+                  ) : scan.syncStatus === 'failed' ? (
+                    <span
+                      className="text-[10px] font-bold text-rose-600 dark:text-rose-400 truncate max-w-[140px] text-right shrink-0"
+                      title={scan.errorMessage}
+                    >
+                      {toHumanErrorMessage(scan.errorMessage || 'Sync failed', locale)}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold text-[#C2703D] dark:text-amber-400 shrink-0">
+                      {t('sync.readyToSync', locale)}
+                    </span>
+                  )}
                 </div>
-                <span className="text-[10px] font-bold text-[#C2703D] dark:text-amber-400">
-                  Ready to sync
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <button
@@ -222,7 +296,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
             className="w-full py-3 px-4 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs sm:text-sm rounded-xl shadow-md active:scale-98 transition-all flex items-center justify-center space-x-2 min-h-[56px] disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span>{isSyncing ? syncStatusMsg : 'Sync Now (अभी सिंक करें)'}</span>
+            <span>{isSyncing ? (syncStatusMsg || t('sync.syncing', locale)) : t('sync.syncNow', locale)}</span>
           </button>
         </div>
       )}
@@ -432,39 +506,46 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
 
       {/* Report Modal */}
       {showReportModal && (
-        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="report-modal-title"
+        >
           <div className="bg-field-surface dark:bg-slate-900 border border-field-border dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-field-text dark:text-white">Report Suspicious Feed Batch</h3>
+              <h3 id="report-modal-title" className="text-base font-bold text-field-text dark:text-white">
+                {t('alerts.reportModalTitle', locale)}
+              </h3>
               <button
+                type="button"
                 onClick={() => setShowReportModal(false)}
-                className="w-9 h-9 rounded-full bg-field-base dark:bg-slate-800 text-field-text/70 dark:text-slate-400 hover:text-field-text dark:hover:text-white flex items-center justify-center"
+                className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full bg-field-base dark:bg-slate-800 text-field-text/70 dark:text-slate-400 hover:text-field-text dark:hover:text-white flex items-center justify-center transition-colors"
+                aria-label={t('common.close', locale)}
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             <p className="text-xs text-field-text/70 dark:text-slate-300">
-              Submit details to alert dairy cooperative members and livestock officers in your taluka.
+              {t('alerts.reportModalSub', locale)}
             </p>
 
             {submitted ? (
               <div className="py-8 text-center text-brand-700 dark:text-emerald-400 space-y-2">
                 <CheckCircle2 className="w-12 h-12 mx-auto animate-bounce" />
                 <div className="text-sm font-bold">
-                  {submitStatus === 'online' ? 'Report Published to Live Radar!' : 'Saved locally. Will sync when online.'}
-                </div>
-                <div className="text-xs text-field-text/70 dark:text-slate-300">
-                  {submitStatus === 'online'
-                    ? 'Shared across regional dairy cooperative network'
-                    : 'Queued for automatic community broadcast'}
+                  {t('alerts.reportSuccess', locale)}
                 </div>
               </div>
             ) : (
               <form onSubmit={handleSubmitReport} className="space-y-3 text-sm">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-field-text dark:text-slate-300 font-bold block mb-1 text-xs">District:</label>
+                    <label htmlFor="report-district" className="text-field-text dark:text-slate-300 font-bold block mb-1 text-xs">
+                      {t('alerts.location', locale)} (District):
+                    </label>
                     <input
+                      id="report-district"
                       type="text"
                       required
                       placeholder="e.g. Pune"
@@ -474,8 +555,11 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
                     />
                   </div>
                   <div>
-                    <label className="text-field-text dark:text-slate-300 font-bold block mb-1 text-xs">Taluka:</label>
+                    <label htmlFor="report-taluka" className="text-field-text dark:text-slate-300 font-bold block mb-1 text-xs">
+                      {t('alerts.location', locale)} (Taluka):
+                    </label>
                     <input
+                      id="report-taluka"
                       type="text"
                       placeholder="e.g. Baramati"
                       value={taluka}
@@ -486,8 +570,11 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
                 </div>
 
                 <div>
-                  <label className="text-field-text dark:text-slate-300 font-bold block mb-1">Feed Brand / Supplier:</label>
+                  <label htmlFor="report-brand" className="text-field-text dark:text-slate-300 font-bold block mb-1">
+                    {t('alerts.supplier', locale)}:
+                  </label>
                   <input
+                    id="report-brand"
                     type="text"
                     required
                     placeholder="e.g. Kisan Super Pellets"
@@ -498,8 +585,11 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
                 </div>
 
                 <div>
-                  <label className="text-field-text dark:text-slate-300 font-bold block mb-1">Batch Number:</label>
+                  <label htmlFor="report-batch" className="text-field-text dark:text-slate-300 font-bold block mb-1">
+                    {t('score.certNo', locale)}:
+                  </label>
                   <input
+                    id="report-batch"
                     type="text"
                     required
                     placeholder="e.g. BATCH-8891"
@@ -510,10 +600,13 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
                 </div>
 
                 <div>
-                  <label className="text-field-text dark:text-slate-300 font-bold block mb-1">Observed Issue / Adulteration:</label>
+                  <label htmlFor="report-issue" className="text-field-text dark:text-slate-300 font-bold block mb-1">
+                    {t('alerts.issueDescription', locale)}:
+                  </label>
                   <textarea
+                    id="report-issue"
                     rows={3}
-                    placeholder="e.g. Heavy sand settling in trough, ammoniacal odor, cows refusing feed."
+                    placeholder={t('alerts.issuePlaceholder', locale)}
                     value={issue}
                     onChange={(e) => setIssue(e.target.value)}
                     className="w-full bg-field-base dark:bg-slate-800 border border-field-border dark:border-slate-700 rounded-xl p-3 text-field-text dark:text-white focus:outline-none focus:border-brand-500 text-sm"
@@ -526,17 +619,54 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
                     onClick={() => setShowReportModal(false)}
                     className="flex-1 py-3 bg-field-base dark:bg-slate-800 text-field-text dark:text-slate-300 font-bold rounded-xl border border-field-border dark:border-slate-700 min-h-[56px]"
                   >
-                    Cancel
+                    {t('common.cancel', locale)}
                   </button>
                   <button
                     type="submit"
                     className="flex-1 py-3 bg-danger-600 hover:bg-danger-700 text-white font-bold rounded-xl shadow min-h-[56px]"
                   >
-                    Submit Alert
+                    {t('alerts.submitReport', locale)}
                   </button>
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* In-app Notice / Alert Modal */}
+      {noticeModal && (
+        <div
+          className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="bg-[#FBF8F1] dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-2xl text-[#1A1A1A] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-800 pb-2.5">
+              <h3 className="text-sm font-black flex items-center space-x-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+                <span>{noticeModal.title || 'Notice'}</span>
+              </h3>
+              <button
+                onClick={() => setNoticeModal(null)}
+                className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"
+                aria-label={t('common.close', locale)}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-xs text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed">
+              {noticeModal.message}
+            </p>
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setNoticeModal(null)}
+                className="w-full py-3 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs rounded-2xl shadow-lg min-h-[48px] transition-all"
+              >
+                {t('common.understood', locale)}
+              </button>
+            </div>
           </div>
         </div>
       )}

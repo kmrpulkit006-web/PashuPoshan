@@ -118,11 +118,11 @@ export class GeminiFlashVisionProvider implements VisionProvider {
         }
       } catch (err: any) {
         if (err.name === 'AbortError') {
-          throw new Error(`Gemini Vision API request to ${candidate} timed out after 15 seconds.`);
+          lastError = `Gemini Vision API request to ${candidate} timed out after 15 seconds.`;
+          continue;
         }
-        if (err.message && !err.message.includes('404')) {
-          throw err;
-        }
+        lastError = `${candidate}: ${err.message || 'Network error'}`;
+        continue;
       } finally {
         clearTimeout(timeoutId);
       }

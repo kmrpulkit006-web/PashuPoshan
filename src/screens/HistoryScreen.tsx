@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FeedSample, FeedCategory, Locale } from '../lib/types';
 import { getLocalScans } from '../lib/storage';
 import { t } from '../lib/i18n';
-import { Camera, ArrowRight, Clock, Plus, Sparkles, Filter } from 'lucide-react';
+import { Camera, ArrowRight, Clock, Plus } from 'lucide-react';
 
 interface HistoryScreenProps {
   onSelectSample: (sample: FeedSample) => void;
@@ -36,10 +36,10 @@ function formatFriendlyTimestamp(timestampStr: string, locale: Locale): string {
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     if (isToday) {
-      return locale === 'hi' ? `आज, ${timeStr}` : `Today, ${timeStr}`;
+      return `${t('common.today', locale)}, ${timeStr}`;
     }
     if (isYesterday) {
-      return locale === 'hi' ? `कल, ${timeStr}` : `Yesterday, ${timeStr}`;
+      return `${t('common.yesterday', locale)}, ${timeStr}`;
     }
 
     const dateStr = date.toLocaleDateString(locale === 'hi' ? 'hi-IN' : 'en-IN', {
@@ -53,13 +53,12 @@ function formatFriendlyTimestamp(timestampStr: string, locale: Locale): string {
 }
 
 function getVerdictBadge(sample: FeedSample, locale: Locale) {
-  const isHi = locale === 'hi';
   const grade = sample.overallGrade || '';
 
   if (grade.includes('Tier A') || grade.toLowerCase().includes('good') || sample.visualAnalysis?.overallVisualCondition === 'good') {
     return {
       dot: '🟢',
-      label: isHi ? 'उत्तम (GOOD)' : 'GOOD',
+      label: t('history.verdictGood', locale),
       tagColor: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700',
     };
   }
@@ -67,14 +66,14 @@ function getVerdictBadge(sample: FeedSample, locale: Locale) {
   if (grade.includes('Tier B') || sample.visualAnalysis?.overallVisualCondition === 'fair') {
     return {
       dot: '🟡',
-      label: isHi ? 'सामान्य (FAIR)' : 'FAIR',
+      label: t('history.verdictFair', locale),
       tagColor: 'bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-300 border-amber-300 dark:border-amber-700',
     };
   }
 
   return {
     dot: '🔴',
-    label: isHi ? 'खतरा (DANGER)' : 'DANGER',
+    label: t('history.verdictDanger', locale),
     tagColor: 'bg-red-100 text-red-900 dark:bg-red-950/80 dark:text-red-300 border-red-300 dark:border-red-700',
   };
 }
@@ -102,7 +101,6 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
 }) => {
   const [scans, setScans] = useState<FeedSample[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<'all' | FeedCategory>('all');
-  const isDark = theme === 'dark';
 
   useEffect(() => {
     const loaded = getLocalScans();
@@ -113,6 +111,21 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
     if (selectedCategory === 'all') return true;
     return s.category === selectedCategory;
   });
+
+  const getLocalizedCategoryName = (cat: FeedCategory): string => {
+    switch (cat) {
+      case 'silage':
+        return t('history.silage', locale);
+      case 'concentrate':
+        return t('history.concentrate', locale);
+      case 'green_fodder':
+        return t('history.greenFodder', locale);
+      case 'dry_fodder':
+        return t('history.dryFodder', locale);
+      default:
+        return cat;
+    }
+  };
 
   return (
     <div className="p-3 sm:p-4 space-y-4 max-w-lg mx-auto pb-8">
@@ -125,77 +138,90 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black tracking-tight">
-                {locale === 'hi' ? 'पिछली जांचें (इतिहास)' : 'Previous Feed Tests'}
+                {t('history.title', locale)}
               </h2>
               <p className="text-xs text-emerald-100/90 font-medium">
-                {locale === 'hi'
-                  ? `${scans.length} जांच रिकॉर्ड सहेजे गए हैं`
-                  : `${scans.length} test records saved`}
+                {scans.length} {t('history.title', locale)}
               </p>
             </div>
           </div>
 
           <button
             onClick={onNavigateToScan}
-            className="flex items-center space-x-1 bg-white text-[#1F5D3B] font-black text-xs px-3 py-2 rounded-xl shadow hover:bg-emerald-50 active:scale-95 transition-all min-h-[40px]"
+            className="flex items-center space-x-1.5 bg-white text-[#1F5D3B] font-black text-xs px-3.5 py-2.5 rounded-xl shadow hover:bg-emerald-50 active:scale-95 transition-all min-h-[44px]"
+            aria-label={t('history.newTest', locale)}
           >
             <Plus className="w-4 h-4" />
-            <span>{locale === 'hi' ? 'नई जांच' : 'New Test'}</span>
+            <span>{t('history.newTest', locale)}</span>
           </button>
         </div>
       </div>
 
       {/* Category Filter Chips */}
-      <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
+      <div
+        className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1"
+        role="tablist"
+        aria-label="Filter test history by feed category"
+      >
         <button
+          role="tab"
+          aria-selected={selectedCategory === 'all'}
           onClick={() => setSelectedCategory('all')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+          className={`px-3.5 py-2.5 min-h-[44px] rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
             selectedCategory === 'all'
               ? 'bg-[#1F5D3B] text-white border-[#1F5D3B]'
               : 'bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 border-[#DCD3BF] dark:border-slate-700'
           }`}
         >
-          {locale === 'hi' ? 'सभी' : 'All'} ({scans.length})
+          {t('history.all', locale)} ({scans.length})
         </button>
         <button
+          role="tab"
+          aria-selected={selectedCategory === 'silage'}
           onClick={() => setSelectedCategory('silage')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+          className={`px-3.5 py-2.5 min-h-[44px] rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
             selectedCategory === 'silage'
               ? 'bg-[#1F5D3B] text-white border-[#1F5D3B]'
               : 'bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 border-[#DCD3BF] dark:border-slate-700'
           }`}
         >
-          🌾 {locale === 'hi' ? 'साइलेज' : 'Silage'}
+          🌾 {t('history.silage', locale)}
         </button>
         <button
+          role="tab"
+          aria-selected={selectedCategory === 'concentrate'}
           onClick={() => setSelectedCategory('concentrate')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+          className={`px-3.5 py-2.5 min-h-[44px] rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
             selectedCategory === 'concentrate'
               ? 'bg-[#1F5D3B] text-white border-[#1F5D3B]'
               : 'bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 border-[#DCD3BF] dark:border-slate-700'
           }`}
         >
-          🥣 {locale === 'hi' ? 'खल / दाना' : 'Feed / Pellets'}
+          🥣 {t('history.concentrate', locale)}
         </button>
         <button
+          role="tab"
+          aria-selected={selectedCategory === 'green_fodder'}
           onClick={() => setSelectedCategory('green_fodder')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+          className={`px-3.5 py-2.5 min-h-[44px] rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
             selectedCategory === 'green_fodder'
               ? 'bg-[#1F5D3B] text-white border-[#1F5D3B]'
               : 'bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 border-[#DCD3BF] dark:border-slate-700'
           }`}
         >
-          🌱 {locale === 'hi' ? 'हरा चारा' : 'Green Grass'}
+          🌱 {t('history.greenFodder', locale)}
         </button>
         <button
+          role="tab"
+          aria-selected={selectedCategory === 'dry_fodder'}
           onClick={() => setSelectedCategory('dry_fodder')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+          className={`px-3.5 py-2.5 min-h-[44px] rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
             selectedCategory === 'dry_fodder'
               ? 'bg-[#1F5D3B] text-white border-[#1F5D3B]'
               : 'bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 border-[#DCD3BF] dark:border-slate-700'
           }`}
         >
-          🌾 {locale === 'hi' ? 'भूसा' : 'Dry Straw'}
+          🌾 {t('history.dryFodder', locale)}
         </button>
       </div>
 
@@ -208,20 +234,18 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
             </div>
             <div className="space-y-1">
               <h3 className="text-base font-black text-[#1A1A1A] dark:text-white">
-                {locale === 'hi' ? 'कोई पिछली जांच नहीं मिली' : 'No feed tests yet'}
+                {t('history.empty', locale)}
               </h3>
               <p className="text-xs text-[#5A5243] dark:text-slate-400 max-w-xs mx-auto">
-                {locale === 'hi'
-                  ? 'अपने पशु के चारे की जांच करने के लिए एक फोटो लें या स्ट्रिप जांचें।'
-                  : 'Take a clear photo of your cattle feed or check with a strip.'}
+                {t('history.emptySub', locale)}
               </p>
             </div>
             <button
               onClick={onNavigateToScan}
-              className="px-5 py-3 bg-[#1F5D3B] hover:bg-[#184a2f] text-white rounded-2xl font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 inline-flex items-center space-x-2"
+              className="px-5 py-3 min-h-[44px] bg-[#1F5D3B] hover:bg-[#184a2f] text-white rounded-2xl font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 inline-flex items-center space-x-2"
             >
               <Camera className="w-4 h-4" />
-              <span>{locale === 'hi' ? 'चारा जांचें' : 'Check Feed Now'}</span>
+              <span>{t('history.startFirst', locale)}</span>
             </button>
           </div>
         ) : (
@@ -249,12 +273,12 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
                   <div className="flex items-center space-x-2 min-w-0">
                     <span className="text-lg shrink-0">📷</span>
                     <h3 className="font-black text-sm sm:text-base text-[#1A1A1A] dark:text-white truncate">
-                      {sample.name || (locale === 'hi' ? 'चारा जांच' : 'Feed Test')}
+                      {sample.name || t('nav.scan', locale)}
                     </h3>
                   </div>
 
                   <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0">
-                    {categoryIcon} {sample.category}
+                    {categoryIcon} {getLocalizedCategoryName(sample.category)}
                   </span>
                 </div>
 
@@ -276,7 +300,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({
 
                   {/* View Result Link */}
                   <div className="flex items-center space-x-1 text-xs font-black text-[#1F5D3B] dark:text-emerald-400 hover:underline">
-                    <span>{locale === 'hi' ? 'जांच परिणाम देखें' : 'View Result'}</span>
+                    <span>{t('history.viewResult', locale)}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </div>
                 </div>

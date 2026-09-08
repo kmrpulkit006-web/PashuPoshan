@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Sparkles, Play, Square } from 'lucide-react';
+import { Volume2, Square } from 'lucide-react';
 import { Locale } from '../lib/types';
 import { t } from '../lib/i18n';
 
@@ -21,6 +21,11 @@ export const AudioGuidance: React.FC<AudioGuidanceProps> = ({
     if ('speechSynthesis' in window) {
       setSupported(true);
     }
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
   }, []);
 
   const handleTogglePlay = () => {

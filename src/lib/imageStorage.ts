@@ -101,3 +101,19 @@ export async function getImageFromIndexedDb(id: string): Promise<string | null> 
     return null;
   }
 }
+
+export async function deleteImageFromIndexedDb(id: string): Promise<void> {
+  try {
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch (e) {
+    // Ignore error if IndexedDB is not available
+  }
+}
+

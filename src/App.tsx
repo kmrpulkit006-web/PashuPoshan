@@ -220,7 +220,7 @@ export const App: React.FC = () => {
               )}
 
               {activeTab === 'alerts' && (
-                <AlertsScreen locale={locale} />
+                <AlertsScreen locale={locale} isOnline={isOnline} />
               )}
             </main>
 

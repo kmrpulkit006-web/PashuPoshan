@@ -35,16 +35,21 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="w-16 h-16 rounded-2xl bg-danger-500/15 border border-danger-500/30 text-danger-700 dark:text-rose-400 flex items-center justify-center mb-4">
             <AlertOctagon className="w-9 h-9" />
           </div>
-          <h2 className="text-lg font-bold mb-2">Something went wrong</h2>
-          <p className="text-sm text-field-text/70 dark:text-slate-400 max-w-xs mb-6">
-            The application encountered an unexpected issue. Your locally saved test records and herd data remain safe.
+          <h2 className="text-lg font-black mb-2">
+            Something went wrong • कुछ गलत हो गया
+          </h2>
+          <p className="text-sm text-field-text/70 dark:text-slate-300 max-w-sm mb-6 leading-relaxed">
+            The application encountered an unexpected issue. Your locally saved test records and cattle data remain safe.<br />
+            <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block">
+              चिंता न करें, आपके पहले से सहेजे गए सभी टेस्ट रिकॉर्ड व पशु डेटा फोन में सुरक्षित हैं।
+            </span>
           </p>
           <button
             onClick={this.handleReset}
-            className="flex items-center space-x-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-2xl shadow-md transition-all min-h-[56px]"
+            className="flex items-center space-x-2 px-6 py-3.5 bg-[#1F5D3B] hover:bg-[#184a2f] text-white text-sm font-black rounded-2xl shadow-lg transition-all min-h-[56px] active:scale-95"
           >
             <RotateCcw className="w-5 h-5" />
-            <span>Reload Application</span>
+            <span>Reload App • ऐप दोबारा शुरू करें</span>
           </button>
         </div>
       );

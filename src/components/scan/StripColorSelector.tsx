@@ -14,18 +14,24 @@ export const StripColorSelector: React.FC<StripColorSelectorProps> = ({
   locale,
 }) => {
   return (
-    <div className="bg-[#F3EEE1] dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-4 space-y-2.5 text-[#1A1A1A] dark:text-white shadow-sm">
+    <div
+      role="radiogroup"
+      aria-label={t('scan.stripSimulation', locale)}
+      className="bg-[#F3EEE1] dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-4 space-y-2.5 text-[#1A1A1A] dark:text-white shadow-sm"
+    >
       <div className="flex items-center justify-between">
         <span className="text-xs font-black">
-          {locale === 'hi' ? 'जांच पट्टी का प्रकार चुनें' : 'Select Reagent / Strip Type'}
+          {t('scan.stripSimulation', locale)}
         </span>
         <span className="text-[11px] text-[#5A5243] dark:text-slate-400 font-bold">
-          {locale === 'hi' ? 'रंग सीधे तस्वीर से पढ़ा जाएगा' : 'Color sampled from photo'}
+          {t('scan.stripTapTip', locale)}
         </span>
       </div>
       <div className="grid grid-cols-3 gap-2.5">
         <button
           type="button"
+          role="radio"
+          aria-checked={stripColor === 'yellow'}
           onClick={() => setStripColor('yellow')}
           className={`p-2.5 rounded-2xl border-2 text-center transition-all min-h-[56px] flex flex-col items-center justify-center ${
             stripColor === 'yellow'
@@ -35,15 +41,17 @@ export const StripColorSelector: React.FC<StripColorSelectorProps> = ({
         >
           <div className="w-full h-3 rounded-full bg-amber-400 mb-1.5 shadow-inner" />
           <div className="text-[11px] font-bold leading-tight">
-            {locale === 'hi' ? 'यूरिया पट्टी' : 'Urea Strip'}
+            {t('scan.strip.urea', locale)}
           </div>
-          <div className="text-[9px] text-[#5A5243] dark:text-slate-400">
-            {locale === 'hi' ? '0-5% पैमाना' : '0-5% Scale'}
+          <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-medium">
+            0-5% Scale
           </div>
         </button>
 
         <button
           type="button"
+          role="radio"
+          aria-checked={stripColor === 'magenta'}
           onClick={() => setStripColor('magenta')}
           className={`p-2.5 rounded-2xl border-2 text-center transition-all min-h-[56px] flex flex-col items-center justify-center ${
             stripColor === 'magenta'
@@ -53,15 +61,17 @@ export const StripColorSelector: React.FC<StripColorSelectorProps> = ({
         >
           <div className="w-full h-3 rounded-full bg-pink-600 mb-1.5 shadow-inner" />
           <div className="text-[11px] font-bold leading-tight">
-            {locale === 'hi' ? 'मिलावट पट्टी' : 'Adulteration'}
+            {t('score.adulterationTitle', locale)}
           </div>
-          <div className="text-[9px] text-[#5A5243] dark:text-slate-400">
-            {locale === 'hi' ? 'तीव्र रीएजेंट' : 'Spike Reagent'}
+          <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-medium">
+            Spike Test
           </div>
         </button>
 
         <button
           type="button"
+          role="radio"
+          aria-checked={stripColor === 'green'}
           onClick={() => setStripColor('green')}
           className={`p-2.5 rounded-2xl border-2 text-center transition-all min-h-[56px] flex flex-col items-center justify-center ${
             stripColor === 'green'
@@ -71,10 +81,10 @@ export const StripColorSelector: React.FC<StripColorSelectorProps> = ({
         >
           <div className="w-full h-3 rounded-full bg-teal-500 mb-1.5 shadow-inner" />
           <div className="text-[11px] font-bold leading-tight">
-            {locale === 'hi' ? 'pH पट्टी' : 'pH Indicator'}
+            {t('scan.strip.ph', locale)}
           </div>
-          <div className="text-[9px] text-[#5A5243] dark:text-slate-400">
-            {locale === 'hi' ? 'साइलेज किण्वन' : 'Fermentation'}
+          <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-medium">
+            {t('silage.title', locale)}
           </div>
         </button>
       </div>
