@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { CowProfile, FeedSample, CowYieldLogEntry, Locale } from '../../lib/types';
 import { getLocalYieldLogs, saveYieldLogEntry, getSamplesForCow } from '../../lib/storage';
-import { t } from '../../lib/i18n';
+import { t, getBcp47Locale } from '../../lib/i18n';
 
 interface CowHistoryTimelineProps {
   cow: CowProfile;
@@ -177,7 +177,7 @@ export const CowHistoryTimeline: React.FC<CowHistoryTimelineProps> = ({
     try {
       const d = new Date(isoOrStr);
       if (isNaN(d.getTime())) return isoOrStr;
-      return d.toLocaleDateString(locale === 'hi' ? 'hi-IN' : 'en-IN', {
+      return d.toLocaleDateString(getBcp47Locale(locale), {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
@@ -257,7 +257,7 @@ export const CowHistoryTimeline: React.FC<CowHistoryTimelineProps> = ({
                 <div className="flex items-center space-x-1.5">
                   <Milk className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400" />
                   <span className="font-extrabold text-xs text-[#1F5D3B] dark:text-emerald-300">
-                    {locale === 'hi' ? 'दैनिक दूध उत्पादन दर्ज करें' : "Log Today's Milk Yield"}
+                    {t('ration.logYieldTitle', locale)}
                   </span>
                 </div>
                 <button

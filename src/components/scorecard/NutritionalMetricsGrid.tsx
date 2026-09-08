@@ -48,7 +48,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
             </div>
             <div className="p-2.5 bg-white/80 dark:bg-slate-900/80 border border-[#DCD3BF] dark:border-slate-700 rounded-xl">
               <div className="text-[11px] font-bold text-[#5A5243] dark:text-slate-400">
-                Fermentation Type:
+                {t('score.silageAcidType', locale)}
               </div>
               <div className="text-xs font-bold text-[#1A1A1A] dark:text-slate-200 truncate mt-0.5">
                 {sample.silageMetrics.primaryAcid}
@@ -66,8 +66,8 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
           </h4>
           <span className="text-[10px] text-[#C2703D] dark:text-amber-400 font-bold">
             {sample.metrics.requiresLabTest
-              ? (locale === 'hi' ? '*लैब परीक्षण आवश्यक' : '*Lab Testing Recommended')
-              : (locale === 'hi' ? '*त्वरित जांच' : '*Quick Farm Check')}
+              ? `*${t('score.labRequired', locale)}`
+              : `*${t('score.farmCheck', locale)}`}
           </span>
         </div>
 
@@ -126,34 +126,32 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
         ) : (
           <div className="bg-[#fdf8f4] dark:bg-amber-950/40 border-2 border-[#C2703D] dark:border-amber-600/60 rounded-2xl p-4 space-y-2 text-[#1A1A1A] dark:text-white shadow-sm">
             <div className="flex items-center space-x-2 text-xs font-black text-[#C2703D] dark:text-amber-300 uppercase tracking-wide">
-              <span>🔬 {locale === 'hi' ? 'विस्तृत लैब परीक्षण (यदि जरूरी हो)' : 'Detailed Lab Testing (If Needed)'}</span>
+              <span>🔬 {t('score.detailedLabTitle', locale)}</span>
             </div>
             <p className="text-xs text-[#5A5243] dark:text-slate-300 leading-relaxed font-semibold">
-              {locale === 'hi'
-                ? 'प्रोटीन, रेशा (फाइबर) और फफूंद विषैलेपन की कानूनी व सटीक जांच के लिए आप नजदीकी डेयरी प्रयोगशाला से संपर्क कर सकते हैं।'
-                : 'For official dispute resolution or exact chemical testing of protein, fiber, and aflatoxin, you can consult an accredited laboratory.'}
+              {t('score.detailedLabDesc', locale)}
             </p>
             <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
               <div className="bg-white/80 dark:bg-slate-900/80 p-2 rounded-xl border border-[#DCD3BF] dark:border-slate-800">
                 <span className="font-bold block text-[#5A5243] dark:text-slate-400">
-                  {locale === 'hi' ? 'प्रोटीन स्तर' : 'Protein Level'}
+                  {t('score.proteinLevel', locale)}
                 </span>
                 <span className="font-black text-[#1F5D3B] dark:text-emerald-400">
-                  {locale === 'hi' ? 'प्रमाणित लैब जांच' : 'Certified Lab Assay'}
+                  {t('score.certifiedLabAssay', locale)}
                 </span>
               </div>
               <div className="bg-white/80 dark:bg-slate-900/80 p-2 rounded-xl border border-[#DCD3BF] dark:border-slate-800">
                 <span className="font-bold block text-[#5A5243] dark:text-slate-400">
-                  {locale === 'hi' ? 'फाइबर / रेशा' : 'Digestible Fiber'}
+                  {t('score.digestibleFiber', locale)}
                 </span>
                 <span className="font-black text-[#1F5D3B] dark:text-emerald-400">
-                  {locale === 'hi' ? 'प्रमाणित लैब जांच' : 'Certified Lab Assay'}
+                  {t('score.certifiedLabAssay', locale)}
                 </span>
               </div>
             </div>
             <div className="pt-1.5 flex items-center justify-between">
               <span className="text-[10px] text-[#5A5243] dark:text-slate-400 font-medium">
-                {locale === 'hi' ? 'सरकारी व सहकारी डेयरी लैब' : 'Accredited Dairy Lab Analysis'}
+                {t('score.accreditedLabDesc', locale)}
               </span>
               {onOpenLabModal ? (
                 <button
@@ -161,14 +159,14 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
                   onClick={onOpenLabModal}
                   className="text-xs font-black text-[#1F5D3B] dark:text-emerald-400 underline hover:no-underline min-h-[44px] px-2 inline-flex items-center"
                 >
-                  {locale === 'hi' ? 'नजदीकी लैब खोजें →' : 'Find Nearest Lab →'}
+                  {t('score.findLab', locale)} →
                 </button>
               ) : (
                 <a
                   href="tel:1962"
                   className="text-xs font-black text-[#1F5D3B] dark:text-emerald-400 underline hover:no-underline min-h-[44px] px-2 inline-flex items-center"
                 >
-                  Find Nearest Lab / Call 1962
+                  {t('score.findLab', locale)} / {t('score.call1962', locale)}
                 </a>
               )}
             </div>

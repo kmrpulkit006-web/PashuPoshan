@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FeedSample, FeedCategory, Locale } from '../lib/types';
 import { getLocalScans } from '../lib/storage';
-import { t } from '../lib/i18n';
+import { t, getBcp47Locale } from '../lib/i18n';
 import { Camera, ArrowRight, Clock, Plus } from 'lucide-react';
 
 interface HistoryScreenProps {
@@ -42,7 +42,7 @@ function formatFriendlyTimestamp(timestampStr: string, locale: Locale): string {
       return `${t('common.yesterday', locale)}, ${timeStr}`;
     }
 
-    const dateStr = date.toLocaleDateString(locale === 'hi' ? 'hi-IN' : 'en-IN', {
+    const dateStr = date.toLocaleDateString(getBcp47Locale(locale), {
       day: 'numeric',
       month: 'short',
     });

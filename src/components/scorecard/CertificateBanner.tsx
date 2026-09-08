@@ -37,7 +37,7 @@ export const CertificateBanner: React.FC<CertificateBannerProps> = ({ sample, lo
           ) : (
             <ShieldAlert className="w-3.5 h-3.5 text-[#B3261E] dark:text-rose-400" />
           )}
-          <span>{sample.bisCompliant ? (locale === 'hi' ? 'मानक अनुरूप सुरक्षित' : 'Safe & Approved') : (locale === 'hi' ? 'मानक से कम / असुरक्षित' : 'Safety Risk / Unsafe')}</span>
+          <span>{sample.bisCompliant ? t('score.statusApproved', locale) : t('score.statusRisk', locale)}</span>
         </div>
       </div>
 

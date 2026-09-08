@@ -20,16 +20,13 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
         </div>
         <div>
           <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/40 text-amber-200">
-            {locale === 'hi' ? 'अमान्य तस्वीर' : 'Not Cattle Feed'}
+            {t('score.notCattleFeedTag', locale)}
           </span>
           <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white uppercase tracking-tight">
-            {locale === 'hi' ? 'चारे की साफ फोटो लें' : 'Please Take a Clear Photo of Cattle Feed'}
+            {t('score.notCattleFeedTitle', locale)}
           </h2>
           <p className="text-xs text-rose-100 font-bold mt-1 max-w-sm mx-auto leading-relaxed">
-            {sample.visualAnalysis?.rejectionMessage ||
-              (locale === 'hi'
-                ? 'यह फोटो चारे या साइलेज की नहीं लग रही है। कृपया अच्छी रोशनी में चारे की फोटो लें।'
-                : 'The uploaded photo does not appear to be cattle feed, silage, or fodder. Please retake a clear photo.')}
+            {sample.visualAnalysis?.rejectionMessage || t('score.notCattleFeedDesc', locale)}
           </p>
         </div>
       </div>

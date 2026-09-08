@@ -77,11 +77,8 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   const handleManualSync = async () => {
     if (!isOnline) {
       setHeaderNotice({
-        title: locale === 'hi' ? 'ऑफ़लाइन सूचना' : 'Offline Notice',
-        message:
-          locale === 'hi'
-            ? 'आप अभी ऑफ़लाइन हैं। सिंक करने के लिए इंटरनेट से जुड़ें।'
-            : 'You are currently offline. Please connect to the internet to sync.',
+        title: t('header.offlineTitle', locale),
+        message: t('header.offlineNotice', locale),
       });
       return;
     }
@@ -93,16 +90,13 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
       const q2 = getPendingOfflineScans();
       setPendingCount(q1.length + q2.length);
       setHeaderNotice({
-        title: locale === 'hi' ? 'सिंक संपन्न' : 'Sync Complete',
-        message:
-          locale === 'hi'
-            ? `सिंक संपन्न: ${successful} स्कैन सफलतापूर्वक अपलोड हुए।`
-            : `Sync Complete: ${successful} scan(s) synchronized.`,
+        title: t('sync.complete', locale),
+        message: t('header.syncSuccess', locale, { count: successful }),
       });
     } catch (e: any) {
       setIsSyncing(false);
       setHeaderNotice({
-        title: locale === 'hi' ? 'सिंक त्रुटि' : 'Sync Notice',
+        title: t('sync.failedRetry', locale),
         message: toHumanErrorMessage(e, locale),
       });
     }
@@ -111,7 +105,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   const handleInstallClick = async () => {
     if (!installPrompt) {
       setHeaderNotice({
-        title: 'Install PashuPoshan AI',
+        title: t('app.installPwa', locale),
         message:
           'PashuPoshan AI can be installed directly by tapping "Add to Home Screen" in your mobile browser settings.',
       });
@@ -126,14 +120,11 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
 
   const handleClearQueue = () => {
     setHeaderNotice({
-      title: locale === 'hi' ? 'कतार साफ़ करें?' : 'Clear Queue?',
-      message:
-        locale === 'hi'
-          ? 'क्या आप वाकई लंबित ऑफ़लाइन रिकॉर्ड की स्थानीय कतार को साफ़ करना चाहते हैं?'
-          : 'Are you sure you want to clear the local test queue of pending offline records?',
+      title: t('header.clearQueueTitle', locale),
+      message: t('header.clearQueueConfirm', locale),
       isConfirm: true,
-      confirmLabel: locale === 'hi' ? 'हाँ, साफ़ करें' : 'Clear Queue',
-      cancelLabel: locale === 'hi' ? 'रद्द करें' : 'Cancel',
+      confirmLabel: t('header.clearQueueBtn', locale),
+      cancelLabel: t('common.cancel', locale),
       onConfirm: () => {
         clearDemoQueue();
         clearPendingOfflineScans();

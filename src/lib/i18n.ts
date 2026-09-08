@@ -111,3 +111,12 @@ export function t(
 
   return str;
 }
+
+/**
+ * Returns the appropriate BCP-47 locale tag for standard Date/Number formatting
+ * across all 23 official Indian languages (e.g., 'hi-IN', 'bn-IN', 'ta-IN', 'en-IN').
+ */
+export function getBcp47Locale(locale: Locale | string): string {
+  if (locale === 'en') return 'en-IN';
+  return `${locale}-IN`;
+}

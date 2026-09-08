@@ -314,7 +314,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
             </div>
             <div>
               <h3 className="text-xs sm:text-sm font-black text-[#1A1A1A] dark:text-white leading-none">
-                Doctor Diet Advisory (संतुलित आहार सलाह)
+                {t('ration.doctorAdvisoryTitle', locale)}
               </h3>
               <p className="text-[10px] text-[#5A5243] dark:text-slate-400 font-semibold mt-0.5">
                 Based on ICAR-NDRI Cattle Nutrition Guidelines
@@ -336,12 +336,12 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
             {isOptimizingRation ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin text-emerald-200" />
-                <span>Checking diet balance and health...</span>
+                <span>{t('ration.checkingDiet', locale)}</span>
               </>
             ) : (
               <>
                 <Bot className="w-4 h-4 text-emerald-300" />
-                <span>🩺 Get Doctor's Advice on This Diet (सलाह लें)</span>
+                <span>🩺 {t('ration.getDoctorAdviceBtn', locale)}</span>
               </>
             )}
           </button>
@@ -349,21 +349,21 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
           <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 rounded-2xl space-y-2 text-xs">
             <div className="flex items-center justify-between border-b border-emerald-200 dark:border-emerald-800 pb-1.5">
               <span className="font-extrabold text-[#1F5D3B] dark:text-emerald-300">
-                Diet &amp; Health Advice (आहार और स्वास्थ्य सलाह)
+                {t('ration.dietAdviceHeading', locale)}
               </span>
               <button
                 type="button"
                 onClick={() => setRationAdvice(null)}
                 className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-[10px] font-bold underline"
               >
-                Close
+                {t('common.close', locale)}
               </button>
             </div>
             <div className="text-slate-800 dark:text-slate-200 whitespace-pre-line leading-relaxed font-medium">
               {rationAdvice}
             </div>
             <div className="pt-1 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
-              <span>Safe for cattle health &amp; digestion (पाचन और स्वास्थ्य सुरक्षा)</span>
+              <span>{t('ration.digestionSafe', locale)}</span>
               <button
                 type="button"
                 onClick={handleOptimizeRation}
@@ -371,7 +371,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                 className="text-[#1F5D3B] dark:text-emerald-400 font-extrabold flex items-center space-x-1"
               >
                 <RefreshCw className={`w-3 h-3 ${isOptimizingRation ? 'animate-spin' : ''}`} />
-                <span>Check Again</span>
+                <span>{t('ration.checkAgain', locale)}</span>
               </button>
             </div>
           </div>

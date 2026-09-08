@@ -92,17 +92,14 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale, isOnline }) 
   const handleManualSync = async () => {
     if (!isOnline || (typeof navigator !== 'undefined' && !navigator.onLine)) {
       setNoticeModal({
-        title: locale === 'hi' ? 'ऑफ़लाइन सूचना' : 'Offline Notice',
-        message:
-          locale === 'hi'
-            ? 'आप अभी ऑफ़लाइन हैं। सिंक करने के लिए कृपया इंटरनेट या मोबाइल डेटा से जुड़ें।'
-            : 'You are currently offline. Please connect to Wi-Fi or mobile cellular data to sync pending scans.',
+        title: t('header.offlineTitle', locale),
+        message: t('alerts.offlineSyncPrompt', locale),
       });
       return;
     }
 
     setIsSyncing(true);
-    setSyncStatusMsg(locale === 'hi' ? 'सर्वर से जुड़ रहे हैं...' : 'Connecting to service...');
+    setSyncStatusMsg(t('alerts.syncConnecting', locale));
 
     try {
       const { successful, failed } = await syncPendingScans((current, total) => {
@@ -118,25 +115,19 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale, isOnline }) 
       setIsSyncing(false);
       if (successful > 0) {
         setNoticeModal({
-          title: locale === 'hi' ? 'सिंक संपन्न' : 'Sync Complete',
-          message:
-            locale === 'hi'
-              ? `सिंक संपन्न: ${successful} ऑफ़लाइन स्कैन सफलतापूर्वक अपलोड हुए।`
-              : `Sync Complete: Successfully processed ${successful} offline scan(s).`,
+          title: t('sync.complete', locale),
+          message: t('alerts.syncCompleteMsg', locale, { count: successful }),
         });
       } else if (failed > 0) {
         setNoticeModal({
-          title: locale === 'hi' ? 'सिंक सूचना' : 'Sync Notice',
-          message:
-            locale === 'hi'
-              ? `${failed} स्कैन सिंक नहीं हो सके। कृपया नेटवर्क कनेक्शन की जाँच करें।`
-              : `Sync notice: ${failed} scan(s) could not be synchronized. Please check network connection.`,
+          title: t('sync.failedRetry', locale),
+          message: t('alerts.syncPartialFailed', locale, { count: failed }),
         });
       }
     } catch (err: any) {
       setIsSyncing(false);
       setNoticeModal({
-        title: locale === 'hi' ? 'सिंक त्रुटि' : 'Sync Notice',
+        title: t('sync.failedRetry', locale),
         message: toHumanErrorMessage(err, locale),
       });
     }
@@ -355,18 +346,9 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale, isOnline }) 
           // Plain-Language Summary & Themed Styling Derivation
           const alertConfig = (() => {
             switch (alert.alertType) {
-              case 'adulterated_batch':
+               case 'adulterated_batch':
                 return {
-                  plainHeadline:
-                    locale === 'hi'
-                      ? 'आसपास खराब / मिलावटी आहार की सूचना'
-                      : locale === 'mr'
-                      ? 'जवळपास भेसळयुक्त खाद्याची तक्रार'
-                      : locale === 'gu'
-                      ? 'નજીકમાં ભેળસેળવાળા ખાણની ચેતવણી'
-                      : locale === 'pa'
-                      ? 'ਨੇੜੇ ਖ਼ਰਾਬ ਫੀਡ ਬੈਚ ਦੀ ਚੇਤਾਵਨੀ'
-                      : 'Bad feed batch reported nearby',
+                  plainHeadline: t('alerts.adulteratedHeadline', locale),
                   tag: 'Adulteration Hazard',
                   badgeClass: 'bg-[#B3261E] text-white border-red-400',
                   iconContainer: 'bg-[#FDECEA] dark:bg-rose-950/60 border-2 border-[#B3261E]/40 text-[#B3261E] dark:text-rose-400',
@@ -376,16 +358,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale, isOnline }) 
                 };
               case 'aflatoxin_surge':
                 return {
-                  plainHeadline:
-                    locale === 'hi'
-                      ? 'भंडारित चारे में फफूंद व जहर का खतरा'
-                      : locale === 'mr'
-                      ? 'साठवलेल्या चाऱ्यात बुरशीचा धोका'
-                      : locale === 'gu'
-                      ? 'સંગ્રહિત ઘાસચારામાં ફૂગનો ખતરો'
-                      : locale === 'pa'
-                      ? 'ਸਟੋਰ ਕੀਤੇ ਚਾਰੇ ਵਿੱਚ ਉੱਲੀ ਦਾ ਖ਼ਤਰਾ'
-                      : 'High mold & fungus risk in stored fodder',
+                  plainHeadline: t('alerts.aflatoxinHeadline', locale),
                   tag: 'Toxin / Mold Warning',
                   badgeClass: 'bg-[#C2703D] text-white border-amber-400',
                   iconContainer: 'bg-[#fdf8f4] dark:bg-amber-950/60 border-2 border-[#C2703D]/40 text-[#C2703D] dark:text-amber-400',
@@ -395,16 +368,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale, isOnline }) 
                 };
               case 'fodder_scarcity':
                 return {
-                  plainHeadline:
-                    locale === 'hi'
-                      ? 'सस्ते सहकारी चारे व साइलेज की उपलब्धता'
-                      : locale === 'mr'
-                      ? 'सवलतीच्या दरात सायलेज डेपो सुरू'
-                      : locale === 'gu'
-                      ? 'સબસિડીવાળા ઘાસચારા/સાયલેજનો ડેપો શરૂ'
-                      : locale === 'pa'
-                      ? 'ਸਬਸਿਡੀ ਵਾਲੇ ਚਾਰੇ ਦਾ ਡੀਪੂ ਖੁੱਲ੍ਹਿਆ'
-                      : 'Subsidized fodder & silage depot open',
+                  plainHeadline: t('alerts.scarcityHeadline', locale),
                   tag: 'Co-op Fodder Depot',
                   badgeClass: 'bg-[#1F5D3B] text-white border-emerald-400',
                   iconContainer: 'bg-[#edf7f0] dark:bg-emerald-950/60 border-2 border-[#1F5D3B]/40 text-[#1F5D3B] dark:text-emerald-400',
@@ -414,10 +378,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale, isOnline }) 
                 };
               default:
                 return {
-                  plainHeadline:
-                    locale === 'hi'
-                      ? 'पशु आहार की बाजार कीमतों में बदलाव'
-                      : 'Market feed price alert',
+                  plainHeadline: t('alerts.priceHeadline', locale),
                   tag: 'Market Price Notice',
                   badgeClass: 'bg-[#C2703D] text-white border-amber-400',
                   iconContainer: 'bg-[#fdf8f4] dark:bg-amber-950/60 border-2 border-[#C2703D]/40 text-[#C2703D] dark:text-amber-400',

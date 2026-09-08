@@ -86,12 +86,10 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="text-base sm:text-lg font-black text-[#1F5D3B] dark:text-emerald-300 leading-tight">
-              {locale === 'hi' ? 'चारे की शुद्धता व गुणवत्ता जांचें' : t('scan.title', locale)}
+              {t('scan.heroTitle', locale)}
             </h2>
             <p className="text-xs text-[#2c533c] dark:text-emerald-100 font-semibold mt-1 leading-relaxed">
-              {locale === 'hi'
-                ? 'फोटो खींचकर या टेस्ट स्ट्रिप से आसानी से पता करें कि चारा आपके पशुओं के लिए सुरक्षित व पौष्टिक है या नहीं।'
-                : 'Take a photo or use a test strip to check if your cattle feed is safe and healthy for milk yield.'}
+              {t('scan.heroSubtitle', locale)}
             </p>
           </div>
         </div>
@@ -100,15 +98,15 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
         <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-emerald-200/80 dark:border-emerald-800 text-center">
           <div className="bg-white/80 dark:bg-slate-900/70 rounded-xl p-2 text-[11px] font-bold text-[#1F5D3B] dark:text-emerald-200 shadow-xs">
             <span className="block text-sm">1️⃣</span>
-            <span>{locale === 'hi' ? 'चारा चुनें' : '1. Pick Feed'}</span>
+            <span>{t('scan.step1', locale)}</span>
           </div>
           <div className="bg-white/80 dark:bg-slate-900/70 rounded-xl p-2 text-[11px] font-bold text-[#1F5D3B] dark:text-emerald-200 shadow-xs">
             <span className="block text-sm">2️⃣</span>
-            <span>{locale === 'hi' ? 'फोटो लें' : '2. Take Photo'}</span>
+            <span>{t('scan.step2', locale)}</span>
           </div>
           <div className="bg-white/80 dark:bg-slate-900/70 rounded-xl p-2 text-[11px] font-bold text-[#1F5D3B] dark:text-emerald-200 shadow-xs">
             <span className="block text-sm">3️⃣</span>
-            <span>{locale === 'hi' ? 'कार्ड पाएं' : '3. Get Result'}</span>
+            <span>{t('scan.step3', locale)}</span>
           </div>
         </div>
       </div>
@@ -143,7 +141,7 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
               aria-label="View Past Tests"
             >
               <Clock className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400" />
-              <span className="hidden xs:inline">{locale === 'hi' ? 'पिछली जांचें' : 'Past Tests'}</span>
+              <span className="hidden xs:inline">{t('scan.pastTests', locale)}</span>
             </button>
             <button
               onClick={handleSimulateQrScan}
@@ -264,12 +262,12 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
                 <p className="text-sm font-black text-white leading-snug">
                   {scanMode === 'vision'
                     ? t('scan.pointCamera', locale)
-                    : (locale === 'hi' ? 'स्ट्रिप को बॉक्स में सफेद पेपर के पास रखें' : 'Place strip in box next to white paper')}
+                    : t('scan.alignStripDetail', locale)}
                 </p>
                 <p className="text-[11px] text-slate-300 mt-1 font-semibold">
                   {scanMode === 'vision'
                     ? t('scan.lightingTip', locale)
-                    : (locale === 'hi' ? 'अच्छी रोशनी में 15-20 सेमी दूरी से फोटो लें' : 'Hold steady in good light (15-20cm away)')}
+                    : t('scan.lightingTipDetail', locale)}
                 </p>
               </div>
 
@@ -277,17 +275,17 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
               {scanMode === 'strip' ? (
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <div className="border-2 border-dashed border-white/60 bg-white/10 rounded-xl p-1.5 text-[11px] text-white font-bold">
-                    <span>⬜ {locale === 'hi' ? 'सफेद पेपर' : 'White Card'}</span>
-                    <span className="block text-[9px] text-emerald-200">{locale === 'hi' ? 'सफेद पृष्ठभूमि' : 'Paper / Card'}</span>
+                    <span>⬜ {t('scan.whiteCard', locale)}</span>
+                    <span className="block text-[9px] text-emerald-200">{t('scan.whiteBg', locale)}</span>
                   </div>
                   <div className="border-2 border-dashed border-amber-300/80 bg-amber-500/10 rounded-xl p-1.5 text-[11px] text-amber-200 font-bold">
-                    <span>🧪 {locale === 'hi' ? 'टेस्ट स्ट्रिप' : 'Test Strip'}</span>
-                    <span className="block text-[9px] text-amber-300">{locale === 'hi' ? 'यूरिया / pH स्ट्रिप' : 'Chemical Strip'}</span>
+                    <span>🧪 {t('scan.testStrip', locale)}</span>
+                    <span className="block text-[9px] text-amber-300">{t('scan.chemicalStrip', locale)}</span>
                   </div>
                 </div>
               ) : (
                 <div className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/35 text-xs text-emerald-200 font-bold">
-                  <span>{locale === 'hi' ? 'चारे को फ्रेम के बीच में रखें' : 'Keep feed centered inside frame'}</span>
+                  <span>{t('scan.keepCentered', locale)}</span>
                 </div>
               )}
             </div>
@@ -304,8 +302,8 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
             </p>
             <p className="text-xs text-emerald-300 mt-1.5 font-semibold max-w-xs">
               {scanMode === 'strip'
-                ? (locale === 'hi' ? 'स्ट्रिप के रंग की जांच हो रही है...' : 'Matching test strip colors...')
-                : (locale === 'hi' ? 'चारे की शुद्धता, फफूंद व सुरक्षा की जांच हो रही है...' : 'Checking freshness, cleanliness, and safety...')}
+                ? t('scan.stripMatching', locale)
+                : t('scan.visionChecking', locale)}
             </p>
           </div>
         )}
