@@ -192,6 +192,54 @@ export function getActionableAdviceText(actionText: string, locale: Locale | str
   if (actionText.includes('DO NOT FEED TO CATTLE') && actionText.includes('Visible fungal mold')) {
     return t('score.advisoryMoldHazard', locale);
   }
+  if (actionText.includes('18-22 kg/day fresh weight')) {
+    return t('score.actMaizeIntake', locale);
+  }
+  if (actionText.includes('Feed promptly after removal from pit face')) {
+    return t('score.actMaizePromptFeed', locale);
+  }
+  if (actionText.includes('Combine with 1.5 - 2.0 kg wheat bhusa')) {
+    return t('score.actMaizeScratchFactor', locale);
+  }
+  if (actionText.includes('bovine ammonia toxicity') || (actionText.includes('DO NOT FEED TO CATTLE') && actionText.includes('Spiked urea'))) {
+    return t('score.actUreaToxicity', locale);
+  }
+  if (actionText.includes('High silica content') || actionText.includes('damages dental enamel')) {
+    return t('score.actSilicaImpaction', locale);
+  }
+  if (actionText.includes('Dairy Cooperative Society (DCS) secretary')) {
+    return t('score.actDcsAlert', locale);
+  }
+  if (actionText.includes('Discard the top 30-45 cm mold-infested crust')) {
+    return t('score.actDiscardCrust', locale);
+  }
+  if (actionText.includes('High butyric acid induces ketosis')) {
+    return t('score.actButyricKetosis', locale);
+  }
+  if (actionText.includes('Re-seal unaffected layers airtight')) {
+    return t('score.actResealAirtight', locale);
+  }
+  if (actionText.includes('Feed is safe to consume but requires supplementary protein')) {
+    return t('score.actProteinDeficit', locale);
+  }
+  if (actionText.includes('mustard cake (sarson khal)')) {
+    return t('score.actMustardCakeBalance', locale);
+  }
+  if (actionText.includes('Request batch compliance certificate from feed merchant')) {
+    return t('score.actMerchantCompliance', locale);
+  }
+  if (actionText.includes('Preserves optimal rumen environment without metabolic disruption')) {
+    return t('score.advRumenSafe', locale);
+  }
+  if (actionText.includes('Aflatoxin B1 passes into cow milk as Aflatoxin M1')) {
+    return t('score.advAflatoxinM1Hazard', locale);
+  }
+  if (actionText.includes('The crude protein content is 19.8%')) {
+    return t('score.advSuboptimalProtein', locale);
+  }
+  if (actionText.includes('National Animal Disease Emergency Helpline: 1962') || actionText.includes('acute cattle illness')) {
+    return t('score.advEmergencyHelpline', locale);
+  }
   return actionText;
 }
 

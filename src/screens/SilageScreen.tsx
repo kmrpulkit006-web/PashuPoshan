@@ -273,7 +273,11 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                     {getCompactionRatingText(pit.compactionRating, locale)}
                   </div>
                   <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-bold mt-0.5 truncate">
-                    {pit.compactionRating.includes('Optimum') ? (locale === 'hi' ? 'उत्तम कसाव' : 'Optimum') : pit.compactionRating.split(' ')[0]}
+                    {pit.compactionRating.includes('Optimum')
+                      ? (locale === 'hi' ? 'उत्तम कसाव' : 'Optimum')
+                      : pit.compactionRating.includes('Loose') || pit.compactionRating.includes('Air-Pockets')
+                      ? (locale === 'hi' ? 'हवा का रिसाव' : 'Loose')
+                      : pit.compactionRating.split(' ')[0]}
                   </div>
                 </div>
               </div>
@@ -333,19 +337,19 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
         <ul className="text-xs text-[#1A1A1A] dark:text-slate-300 space-y-2 font-medium">
           <li className="flex items-start space-x-2">
             <span className="text-[#1F5D3B] dark:text-emerald-400 font-black">1.</span>
-            <span>Harvest maize when grain milk line is at 1/2 to 2/3 stage (32-35% Dry Matter).</span>
+            <span>{t('silage.sop1', locale)}</span>
           </li>
           <li className="flex items-start space-x-2">
             <span className="text-[#1F5D3B] dark:text-emerald-400 font-black">2.</span>
-            <span>Chop fodder into 1.5 cm to 2.0 cm particles for maximum packing density.</span>
+            <span>{t('silage.sop2', locale)}</span>
           </li>
           <li className="flex items-start space-x-2">
             <span className="text-[#1F5D3B] dark:text-emerald-400 font-black">3.</span>
-            <span>Tractor compact in 15cm progressive layers to expel all oxygen.</span>
+            <span>{t('silage.sop3', locale)}</span>
           </li>
           <li className="flex items-start space-x-2">
             <span className="text-[#1F5D3B] dark:text-emerald-400 font-black">4.</span>
-            <span>Seal with 200-micron UV-stabilized LDPE plastic sheet under tire weights.</span>
+            <span>{t('silage.sop4', locale)}</span>
           </li>
         </ul>
       </div>

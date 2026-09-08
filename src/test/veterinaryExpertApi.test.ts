@@ -186,6 +186,66 @@ describe('AI Veterinary & Nutrition Expert API (api/veterinary-expert.ts)', () =
       expect(messages[1].content).toContain('14 Liters/day');
       expect(messages[1].content).toContain('Green Fodder: 20 kg');
     });
+
+    it('injects critical language directive when non-English locale is requested', () => {
+      const payloadHindi: VeterinaryExpertRequest = {
+        mode: 'scorecard_clinical_review',
+        locale: 'hi',
+        scorecardData: {
+          feedName: 'Green Fodder Bales',
+          category: 'silage',
+          overallGrade: 'Tier A: Premium',
+        },
+      };
+      const messagesHindi = buildPromptForRequest(payloadHindi);
+      expect(messagesHindi[0].content).toContain('Hindi (हिंदी)');
+      expect(messagesHindi[1].content).toContain('Hindi (हिंदी)');
+
+      const payloadMarathi: VeterinaryExpertRequest = {
+        mode: 'ration_optimization',
+        locale: 'mr',
+        rationData: {
+          breedName: 'Pandharpuri Buffalo',
+          bodyWeightKg: 500,
+          dailyMilkLiters: 11,
+          fatPercentage: 7.0,
+          lactationStage: 'Early Lactation',
+          dryMatterTargetKg: 14,
+          crudeProteinTargetG: 1600,
+          greenFodderKg: 20,
+          dryBhusaKg: 5,
+          concentrateKg: 5,
+          mineralMixtureG: 60,
+        },
+      };
+      const messagesMarathi = buildPromptForRequest(payloadMarathi);
+      expect(messagesMarathi[0].content).toContain('Marathi (मराठी)');
+      expect(messagesMarathi[1].content).toContain('Marathi (मराठी)');
+    });
+
+    it('generates rich Hindi offline advisory when locale is hi', () => {
+      const hindiScorecardReview = generateOfflineVeterinaryFallback({
+        mode: 'scorecard_clinical_review',
+        locale: 'hi',
+        scorecardData: {
+          feedName: 'मक्का साइलेज',
+          category: 'silage',
+          overallGrade: 'Tier C: Hazardous/Reject',
+          ureaSpiked: true,
+        },
+      });
+      expect(hindiScorecardReview).toContain('नैदानिक पशु चिकित्सा समीक्षा');
+      expect(hindiScorecardReview).toContain('उच्च जोखिम');
+      expect(hindiScorecardReview).toContain('1962');
+
+      const hindiSilageChat = generateOfflineVeterinaryFallback({
+        mode: 'chat',
+        locale: 'hi',
+        query: 'साइलेज का pH कितना होना चाहिए?',
+      });
+      expect(hindiSilageChat).toContain('साइलेज प्रबंधन सलाह');
+      expect(hindiSilageChat).toContain('3.8 से 4.2');
+    });
   });
 
   describe('Rate Limiting (checkRateLimit)', () => {

@@ -58,9 +58,7 @@ export const VeterinaryChatModal: React.FC<VeterinaryChatModalProps> = ({
     {
       id: 'welcome_1',
       role: 'assistant',
-      content: `Namaste! I am your **PashuPoshan Doctor & Feed Nutrition Assistant**, ready to help with livestock care based on **ICAR-NDRI** guidelines.
-
-How can I help you with your cattle's feed, milk yield, or health today?`,
+      content: t('chat.welcome', locale),
       timestamp: 'Just now',
     },
   ]);
@@ -131,6 +129,7 @@ How can I help you with your cattle's feed, milk yield, or health today?`,
         body: JSON.stringify({
           mode: 'chat',
           messages: chatHistory,
+          locale,
         }),
       });
 
@@ -142,7 +141,7 @@ How can I help you with your cattle's feed, milk yield, or health today?`,
       const assistantMsg: Message = {
         id: `assistant_${Date.now()}`,
         role: 'assistant',
-        content: data.advice || 'Thank you for your question. Please monitor your herd closely and call 1962 if symptoms worsen.',
+        content: data.advice || (locale === 'hi' ? 'आपके प्रश्न के लिए धन्यवाद। कृपया अपने पशुओं की बारीकी से निगरानी करें और लक्षण बिगड़ने पर 1962 पर कॉल करें।' : 'Thank you for your question. Please monitor your herd closely and call 1962 if symptoms worsen.'),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isFallback: data.isFallback,
       };
@@ -152,13 +151,7 @@ How can I help you with your cattle's feed, milk yield, or health today?`,
       const fallbackMsg: Message = {
         id: `fallback_${Date.now()}`,
         role: 'assistant',
-        content: `### Offline Advisory Notice
-Currently offline or live doctor service is unreachable.
-
-**Standard Field Guidelines (ICAR-NDRI)**:
-- For cattle showing symptoms of acute bloat or feed toxicity, withdraw the suspected feed batch immediately.
-- Administer sweet soda (sodium bicarbonate, 60-80g in drinking water) if mild rumen acidosis is suspected.
-- Contact your nearest Veterinary Dispensary or call the National Animal Disease Helpline at **1962**.`,
+        content: t('chat.offlineMsg', locale),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isFallback: true,
       };
@@ -198,9 +191,7 @@ Currently offline or live doctor service is unreachable.
       {
         id: 'welcome_1',
         role: 'assistant',
-        content: `Namaste! I am your **PashuPoshan Doctor & Feed Nutrition Assistant**, ready to help with livestock care based on **ICAR-NDRI** guidelines.
-
-How can I help you with your cattle's feed, milk yield, or health today?`,
+        content: t('chat.welcome', locale),
         timestamp: 'Just now',
       },
     ]);

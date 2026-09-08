@@ -75,7 +75,7 @@ export const PresetScenarioList: React.FC<PresetScenarioListProps> = ({
                       : 'bg-amber-50 text-[#C2703D] border-[#f3d6c4] dark:bg-amber-950 dark:text-amber-300'
                   }`}
                 >
-                  {isTierA ? 'Grade A' : isTierC ? 'Hazard!' : 'Tier B'}
+                  {isTierA ? t('score.tierAGrade', locale) : isTierC ? t('score.tierCHazard', locale) : t('score.tierBGrade', locale)}
                 </span>
                 <div className="text-[11px] font-black text-[#1A1A1A] dark:text-slate-300 mt-1">
                   CP {scenario.metrics.crudeProtein}%

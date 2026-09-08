@@ -90,6 +90,7 @@ export interface VeterinaryExpertRequest {
   mode: 'chat' | 'scorecard_clinical_review' | 'ration_optimization';
   query?: string;
   messages?: ChatMessage[];
+  locale?: string;
   scorecardData?: {
     feedName: string;
     category: string;
@@ -115,6 +116,32 @@ export interface VeterinaryExpertRequest {
     mineralMixtureG: number;
   };
 }
+
+export const LANGUAGE_NAMES: Record<string, string> = {
+  hi: 'Hindi (हिंदी)',
+  bn: 'Bengali (বাংলা)',
+  te: 'Telugu (తెలుగు)',
+  mr: 'Marathi (मराठी)',
+  ta: 'Tamil (தமிழ்)',
+  gu: 'Gujarati (ગુજરાતી)',
+  kn: 'Kannada (ಕನ್ನಡ)',
+  ml: 'Malayalam (മലയാളം)',
+  pa: 'Punjabi (ਪੰਜਾਬੀ)',
+  or: 'Odia (ଓଡ଼ିଆ)',
+  as: 'Assamese (অসমীয়া)',
+  ur: 'Urdu (اردو)',
+  sa: 'Sanskrit (संस्कृतम्)',
+  kok: 'Konkani (कोंकणी)',
+  mai: 'Maithili (मैथिली)',
+  ne: 'Nepali (नेपाली)',
+  ks: 'Kashmiri (کٲشُر)',
+  mni: 'Manipuri (মৈতৈলোন্)',
+  sd: 'Sindhi (سنڌي)',
+  doi: 'Dogri (डोगरी)',
+  brx: 'Bodo (बर\')',
+  sat: 'Santali (ᱥᱟᱱᱛᱟᱲᱤ)',
+  en: 'English',
+};
 
 const SYSTEM_PROMPT_VET = `You are the chief AI Veterinary Scientist and Dairy Cattle Nutritionist for PashuPoshan AI (पशु-पोषण AI), an initiative supporting Indian dairy farmers and cooperatives (ICAR, NDRI Karnal, NDDB).
 Your expertise spans:
@@ -172,12 +199,18 @@ export function extractRationData(payload: any) {
 }
 
 export function buildPromptForRequest(payload: VeterinaryExpertRequest): ChatMessage[] {
-  const messages: ChatMessage[] = [{ role: 'system', content: SYSTEM_PROMPT_VET }];
+  let systemPrompt = SYSTEM_PROMPT_VET;
+  if (payload.locale && payload.locale !== 'en') {
+    const langName = LANGUAGE_NAMES[payload.locale] || payload.locale;
+    systemPrompt += `\n\nCRITICAL LANGUAGE DIRECTIVE: The user's preferred language is ${langName}. You MUST generate your entire response strictly in ${langName}. Use clean Markdown and simple, practical terminology understood by rural dairy farmers.`;
+  }
+
+  const messages: ChatMessage[] = [{ role: 'system', content: systemPrompt }];
 
   const scorecardData = extractScorecardData(payload);
   if (payload.mode === 'scorecard_clinical_review' && scorecardData) {
     const s = scorecardData;
-    const reviewPrompt = `Perform a deep clinical veterinary pathology review on the following tested cattle feed sample:
+    let reviewPrompt = `Perform a deep clinical veterinary pathology review on the following tested cattle feed sample:
 - Feed Type: ${s.feedName} (${s.category})
 - Tested Overall Grade: ${s.overallGrade}
 - Silage pH: ${s.silagePh ?? 'N/A'}
@@ -192,6 +225,12 @@ Please provide:
 2. **Milk Safety & Aflatoxin M1 Risk**: Potential risk of toxin transfer into the human milk supply.
 3. **Actionable Farm Management Directives**: Immediate physical steps (isolation, dilution, aeration, or discard) and compensatory dietary adjustments.
 4. **Veterinary Intervention Level**: Normal monitoring, prompt dietary adjustment, or urgent veterinary attention (1962).`;
+
+    if (payload.locale && payload.locale !== 'en') {
+      const langName = LANGUAGE_NAMES[payload.locale] || payload.locale;
+      reviewPrompt += `\n\n(IMPORTANT: Respond completely in ${langName})`;
+    }
+
     messages.push({ role: 'user', content: reviewPrompt });
     return messages;
   }
@@ -199,7 +238,7 @@ Please provide:
   const rationData = extractRationData(payload);
   if (payload.mode === 'ration_optimization' && rationData) {
     const r = rationData;
-    const rationPrompt = `Evaluate and optimize the following Total Mixed Ration (TMR) formulated under ICAR-NDRI standards:
+    let rationPrompt = `Evaluate and optimize the following Total Mixed Ration (TMR) formulated under ICAR-NDRI standards:
 - Animal: ${r.breedName} (Body Weight: ${r.bodyWeightKg} kg, Lactation: ${r.lactationStage})
 - Production: ${r.dailyMilkLiters} Liters/day (Milk Fat: ${r.fatPercentage}%)
 - Current Daily Ration:
@@ -213,6 +252,12 @@ Please provide:
 1. **Nutritional Balance Evaluation**: Adequacy of effective fiber (NDF), bypass protein, and energy density for this milk yield.
 2. **Cost-Optimization Recommendations**: Economical local substitutes (e.g. mustard cake/sarson khal, cotton seed cake, maize grain) to lower feeding cost without compromising yield.
 3. **Metabolic Health & Rumination Directives**: Tips to prevent acidosis and sustain peak lactation.`;
+
+    if (payload.locale && payload.locale !== 'en') {
+      const langName = LANGUAGE_NAMES[payload.locale] || payload.locale;
+      rationPrompt += `\n\n(IMPORTANT: Respond completely in ${langName})`;
+    }
+
     messages.push({ role: 'user', content: rationPrompt });
     return messages;
   }
@@ -230,10 +275,26 @@ Please provide:
 }
 
 export function generateOfflineVeterinaryFallback(payload: VeterinaryExpertRequest): string {
+  const isHindi = payload.locale === 'hi';
   const scorecardData = extractScorecardData(payload);
   if (payload.mode === 'scorecard_clinical_review') {
     const s = scorecardData;
     const isCritical = s?.ureaSpiked || s?.overallGrade?.includes('Tier C');
+    if (isHindi) {
+      return `### नैदानिक पशु चिकित्सा समीक्षा (ICAR-NDRI दिशा-निर्देश सारांश)
+**नमूना**: ${s?.feedName || 'चारा नमूना'} | **ग्रेड**: ${s?.overallGrade || 'समीक्षाधीन'}
+
+1. **रूमेन और चयापचय स्वास्थ्य**:
+   ${isCritical ? '⚠️ **उच्च जोखिम**: अत्यधिक गैर-प्रोटीन नाइट्रोजन या फफूंद का पता चला। तीव्र अमोनिया विषाक्तता का खतरा। इस चारे को पशुओं को देना तुरंत रोकें।' : '✅ **सुरक्षित प्रोफाइल**: चारे की गुणवत्ता सामान्य पोषण आवश्यकताओं के अनुरूप है। पशु को स्वच्छ व ताजा पानी उपलब्ध कराएं।'}
+
+2. **आवश्यक फार्म प्रबंधन निर्देश**:
+   - चारे को हवादार और सीलन-मुक्त स्थान पर रखें।
+   - साइलेज गड्ढा खोलने के 2 घंटे के भीतर पशु को खिलाएं ताकि हवा से खराब न हो।
+   - यदि एसिडोसिस के हल्के लक्षण दिखें तो मीठा सोडा (सोडियम बाइकार्बोनेट, 50-80 ग्राम/गाय/दिन) दें।
+
+3. **आपातकालीन हेल्पलाइन**:
+   - पशु में गंभीर अफारा (पेट फूलना), कंपकंपी या सांस लेने में तकलीफ होने पर नजदीकी पशु चिकित्सालय संपर्क करें या राष्ट्रीय हेल्पलाइन **1962** पर कॉल करें।`;
+    }
     return `### Clinical Veterinary Review (ICAR-NDRI Guidelines Offline Summary)
 **Sample**: ${s?.feedName || 'Feed Sample'} | **Grade**: ${s?.overallGrade || 'Under Review'}
 
@@ -252,6 +313,20 @@ export function generateOfflineVeterinaryFallback(payload: VeterinaryExpertReque
   const rationData = extractRationData(payload);
   if (payload.mode === 'ration_optimization') {
     const r = rationData;
+    if (isHindi) {
+      return `### ICAR-NDRI संतुलित राशन परामर्श (मानक दिशा-निर्देश)
+**पशु**: ${r?.breedName || 'दुधारू गाय'} (${r?.dailyMilkLiters || 10} लीटर/दिन)
+
+1. **शुष्क पदार्थ (ड्राई मैटर) संतुलन**:
+   - शुष्क पदार्थ के आधार पर सूखे/हरे चारे और दाना मिश्रण का 2:1 अनुपात रखें।
+   - हरा चारा (${r?.greenFodderKg || 15} किग्रा) 2-3 सेमी लंबाई में कुट्टी करके खिलाएं ताकि जुगाली अच्छी हो।
+
+2. **खनिज मिश्रण और नमक**:
+   - खनिज मिश्रण (${r?.mineralMixtureG || 50} ग्राम दैनिक) और 30 ग्राम सादा नमक जरूर दें ताकि बांझपन और प्रजनन समस्याएं न हों।
+
+3. **लागत कम करने के उपाय**:
+   - दलहनी चारा (बरसीम, ल्यूसर्न) और गैर-दलहनी चारा (मक्का, ज्वार) मिलाकर दें, इससे दाने का खर्च 15-20% तक कम हो सकता है।`;
+    }
     return `### ICAR-NDRI Precision Ration Advisory (Offline Standard Guidelines)
 **Target**: ${r?.breedName || 'Dairy Cow'} (${r?.dailyMilkLiters || 10} L/day)
 
@@ -270,6 +345,16 @@ export function generateOfflineVeterinaryFallback(payload: VeterinaryExpertReque
   const q = lastUserMsg.toLowerCase();
 
   if (q.includes('ph') || q.includes('silage') || q.includes('साइलेज')) {
+    if (isHindi) {
+      return `### पशु-पोषण AI - साइलेज प्रबंधन सलाह (ICAR-NDRI गाइड)
+- **आदर्श pH मान**: मक्का/ज्वार साइलेज का सही pH **3.8 से 4.2** होना चाहिए।
+- **pH 4.8 – 5.5 (चेतावनी)**: यह अपूर्ण किण्वन (फर्मेंटेशन) दर्शाता है। खराब ब्यूटिरिक एसिड या फफूंद का खतरा।
+- **खेत स्तर पर जरूरी कदम**:
+  1. सड़े हुए मक्खन जैसी बदबू या गर्म साइलेज (>35°C) की जांच करें।
+  2. कुल सूखे चारे में साइलेज की मात्रा ≤30% तक सीमित रखें।
+  3. ऊपरी काली या फफूंद लगी परत को पूरी तरह फेंक दें।
+  4. साइलेज गड्ढे से रोजाना 15-20 सेमी की परत एक समान निकालें ताकि हवा लगने से खराब न हो।`;
+    }
     return `### PashuPoshan AI - ICAR-NDRI Silage Advisory (Field Guide)
 - **Target pH Range**: Optimal maize/sorghum silage pH is **3.8 to 4.2**.
 - **pH 4.8 – 5.5 (Warning)**: Indicates incomplete lactic fermentation. Risk of clostridial butyric spoilage or aerobic heating.
@@ -281,6 +366,15 @@ export function generateOfflineVeterinaryFallback(payload: VeterinaryExpertReque
   }
 
   if (q.includes('urea') || q.includes('poison') || q.includes('toxicity') || q.includes('यूरिया')) {
+    if (isHindi) {
+      return `### 🚨 आपातकालीन पशु चिकित्सा सलाह: यूरिया विषाक्तता (पशु-पोषण AI)
+- **विषाक्तता के लक्षण**: चारा खाने के 20-60 मिनट में अत्यधिक लार गिरना, पेट फूलना, मांसपेशियों में कंपन, लड़खड़ाना और तेज सांसें।
+- **तत्काल प्राथमिक उपचार**:
+  1. **सिरका का घोल**: 2-3 लीटर घरेलू सिरका 1-2 लीटर ठंडे पानी में मिलाकर तुरंत नाल से पिलाएं ताकि रूमेन अमोनिया निष्प्रभावी हो सके।
+  2. **ठंडा पानी**: 20-30 लीटर ठंडा पानी पिलाएं ताकि पेट का तापमान कम हो और एंजाइम क्रिया रुके।
+  3. **चारा बंद करें**: संदिग्ध चारे और दाने को तुरंत हटा दें।
+  4. **आपातकाल**: तुरंत नजदीकी पशु चिकित्सक से संपर्क करें या राष्ट्रीय हेल्पलाइन **1962** पर कॉल करें।`;
+    }
     return `### 🚨 Emergency Veterinary Advisory: Suspected Urea Toxicity (PashuPoshan AI)
 - **Signs of Toxicity**: Excessive salivation, severe bloat, muscle tremors, staggered gait, rapid breathing within 20-60 min of feeding.
 - **Immediate First-Aid**:
@@ -291,6 +385,14 @@ export function generateOfflineVeterinaryFallback(payload: VeterinaryExpertReque
   }
 
   if (q.includes('acidosis') || q.includes('sara') || q.includes('bloat') || q.includes('पेट फूलना') || q.includes('अफारा')) {
+    if (isHindi) {
+      return `### पशु-पोषण AI - रूमेन एसिडोसिस और अफारा (पेट फूलना) प्रबंधन
+- **मुख्य कारण**: बिना पर्याप्त सूखे चारे (भूसा) के बहुत अधिक दाना या अनाज खिलाना।
+- **उपचार निर्देश**:
+  1. **मीठा सोडा (सोडियम बाइकार्बोनेट)**: 60-100 ग्राम 500 मिली पानी में घोलकर पिलाएं ताकि पेट का pH 6.0 से ऊपर सामान्य हो सके।
+  2. सूखा लंबा भूसा (3 सेमी से बड़ा) बढ़ाएं ताकि पशु जुगाली करे और लार बने।
+  3. झागदार अफारे में 50-100 मिली वनस्पति तेल या अफारा रोधी दवा (जैसे टिम्पोल) पिलाएं।`;
+    }
     return `### PashuPoshan AI - Rumen Acidosis (SARA) & Bloat Management
 - **Primary Cause**: Feeding excessive grains/concentrates without adequate effective fiber (bhusa/fodder).
 - **Corrective Protocol**:
@@ -300,6 +402,15 @@ export function generateOfflineVeterinaryFallback(payload: VeterinaryExpertReque
   }
 
   if (q.includes('bhusa') || q.includes('fodder') || q.includes('ration') || q.includes('दूध') || q.includes('milk') || q.includes('चारा')) {
+    if (isHindi) {
+      return `### पशु-पोषण AI - दुधारू पशुओं के दैनिक आहार का सामान्य नियम
+- **शुष्क पदार्थ (ड्राई मैटर)**: पशु के 100 किग्रा शरीर भार पर 2.5-3.0 किग्रा (जैसे 400 किग्रा गाय के लिए 10-12 किग्रा शुष्क पदार्थ)।
+- **आहार का अनुपात**:
+  - **हरा चारा**: 15–20 किग्रा दैनिक (विटामिन व पाचक प्रोटीन हेतु)।
+  - **सूखा भूसा**: 4–6 किग्रा दैनिक (जुगाली और रेशे हेतु)।
+  - **दाना मिश्रण**: शरीर निर्वाह हेतु 1.5 किग्रा + प्रति 2.5 लीटर दूध उत्पादन पर 1 किग्रा अतिरिक्त।
+  - **खनिज मिश्रण**: 50 ग्राम दैनिक + 30 ग्राम सादा नमक।`;
+    }
     return `### PashuPoshan AI - Daily Dairy Feeding Rule-of-Thumb
 - **Dry Matter Intake (DMI)**: 2.5–3.0 kg per 100 kg body weight (e.g. 10–12 kg DM for a 400 kg cow).
 - **Portion Ratio**:
@@ -307,6 +418,14 @@ export function generateOfflineVeterinaryFallback(payload: VeterinaryExpertReque
   - **Dry Bhusa**: 4–6 kg daily (effective fiber for rumination).
   - **Compound Feed**: 1.5 kg for body maintenance + 1 kg for every 2.5 L milk produced.
   - **Mineral Mixture**: 50g daily + 30g common salt.`;
+  }
+
+  if (isHindi) {
+    return `### पशु-पोषण AI पशु चिकित्सा मार्गदर्शन (मानक दिशा-निर्देश)
+पशु पोषण और चारे की गुणवत्ता संबंधी प्रश्न पूछने के लिए धन्यवाद।
+- ध्यान रखें कि दाना मिश्रण BIS IS:2052 मानकों के अनुसार हो (उच्च दूध उत्पादन के लिए न्यूनतम 20% क्रूड प्रोटीन)।
+- साइलेज में सड़े मक्खन जैसी बदबू या कालेपन की नियमित जांच करें।
+- अपने जिले में आपातकालीन पशु चिकित्सा सहायता के लिए 1962 डायल करें।`;
   }
 
   return `### PashuPoshan AI Veterinary Guidance (Standard Guidelines)
