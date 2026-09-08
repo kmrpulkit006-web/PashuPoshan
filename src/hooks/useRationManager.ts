@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { CowProfile, FeedSample } from '../lib/types';
+import { CowProfile, FeedSample, Locale } from '../lib/types';
 import { calculatePrecisionRation } from '../lib/rationBalancing';
 import { getLocalCows, saveLocalCow, deleteLocalCow } from '../lib/storage';
+import { t, getCowDisplayName } from '../lib/i18n';
 
 export interface RationNotice {
   title: string;
@@ -13,9 +14,10 @@ export interface RationNotice {
 
 interface UseRationManagerProps {
   activeSample?: FeedSample;
+  locale?: Locale;
 }
 
-export function useRationManager({ activeSample }: UseRationManagerProps) {
+export function useRationManager({ activeSample, locale }: UseRationManagerProps) {
   const [cows, setCows] = useState<CowProfile[]>([]);
   const [selectedCowId, setSelectedCowId] = useState<string>('');
   const [dailyYield, setDailyYield] = useState<number>(12);
@@ -94,23 +96,24 @@ export function useRationManager({ activeSample }: UseRationManagerProps) {
 
   const handleDeleteCow = useCallback((id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    const loc = locale || 'hi';
     if (cows.length <= 1) {
       setRationNotice({
-        title: 'Notice',
-        message: 'You must have at least one cattle profile in your herd.',
+        title: t('common.notice', loc) || 'Notice',
+        message: t('ration.minOneCowNotice', loc) || 'You must have at least one cattle profile in your herd.',
       });
       return;
     }
     const targetCow = cows.find(c => c.id === id);
-    const cowName = targetCow ? targetCow.name : 'this cattle profile';
+    const cowName = targetCow ? getCowDisplayName(targetCow, loc) : 'this cattle';
     setRationNotice({
-      title: 'Remove Cattle Profile',
-      message: `Are you sure you want to remove ${cowName} from your herd?`,
+      title: t('history.deleteConfirmTitle', loc) || 'Remove Cattle Profile',
+      message: t('history.deleteConfirmMsg', loc, { name: cowName }) || `Are you sure you want to remove ${cowName} from your herd?`,
       isConfirm: true,
       onConfirm: () => confirmDelete(id),
       onCancel: () => setRationNotice(null),
     });
-  }, [cows, confirmDelete]);
+  }, [cows, confirmDelete, locale]);
 
   return {
     cows,

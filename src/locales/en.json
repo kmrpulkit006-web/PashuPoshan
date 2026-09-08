@@ -440,5 +440,19 @@
   "chat.offlineMsg": "### Offline Advisory Notice\nCurrently offline or live doctor service is unreachable.\n\n**Standard Field Guidelines (ICAR-NDRI)**:\n- For cattle showing symptoms of acute bloat or feed toxicity, withdraw the suspected feed batch immediately.\n- Administer sweet soda (sodium bicarbonate, 60-80g in drinking water) if mild rumen acidosis is suspected.\n- Contact your nearest Veterinary Dispensary or call the National Animal Disease Helpline at **1962**.",
   "score.noSampleTitle": "No Test Report Selected",
   "score.noSampleMsg": "Please test a feed sample or select one from history to view its quality scorecard.",
-  "score.scanNewFeed": "Scan New Feed"
+  "score.scanNewFeed": "Scan New Feed",
+  "cattle.lakshmi": "Lakshmi",
+  "cattle.ganga": "Ganga",
+  "cattle.yamuna": "Yamuna",
+  "cattle.gir": "Gir Cow",
+  "cattle.sahiwal": "Sahiwal Cow",
+  "cattle.redSindhi": "Red Sindhi",
+  "cattle.hfCrossbred": "HF Crossbred",
+  "cattle.jerseyCross": "Jersey Cross",
+  "cattle.murrahBuffalo": "Murrah Buffalo",
+  "category.silage": "Silage",
+  "category.concentrate": "Concentrate",
+  "category.green_fodder": "Green Fodder",
+  "category.dry_fodder": "Dry Fodder",
+  "score.crudeProteinShort": "CP"
 }

@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { calculatePrecisionRation, DEFAULT_FEED_LIBRARY } from '../lib/rationBalancing';
 import { CowProfile, FeedSample } from '../lib/types';
+import {
+  getCowDisplayName,
+  getCowBreedDisplayName,
+  getFeedCategoryDisplayName,
+  getSampleDisplayName,
+} from '../lib/i18n';
 
 describe('ICAR & NDDB Precision Ration Balancer', () => {
   const girCow: CowProfile = {
@@ -61,3 +67,34 @@ describe('ICAR & NDDB Precision Ration Balancer', () => {
   });
 });
 
+describe('Cattle & Ration Localization Helpers', () => {
+  it('translates default cow names and preserves custom names', () => {
+    expect(getCowDisplayName('Lakshmi', 'hi')).toBe('लक्ष्मी');
+    expect(getCowDisplayName('Ganga', 'hi')).toBe('गंगा');
+    expect(getCowDisplayName('Yamuna', 'hi')).toBe('यमुना');
+    expect(getCowDisplayName({ id: 'cow_1', name: 'Lakshmi' }, 'hi')).toBe('लक्ष्मी');
+    expect(getCowDisplayName({ id: 'cow_custom', name: 'Nandini' }, 'hi')).toBe('Nandini');
+  });
+
+  it('translates cattle breeds correctly in Hindi and falls back gracefully', () => {
+    expect(getCowBreedDisplayName('Gir', 'hi')).toBe('गीर गाय');
+    expect(getCowBreedDisplayName('HF Crossbred', 'hi')).toBe('एच.एफ. संकर');
+    expect(getCowBreedDisplayName('Murrah Buffalo', 'hi')).toBe('मुर्रा भैंस');
+    expect(getCowBreedDisplayName('Unknown Breed', 'hi')).toBe('Unknown Breed');
+  });
+
+  it('translates feed categories correctly', () => {
+    expect(getFeedCategoryDisplayName('silage', 'hi')).toBe('साइलेज');
+    expect(getFeedCategoryDisplayName('concentrate', 'hi')).toBe('दाना मिश्रण');
+    expect(getFeedCategoryDisplayName('green_fodder', 'hi')).toBe('हरा चारा');
+    expect(getFeedCategoryDisplayName('dry_fodder', 'hi')).toBe('सूखा भूसा');
+    expect(getFeedCategoryDisplayName('silage', 'en')).toBe('Silage');
+  });
+
+  it('translates visual triage feed sample names correctly', () => {
+    expect(getSampleDisplayName({ name: 'Silage (Visual Triage)' }, 'hi')).toBe('साइलेज (त्वरित जांच)');
+    expect(getSampleDisplayName({ name: 'Green Fodder (Visual Triage)' }, 'hi')).toBe('ताज़ा हरा चारा (त्वरित जांच)');
+    expect(getSampleDisplayName({ name: 'Dry Fodder (Visual Triage)' }, 'hi')).toBe('सूखा भूसा / पुआल (त्वरित जांच)');
+    expect(getSampleDisplayName({ name: 'Concentrate (Visual Triage)' }, 'hi')).toBe('दाना मिश्रण / पेलेट (त्वरित जांच)');
+  });
+});

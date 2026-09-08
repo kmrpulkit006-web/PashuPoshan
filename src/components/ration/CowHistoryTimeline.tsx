@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { CowProfile, FeedSample, CowYieldLogEntry, Locale } from '../../lib/types';
 import { getLocalYieldLogs, saveYieldLogEntry, getSamplesForCow } from '../../lib/storage';
-import { t, getBcp47Locale } from '../../lib/i18n';
+import { t, getBcp47Locale, getCowDisplayName, getCowBreedDisplayName } from '../../lib/i18n';
 
 interface CowHistoryTimelineProps {
   cow: CowProfile;
@@ -213,7 +213,7 @@ export const CowHistoryTimeline: React.FC<CowHistoryTimelineProps> = ({
               <span className="text-[10px] text-slate-500 font-semibold">({timelineItems.length})</span>
             </h3>
             <p className="text-[10px] text-[#5A5243] dark:text-slate-400 font-semibold">
-              {cow.name} • {cow.breed}
+              {getCowDisplayName(cow, locale)} • {getCowBreedDisplayName(cow.breed, locale)}
             </p>
           </div>
         </button>

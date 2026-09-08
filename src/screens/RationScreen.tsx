@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FeedSample, Locale } from '../lib/types';
-import { t } from '../lib/i18n';
+import {
+  t,
+  getSampleDisplayName,
+  getCowDisplayName,
+  getCowBreedDisplayName,
+  getFeedCategoryDisplayName,
+} from '../lib/i18n';
 import { useRationManager } from '../hooks/useRationManager';
 import { AddCowModal } from '../components/ration/AddCowModal';
 import { RationNutrientCards } from '../components/ration/RationNutrientCards';
@@ -37,7 +43,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
     handleSelectCow,
     handleSaveCow,
     handleDeleteCow,
-  } = useRationManager({ activeSample: currentSample });
+  } = useRationManager({ activeSample: currentSample, locale });
 
   useEffect(() => {
     if (!rationNotice) return;
@@ -133,11 +139,12 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
         {currentSample && (
           <div className="mt-3 bg-[#edf7f0] dark:bg-emerald-950/60 border border-[#b0dec0] dark:border-emerald-500/40 rounded-2xl p-2.5 flex items-center justify-between text-xs flex-wrap gap-2">
             <div className="flex items-center space-x-2">
-              <span className="text-[10px] uppercase font-black text-[#1F5D3B] dark:text-emerald-300 bg-white/90 dark:bg-black/40 px-2 py-0.5 rounded-lg border border-[#b0dec0] dark:border-emerald-500/30">
-                {t('ration.feedSlot', locale, { category: currentSample.category.replace('_', ' ') })}
+              <span className="text-[10px] font-black text-[#1F5D3B] dark:text-emerald-300 bg-white/90 dark:bg-black/40 px-2 py-0.5 rounded-lg border border-[#b0dec0] dark:border-emerald-500/30">
+                {t('ration.feedSlot', locale, { category: getFeedCategoryDisplayName(currentSample.category, locale) })}
               </span>
               <span className="font-bold text-[#1A1A1A] dark:text-white text-xs truncate max-w-[170px]">
-                {currentSample.name} (CP {currentSample.metrics.crudeProtein}%)
+                {getSampleDisplayName(currentSample, locale)}
+                {currentSample.metrics?.crudeProtein ? ` (${t('score.crudeProteinShort', locale) || 'CP'} ${currentSample.metrics.crudeProtein}%)` : ''}
               </span>
             </div>
             <div className="flex items-center space-x-1.5">
@@ -146,18 +153,18 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                   type="button"
                   onClick={handleLinkSampleToCow}
                   className="text-[10px] text-white bg-[#1F5D3B] hover:bg-[#184a2f] font-black px-2.5 py-1.5 rounded-lg transition-all active:scale-95 min-h-[36px] flex items-center space-x-1"
-                  title={`Link this tested feed sample to ${activeCow?.name || 'selected cow'}`}
+                  title={`Link this tested feed sample to ${getCowDisplayName(activeCow, locale) || 'selected cow'}`}
                 >
                   <Plus className="w-3 h-3" />
-                  <span>{t('ration.linkToCow', locale, { cow: activeCow?.name?.split(' ')[0] || 'Cow' })}</span>
+                  <span>{t('ration.linkToCow', locale, { cow: getCowDisplayName(activeCow, locale) || 'Cow' })}</span>
                 </button>
               ) : currentSample.linkedCowId === selectedCowId ? (
                 <span className="text-[10px] text-[#1F5D3B] dark:text-emerald-300 font-black">
-                  {t('ration.linkedToCow', locale, { cow: activeCow?.name?.split(' ')[0] || '' })} ✓
+                  {t('ration.linkedToCow', locale, { cow: getCowDisplayName(activeCow, locale) || '' })} ✓
                 </span>
               ) : (
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
-                  {t('ration.linkedToCow', locale, { cow: cows.find((c) => c.id === currentSample.linkedCowId)?.name?.split(' ')[0] || 'Other Cattle' })}
+                  {t('ration.linkedToCow', locale, { cow: getCowDisplayName(cows.find((c) => c.id === currentSample.linkedCowId), locale) || 'Other Cattle' })}
                 </span>
               )}
             </div>
@@ -197,14 +204,14 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                 }}
                 className="absolute top-0.5 right-0.5 text-slate-400 hover:text-[#B3261E] dark:hover:text-red-400 w-11 h-11 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl"
                 title="Remove cattle"
-                aria-label={`Remove ${cow.name}`}
+                aria-label={`Remove ${getCowDisplayName(cow, locale)}`}
               >
                 <Trash2 className="w-4 h-4" />
               </button>
               <div className="text-xl mb-0.5" aria-hidden="true">🐄</div>
-              <div className="text-xs font-black truncate">{cow.name.split(' ')[0]}</div>
+              <div className="text-xs font-black truncate">{getCowDisplayName(cow, locale)}</div>
               <div className="text-[10px] text-[#5A5243] dark:text-slate-400 truncate font-semibold">
-                {cow.breed}
+                {getCowBreedDisplayName(cow.breed, locale)}
               </div>
             </div>
           ))}
@@ -448,7 +455,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                     }}
                     className="flex-1 min-h-[44px] px-4 py-2.5 rounded-2xl border-2 font-bold text-sm bg-white dark:bg-slate-800 border-field-border dark:border-slate-700 text-field-text dark:text-slate-200"
                   >
-                    Cancel
+                    {t('ration.cancelBtn', locale) || 'Cancel'}
                   </button>
                   <button
                     type="button"
@@ -457,7 +464,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                     }}
                     className="flex-1 min-h-[44px] px-4 py-2.5 rounded-2xl font-bold text-sm bg-[#B3261E] text-white hover:bg-red-700"
                   >
-                    Remove
+                    {t('history.delete', locale) || 'Remove'}
                   </button>
                 </>
               ) : (
@@ -466,7 +473,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                   onClick={() => setRationNotice(null)}
                   className="w-full min-h-[44px] px-4 py-2.5 rounded-2xl font-bold text-sm bg-[#1F5D3B] dark:bg-emerald-600 text-white"
                 >
-                  Understood
+                  {t('common.close', locale) || 'Understood'}
                 </button>
               )}
             </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CowProfile, Locale } from '../../lib/types';
-import { t } from '../../lib/i18n';
+import { t, getCowBreedDisplayName } from '../../lib/i18n';
 import { X, Check } from 'lucide-react';
 
 interface AddCowModalProps {
@@ -130,7 +130,7 @@ export const AddCowModal: React.FC<AddCowModalProps> = ({
             >
               {BREED_OPTIONS.map((b) => (
                 <option key={b} value={b}>
-                  {b}
+                  {getCowBreedDisplayName(b, locale)}
                 </option>
               ))}
             </select>

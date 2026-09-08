@@ -149,7 +149,7 @@ export function getSampleDisplayName(
   }
 
   // Triage naming patterns
-  if (name.includes('(Visual Triage)')) {
+  if (name.toLowerCase().includes('visual triage') || name.toLowerCase().includes('(visual triage)')) {
     if (sample.category === 'silage' || name.toLowerCase().includes('silage')) {
       return t('sample.silageVisual', locale);
     }
@@ -339,5 +339,69 @@ export function getAflatoxinRiskText(risk: string | undefined, locale: Locale | 
   if (risk.includes('Moderate')) return t('score.riskAflatoxinModerate', locale);
   if (risk.includes('Safe')) return t('score.riskAflatoxinSafe', locale);
   return risk;
+}
+
+/**
+ * Localizes cattle names (e.g. Lakshmi, Ganga, Yamuna).
+ */
+export function getCowDisplayName(
+  cowOrName: string | { name?: string; id?: string } | undefined | null,
+  locale: Locale | string
+): string {
+  if (!cowOrName) return '';
+  const rawName = typeof cowOrName === 'string' ? cowOrName : (cowOrName.name || '');
+  if (!rawName) return '';
+
+  const clean = rawName.split(' ')[0].toLowerCase().trim();
+  if (clean.includes('lakshmi') || clean.includes('laxmi')) {
+    return t('cattle.lakshmi', locale);
+  }
+  if (clean.includes('ganga')) {
+    return t('cattle.ganga', locale);
+  }
+  if (clean.includes('yamuna')) {
+    return t('cattle.yamuna', locale);
+  }
+  return rawName.split(' ')[0];
+}
+
+/**
+ * Localizes cattle breeds (e.g. Gir, Sahiwal, Red Sindhi, HF Crossbred, Murrah Buffalo).
+ */
+export function getCowBreedDisplayName(breed: string | undefined | null, locale: Locale | string): string {
+  if (!breed) return '';
+  const b = breed.toLowerCase().trim();
+  if (b.includes('gir') || b.includes('गीर')) {
+    return t('cattle.gir', locale);
+  }
+  if (b.includes('sahiwal') || b.includes('साहीवाल')) {
+    return t('cattle.sahiwal', locale);
+  }
+  if (b.includes('red sindhi') || b.includes('सिंधी')) {
+    return t('cattle.redSindhi', locale);
+  }
+  if (b.includes('hf') || b.includes('holstein') || b.includes('crossbred') || b.includes('संकर')) {
+    return t('cattle.hfCrossbred', locale);
+  }
+  if (b.includes('jersey') || b.includes('जर्सी')) {
+    return t('cattle.jerseyCross', locale);
+  }
+  if (b.includes('murrah') || b.includes('buffalo') || b.includes('मुर्रा') || b.includes('भैंस')) {
+    return t('cattle.murrahBuffalo', locale);
+  }
+  return breed;
+}
+
+/**
+ * Localizes feed categories.
+ */
+export function getFeedCategoryDisplayName(category: string | undefined | null, locale: Locale | string): string {
+  if (!category) return '';
+  const c = category.toLowerCase().replace(/[\s_-]+/g, '_');
+  if (c.includes('silage')) return t('category.silage', locale);
+  if (c.includes('concentrate') || c.includes('pellet')) return t('category.concentrate', locale);
+  if (c.includes('green')) return t('category.green_fodder', locale);
+  if (c.includes('dry') || c.includes('bhusa') || c.includes('straw')) return t('category.dry_fodder', locale);
+  return category;
 }
 
