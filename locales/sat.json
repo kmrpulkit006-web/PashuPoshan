@@ -1,5 +1,5 @@
 {
-  "app.name": "ᱯᱚᱥᱩᱯᱳᱥᱚᱱ AI",
+  "app.name": "ᱯᱚᱥᱩᱯᱳᱥᱚᱱ",
   "app.subtitle": "ᱜᱟᱹᱭ ᱡᱚᱢᱟᱜ ᱟᱨ ᱥᱟᱭᱞᱮᱡᱽ ᱵᱤᱰᱟᱹᱣ ᱦᱚᱨᱟ",
   "app.tagline": "ᱥᱢᱟᱨᱴ ᱤᱱᱰᱤᱭᱟ ᱦᱮᱠᱟᱛᱷᱚᱱ (SIH 26111) — ᱯᱚᱥᱩᱯᱟᱞᱚᱱ ᱢᱚᱱᱛᱨᱟᱞᱚᱭ",
   "app.installPwa": "ᱮᱯ ᱤᱱᱥᱴᱚᱞ ᱢᱮ",
@@ -11,7 +11,7 @@
   "nav.ration": "ᱥᱚᱢᱟᱱ ᱡᱚᱢᱟᱜ",
   "nav.silage": "ᱥᱟᱭᱞᱮᱡᱽ ᱠᱷᱟᱫᱟᱱ",
   "nav.alerts": "ᱦᱩᱥᱤᱭᱟᱹᱨ ᱠᱟᱛᱷᱟ",
-  "scan.title": "AI ᱞᱚᱜᱚᱱ ᱜᱩᱱ ᱥᱠᱮᱱᱟᱨ",
+  "scan.title": "Check Your Feed",
   "scan.modeVision": "ᱧᱮᱞ ᱟᱨ ᱥᱮᱭᱟ ᱵᱤᱰᱟᱹᱣ",
   "scan.modeStrip": "ᱠᱮᱢᱤᱠᱮᱞ ᱯᱟᱹᱛᱤ (ᱭᱩᱨᱤᱭᱟ ᱟᱨ pH)",
   "scan.feedType": "ᱡᱚᱢᱟᱜ ᱨᱮᱱᱟᱜ ᱨᱚᱠᱚᱢ:",
@@ -112,8 +112,8 @@
   "lab.directions": "ᱰᱟᱦᱟᱨ (Maps)",
   "lab.accreditation": "ᱢᱟᱱᱟᱣ",
   "lab.capabilities": "ᱵᱤᱰᱟᱹᱣ ᱫᱟᱲᱮ",
-  "chat.title": "ᱯᱚᱥᱩ ᱥᱮᱣᱟ AI (ᱰᱟᱠᱛᱚᱨ)",
-  "chat.subtitle": "AI ᱫᱤᱥᱟᱹ ᱩᱫᱩᱜᱤᱡ ᱟᱨ ᱡᱚᱢᱟᱜ ᱜᱚᱲᱚ",
+  "chat.title": "Pashu Mitra (Doctor Help)",
+  "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "ᱜᱟᱹᱭ ᱡᱚᱢᱟᱜ ᱵᱟᱵᱚᱛ ᱠᱩᱞᱤ ᱢᱮ...",
   "chat.send": "ᱠᱩᱞ ᱢᱮ",
   "chat.emergencyNotice": "ᱟᱹᱰᱤ ᱡᱟᱹᱨᱩᱲ ᱨᱮ 1962 ᱨᱮ ᱯᱷᱳᱱ ᱢᱮ᱾"

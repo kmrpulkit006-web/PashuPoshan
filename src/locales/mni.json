@@ -1,5 +1,5 @@
 {
-  "app.name": "পশুপোষণ AI",
+  "app.name": "পশুপোষণ",
   "app.subtitle": "শন-ইরোই চানবা পোৎলম অমসুং সাইলেজ চাংয়েং",
   "app.tagline": "স্মার্ট ইন্দিয়া হেকাথন (SIH 26111) — এনিমেল হসবেন্দ্রি মন্ত্রালয়",
   "app.installPwa": "এপ ইন্সটোল তৌবীয়ু",
@@ -11,7 +11,7 @@
   "nav.ration": "চানবা চাং মান্নহনবা",
   "nav.silage": "সাইলেজ খোপ",
   "nav.alerts": "মফমগী চেকশিনৱা",
-  "scan.title": "AI য়াংনা গুন চাংয়েং স্কেনর",
+  "scan.title": "Check Your Feed",
   "scan.modeVision": "মিৎনা উবা অমসুং উল চাংয়েং",
   "scan.modeStrip": "কেমিকেল স্ত্ৰিপ (য়ুরিয়া অমসুং pH)",
   "scan.feedType": "চানবা মখল:",
@@ -112,8 +112,8 @@
   "lab.directions": "লম্বী (Maps)",
   "lab.accreditation": "অনুমোদন",
   "lab.capabilities": "চাংয়েংগী পাঙ্গল",
-  "chat.title": "পশু সেবা AI (দোক্তর)",
-  "chat.subtitle": "AI পাউতাকপীবা অমসুং পোৎলম মতেং পাংবা",
+  "chat.title": "Pashu Mitra (Doctor Help)",
+  "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "শন-ইরোই চানবা নত্রগা হকশেলগী হংবীয়ু...",
   "chat.send": "থাগৎলকউ",
   "chat.emergencyNotice": "খুদোংথীবা তারগদি থবক ওইনা 1962 দা কোল তৌবীয়ু।"

@@ -21,6 +21,13 @@ interface ScanScreenProps {
   theme?: 'light' | 'dark';
 }
 
+const CATEGORY_NAMES: Record<FeedCategory, { en: string; hi: string }> = {
+  silage: { en: '🌾 Silage (Achar)', hi: '🌾 साइलेज (अचार)' },
+  concentrate: { en: '🥣 Feed / Khal', hi: '🥣 दाना / खल' },
+  green_fodder: { en: '🌱 Green Grass', hi: '🌱 हरा चारा' },
+  dry_fodder: { en: '🌾 Dry Straw / Bhusa', hi: '🌾 सूखा भूसा' },
+};
+
 export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, theme = 'light' }) => {
   const isDark = theme === 'dark';
   const {
@@ -44,24 +51,44 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
 
   return (
     <div className="p-4 space-y-4 pb-28 print:hidden text-[#1A1A1A] dark:text-white">
-      {/* Prominent On-Farm Screening & Heuristic Notice */}
+      {/* 5-Second Clarity Hero Card: Friendly, Rural & Crystal Clear */}
       <div
-        className="rounded-3xl p-4 flex items-start space-x-3 shadow-sm border-2 transition-colors"
+        className="rounded-3xl p-4 shadow-sm border-2 transition-colors relative overflow-hidden"
         style={{
-          backgroundColor: isDark ? 'rgba(69, 26, 3, 0.85)' : '#fdf8f4',
-          borderColor: isDark ? 'rgba(245, 158, 11, 0.5)' : '#C2703D',
-          color: isDark ? '#fef3c7' : '#1A1A1A',
+          backgroundColor: isDark ? 'rgba(6, 78, 59, 0.85)' : '#edf7f0',
+          borderColor: isDark ? '#059669' : '#a7f3d0',
         }}
-        role="note"
       >
-        <div className="w-8 h-8 rounded-xl bg-[#f3d6c4] dark:bg-amber-500/20 border border-[#C2703D] dark:border-amber-400/40 flex items-center justify-center shrink-0 mt-0.5">
-          <AlertTriangle className="w-5 h-5 text-[#C2703D] dark:text-amber-400" />
+        <div className="flex items-start space-x-3">
+          <div className="w-12 h-12 rounded-2xl bg-[#1F5D3B] text-white flex items-center justify-center shrink-0 shadow-md text-2xl">
+            🐄
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base sm:text-lg font-black text-[#1F5D3B] dark:text-emerald-300 leading-tight">
+              {locale === 'hi' ? 'चारे की शुद्धता व गुणवत्ता जांचें' : t('scan.title', locale)}
+            </h2>
+            <p className="text-xs text-[#2c533c] dark:text-emerald-100 font-semibold mt-1 leading-relaxed">
+              {locale === 'hi'
+                ? 'फोटो खींचकर या टेस्ट स्ट्रिप से आसानी से पता करें कि चारा आपके पशुओं के लिए सुरक्षित व पौष्टिक है या नहीं।'
+                : 'Take a photo or use a test strip to check if your cattle feed is safe and healthy for milk yield.'}
+            </p>
+          </div>
         </div>
-        <div className="text-xs leading-relaxed font-semibold">
-          <span className="font-black text-[#C2703D] dark:text-amber-300 block text-xs uppercase tracking-wide">
-            Rapid Field Screening (खेत पर त्वरित जांच):
-          </span>
-          Instant optical and strip screening for quick on-farm guidance. For official dispute resolution or laboratory certification, confirmatory wet-chemistry analysis is advised.
+
+        {/* 3 Simple Visual Steps (Understood in 5 seconds) */}
+        <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-emerald-200/80 dark:border-emerald-800 text-center">
+          <div className="bg-white/80 dark:bg-slate-900/70 rounded-xl p-2 text-[11px] font-bold text-[#1F5D3B] dark:text-emerald-200 shadow-xs">
+            <span className="block text-sm">1️⃣</span>
+            <span>{locale === 'hi' ? 'चारा चुनें' : '1. Pick Feed'}</span>
+          </div>
+          <div className="bg-white/80 dark:bg-slate-900/70 rounded-xl p-2 text-[11px] font-bold text-[#1F5D3B] dark:text-emerald-200 shadow-xs">
+            <span className="block text-sm">2️⃣</span>
+            <span>{locale === 'hi' ? 'फोटो लें' : '2. Take Photo'}</span>
+          </div>
+          <div className="bg-white/80 dark:bg-slate-900/70 rounded-xl p-2 text-[11px] font-bold text-[#1F5D3B] dark:text-emerald-200 shadow-xs">
+            <span className="block text-sm">3️⃣</span>
+            <span>{locale === 'hi' ? 'कार्ड पाएं' : '3. Get Result'}</span>
+          </div>
         </div>
       </div>
 
@@ -137,19 +164,20 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
           </span>
           {(['silage', 'concentrate', 'green_fodder', 'dry_fodder'] as FeedCategory[]).map((cat) => {
             const isSelected = category === cat;
+            const catLabel = CATEGORY_NAMES[cat] ? (locale === 'hi' ? CATEGORY_NAMES[cat].hi : CATEGORY_NAMES[cat].en) : cat.replace('_', ' ');
             return (
               <button
                 key={cat}
                 type="button"
                 onClick={() => setCategory(cat)}
-                className="px-3 py-2 rounded-xl font-black capitalize whitespace-nowrap text-xs border-2 transition-all min-h-[44px] shrink-0 shadow-xs"
+                className="px-3.5 py-2.5 rounded-2xl font-black whitespace-nowrap text-xs sm:text-sm border-2 transition-all min-h-[46px] shrink-0 shadow-xs"
                 style={{
                   backgroundColor: isSelected ? (isDark ? '#022c22' : '#edf7f0') : (isDark ? '#0f172a' : '#ffffff'),
                   borderColor: isSelected ? (isDark ? '#34d399' : '#1F5D3B') : (isDark ? '#334155' : '#DCD3BF'),
                   color: isSelected ? (isDark ? '#ffffff' : '#1F5D3B') : (isDark ? '#94a3b8' : '#5A5243'),
                 }}
               >
-                {cat.replace('_', ' ')}
+                {catLabel}
               </button>
             );
           })}
@@ -166,7 +194,7 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
             <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-auto">
               <span className="bg-[#1F5D3B]/90 backdrop-blur-xs text-white text-xs font-black px-3 py-1 rounded-full border border-emerald-400/50 flex items-center space-x-1.5 shadow-md">
                 <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
-                <span>Sample Photo Ready</span>
+                <span>{locale === 'hi' ? 'फोटो तैयार है' : 'Photo Ready'}</span>
               </span>
 
               <button
@@ -176,7 +204,7 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
                 title="Retake or choose another photo"
               >
                 <RefreshCw className="w-3.5 h-3.5 text-emerald-300" />
-                <span>Retake</span>
+                <span>{locale === 'hi' ? 'पुनः लें' : 'Retake'}</span>
               </button>
             </div>
           </>
@@ -194,37 +222,37 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
                 <p className="text-sm font-black text-white leading-snug">
                   {scanMode === 'vision'
                     ? t('scan.pointCamera', locale)
-                    : 'Place strip next to reference card inside the box'}
+                    : (locale === 'hi' ? 'स्ट्रिप को बॉक्स में सफेद पेपर के पास रखें' : 'Place strip in box next to white paper')}
                 </p>
                 <p className="text-[11px] text-slate-300 mt-1 font-semibold">
                   {scanMode === 'vision'
                     ? t('scan.lightingTip', locale)
-                    : 'स्ट्रिप को बॉक्स के अंदर संदर्भ कार्ड (सफेद पेपर) के पास रखें'}
+                    : (locale === 'hi' ? 'अच्छी रोशनी में 15-20 सेमी दूरी से फोटो लें' : 'Hold steady in good light (15-20cm away)')}
                 </p>
               </div>
 
               {/* Strip Mode Dual Box Guidance */}
               {scanMode === 'strip' ? (
                 <div className="grid grid-cols-2 gap-2 pt-1">
-                  <div className="border-2 border-dashed border-white/60 bg-white/10 rounded-xl p-1.5 text-[10px] text-white font-bold">
-                    <span>⬜ Reference Card</span>
-                    <span className="block text-[8px] text-emerald-200">सफ़ेद संदर्भ कार्ड</span>
+                  <div className="border-2 border-dashed border-white/60 bg-white/10 rounded-xl p-1.5 text-[11px] text-white font-bold">
+                    <span>⬜ {locale === 'hi' ? 'सफेद पेपर' : 'White Card'}</span>
+                    <span className="block text-[9px] text-emerald-200">{locale === 'hi' ? 'सफेद पृष्ठभूमि' : 'Paper / Card'}</span>
                   </div>
-                  <div className="border-2 border-dashed border-amber-300/80 bg-amber-500/10 rounded-xl p-1.5 text-[10px] text-amber-200 font-bold">
-                    <span>🧪 Test Strip</span>
-                    <span className="block text-[8px] text-amber-300">pH / यूरिया स्ट्रिप</span>
+                  <div className="border-2 border-dashed border-amber-300/80 bg-amber-500/10 rounded-xl p-1.5 text-[11px] text-amber-200 font-bold">
+                    <span>🧪 {locale === 'hi' ? 'टेस्ट स्ट्रिप' : 'Test Strip'}</span>
+                    <span className="block text-[9px] text-amber-300">{locale === 'hi' ? 'यूरिया / pH स्ट्रिप' : 'Chemical Strip'}</span>
                   </div>
                 </div>
               ) : (
-                <div className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-[10px] text-emerald-300 font-mono font-bold uppercase tracking-wider">
-                  <span>Align sample inside frame</span>
+                <div className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/35 text-xs text-emerald-200 font-bold">
+                  <span>{locale === 'hi' ? 'चारे को फ्रेम के बीच में रखें' : 'Keep feed centered inside frame'}</span>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* Processing laser overlay */}
+        {/* Processing overlay */}
         {isProcessing && (
           <div className="absolute inset-0 bg-black/85 backdrop-blur-xs flex flex-col items-center justify-center z-20 px-4 text-center">
             <div className="w-full h-1.5 bg-emerald-400 shadow-[0_0_20px_#10b981] absolute top-0 animate-[bounce_2s_infinite]" />
@@ -234,8 +262,8 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
             </p>
             <p className="text-xs text-emerald-300 mt-1.5 font-semibold max-w-xs">
               {scanMode === 'strip'
-                ? 'Reference Card Gain Normalization & CIEDE2000 Matching...'
-                : 'Physical condition, mold coverage, & foreign matter triage...'}
+                ? (locale === 'hi' ? 'स्ट्रिप के रंग की जांच हो रही है...' : 'Matching test strip colors...')
+                : (locale === 'hi' ? 'चारे की शुद्धता, फफूंद व सुरक्षा की जांच हो रही है...' : 'Checking freshness, cleanliness, and safety...')}
             </p>
           </div>
         )}

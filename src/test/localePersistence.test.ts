@@ -74,17 +74,17 @@ describe('Locale Persistence & Validation', () => {
   });
 
   it('translates strings across multiple Indian regional languages using centralized engine', () => {
-    expect(t('app.name', 'hi')).toBe('पशु-पोषण AI');
-    expect(t('app.name', 'en')).toBe('PashuPoshan AI');
-    expect(t('app.name', 'mr')).toBe('पशुपोषण AI');
-    expect(t('app.name', 'bn')).toBe('পশুপোষণ AI');
-    expect(t('app.name', 'ta')).toBe('பசுபோஷன் AI');
-    expect(t('app.name', 'te')).toBe('పశుపోషణ్ AI');
+    expect(t('app.name', 'hi')).toBe('पशुपोषण');
+    expect(t('app.name', 'en')).toBe('PashuPoshan');
+    expect(t('app.name', 'mr')).toBe('पशुपोषण');
+    expect(t('app.name', 'bn')).toBe('পশুপোষণ');
+    expect(t('app.name', 'ta')).toBe('பசுபோஷன்');
+    expect(t('app.name', 'te')).toBe('పశుపోషణ్');
 
-    expect(t('nav.scan', 'hi')).toBe('स्कैन व जांच');
-    expect(t('nav.scan', 'en')).toBe('Scan & Test');
-    expect(t('nav.scan', 'pa')).toBe('ਸਕੈਨ ਤੇ ਟੈਸਟ');
-    expect(t('nav.scan', 'gu')).toBe('સ્કેન અને ટેસ્ટ');
+    expect(t('nav.scan', 'hi')).toBe('चारा जांचें');
+    expect(t('nav.scan', 'en')).toBe('Check Feed');
+    expect(t('nav.scan', 'pa')).toBe('ਚਾਰਾ ਪਰਖੋ');
+    expect(t('nav.scan', 'gu')).toBe('ઘાસચારો તપાસો');
   });
 
   it('supports runtime dynamic registration of regional dialects and variants', () => {
@@ -92,7 +92,7 @@ describe('Locale Persistence & Validation', () => {
     registerLocale(
       'bho',
       {
-        'app.name': 'पशुपोषण एआई (भोजपुरी)',
+        'app.name': 'पशुपोषण (भोजपुरी)',
         'nav.scan': 'जांच करीं',
       },
       {
@@ -103,10 +103,10 @@ describe('Locale Persistence & Validation', () => {
       }
     );
 
-    expect(t('app.name', 'bho' as any)).toBe('पशुपोषण एआई (भोजपुरी)');
+    expect(t('app.name', 'bho' as any)).toBe('पशुपोषण (भोजपुरी)');
     expect(t('nav.scan', 'bho' as any)).toBe('जांच करीं');
     // Cascading fallback to Hindi for untranslated keys
-    expect(t('score.bisCompliant', 'bho' as any)).toBe('BIS IS:2052 मानक अनुसार सुरक्षित');
+    expect(t('score.disclaimerTitle', 'bho' as any)).toBe('जरूरी किसान सूचना');
     expect(getLanguageInfo('bho' as any).nativeName).toBe('भोजपुरी');
   });
 });

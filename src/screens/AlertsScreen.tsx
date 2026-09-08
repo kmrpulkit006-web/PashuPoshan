@@ -81,7 +81,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale }) => {
     }
 
     setIsSyncing(true);
-    setSyncStatusMsg('Connecting to AI Vision Triage service...');
+    setSyncStatusMsg(locale === 'hi' ? 'सर्वर से जुड़ रहे हैं...' : 'Connecting to service...');
 
     try {
       const { successful, failed } = await syncPendingScans((current, total) => {

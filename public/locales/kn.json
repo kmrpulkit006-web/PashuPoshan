@@ -1,5 +1,5 @@
 {
-  "app.name": "ಪಶುಪೋಷಣ್ AI",
+  "app.name": "ಪಶುಪೋಷಣ್",
   "app.subtitle": "ಪಶು ಆಹಾರ & ಸೈಲೇಜ್ ಗುಣಮಟ್ಟ ಪರೀಕ್ಷಾ ವ್ಯವಸ್ಥೆ",
   "app.tagline": "ಸ್ಮಾರ್ಟ್ ಇಂಡಿಯಾ ಹ್ಯಾಕಥಾನ್ (SIH 26111) — ಪಶುಸಂಗೋಪನಾ ಸಚಿವಾಲಯ",
   "app.installPwa": "ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ",
@@ -11,7 +11,7 @@
   "nav.ration": "ಸಮತೋಲಿತ ಆಹಾರ",
   "nav.silage": "ಸೈಲೇಜ್ ಪಿಟ್",
   "nav.alerts": "ಸ್ಥಳೀಯ ಎಚ್ಚರಿಕೆಗಳು",
-  "scan.title": "AI ತ್ವರಿತ ಗುಣಮಟ್ಟ ಸ್ಕ್ಯಾನರ್",
+  "scan.title": "Check Your Feed",
   "scan.modeVision": "ಗೋಚರತೆ & ಶಿಲೀಂಧ್ರ ಪರೀಕ್ಷೆ",
   "scan.modeStrip": "ರಾಸಾಯನಿಕ ಸ್ಟ್ರಿಪ್ (ಯೂರಿಯಾ & pH)",
   "scan.feedType": "ಆಹಾರದ ವಿಧ:",
@@ -112,8 +112,8 @@
   "lab.directions": "ಮಾರ್ಗ (Maps)",
   "lab.accreditation": "ಮಾನ್ಯತೆ",
   "lab.capabilities": "ಪರೀಕ್ಷಾ ಸಾಮರ್ಥ್ಯಗಳು",
-  "chat.title": "ಪಶು ಸೇವಾ AI (ಪಶುವೈದ್ಯ ತಜ್ಞ)",
-  "chat.subtitle": "AI ಸಲಹೆಗಾರ ಮತ್ತು ಪೌಷ್ಟಿಕಾಂಶ ಸಹಾಯಕ",
+  "chat.title": "Pashu Mitra (Doctor Help)",
+  "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "ಪಶು ಆಹಾರ ಅಥವಾ ಆರೋಗ್ಯದ ಬಗ್ಗೆ ಕೇಳಿ...",
   "chat.send": "ಕಳುಹಿಸಿ",
   "chat.emergencyNotice": "ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ ತಕ್ಷಣ 1962 ಗೆ ಕರೆ ಮಾಡಿ."

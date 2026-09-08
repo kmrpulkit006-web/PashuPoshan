@@ -1,5 +1,5 @@
 {
-  "app.name": "പശുപോഷൺ AI",
+  "app.name": "പശുപോഷൺ",
   "app.subtitle": "കന്നുകാലി തീറ്റ & സൈലേജ് ഗുണനിലവാര പരിശോധന",
   "app.tagline": "സ്മാർട്ട് ഇന്ത്യ ഹാക്കത്തോൺ (SIH 26111) — മൃഗസംരക്ഷണ മന്ത്രാലയം",
   "app.installPwa": "ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യുക",
@@ -11,7 +11,7 @@
   "nav.ration": "റേഷൻ സന്തുലനം",
   "nav.silage": "സൈലേജ് പിറ്റ്",
   "nav.alerts": "പ്രാദേശിക ജാഗ്രത",
-  "scan.title": "AI ഗുണനിലവാര സ്കാനർ",
+  "scan.title": "Check Your Feed",
   "scan.modeVision": "കാഴ്ച & പൂപ്പൽ പരിശോധന",
   "scan.modeStrip": "രാസ സ്ട്രിപ്പ് (യൂറിയ & pH)",
   "scan.feedType": "തീറ്റ വിഭാഗം:",
@@ -112,8 +112,8 @@
   "lab.directions": "വഴികൾ (Maps)",
   "lab.accreditation": "അംഗീകാരം",
   "lab.capabilities": "പരിശോധനാ ശേഷികൾ",
-  "chat.title": "പശു സേവ AI (വെറ്ററിനറി വിദഗ്ധൻ)",
-  "chat.subtitle": "AI ഉപദേശകനും തീറ്റ സഹായിയും",
+  "chat.title": "Pashu Mitra (Doctor Help)",
+  "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "കാലിത്തീറ്റയെക്കുറിച്ചോ ആരോഗ്യത്തെക്കുറിച്ചോ ചോദിക്കുക...",
   "chat.send": "അയക്കുക",
   "chat.emergencyNotice": "അടിയന്തിര സാഹചര്യങ്ങളിൽ ഉടൻ 1962 ലേക്ക് വിളിക്കുക."

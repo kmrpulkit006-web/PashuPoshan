@@ -1,5 +1,5 @@
 {
-  "app.name": "পশুপোষণ AI",
+  "app.name": "পশুপোষণ",
   "app.subtitle": "দ্ৰুত গো-খাদ্য আৰু ছাইলেজ মান পৰীক্ষা ব্যৱস্থা",
   "app.tagline": "স্মাৰ্ট ইণ্ডিয়া হেকাথন (SIH 26111) — পশুপালন মন্ত্ৰালয়",
   "app.installPwa": "এপ ইনষ্টল কৰক",
@@ -11,7 +11,7 @@
   "nav.ration": "সুষম খাদ্য তালিকা",
   "nav.silage": "ছাইলেজ গাঁত",
   "nav.alerts": "স্থানীয় সতৰ্কতা",
-  "scan.title": "AI দ্ৰুত মান স্কেনাৰ",
+  "scan.title": "Check Your Feed",
   "scan.modeVision": "বাহ্যিক আৰু ভেঁকুৰ পৰীক্ষা",
   "scan.modeStrip": "ৰাসায়নিক ষ্ট্ৰিপ (ইউৰিয়া আৰু pH)",
   "scan.feedType": "খাদ্যৰ প্ৰকাৰ:",
@@ -112,8 +112,8 @@
   "lab.directions": "দিশ (Maps)",
   "lab.accreditation": "স্বীকৃতি",
   "lab.capabilities": "পৰীক্ষাৰ ক্ষমতা",
-  "chat.title": "পশু সেৱা AI (পশুচিকিৎসক)",
-  "chat.subtitle": "AI পৰামৰ্শদাতা আৰু খাদ্য সহায়ক",
+  "chat.title": "Pashu Mitra (Doctor Help)",
+  "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "গো-খাদ্য বা স্বাস্থ্য বিষয়ে সোধক...",
   "chat.send": "পঠাওক",
   "chat.emergencyNotice": "জৰুৰী অৱস্থাত তৎক্ষণাত ১৯৬২ নম্বৰত কল কৰক।"

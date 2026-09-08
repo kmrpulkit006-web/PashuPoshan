@@ -1,5 +1,5 @@
 {
-  "app.name": "पशुपोषण AI",
+  "app.name": "पशुपोषण",
   "app.subtitle": "डंगरें दे चारै ते साइलेज दी गुणवत्ता जांच प्रणाली",
   "app.tagline": "स्मार्ट इंडिया हैकाथॉन (SIH 26111) — पशुपालन मंत्रालय",
   "app.installPwa": "ऐप इन्स्टाल करो",
@@ -11,7 +11,7 @@
   "nav.ration": "संतुलित राशन",
   "nav.silage": "साइलेज खड्डा",
   "nav.alerts": "स्थानीय चेताउनी",
-  "scan.title": "AI तेज गुणवत्ता स्कैनर",
+  "scan.title": "चारा जांचें",
   "scan.modeVision": "दिखने ते फफूंदी जांच",
   "scan.modeStrip": "कैमिकल पट्टी (यूरिया ते pH)",
   "scan.feedType": "चारै दी किस्म:",
@@ -112,8 +112,8 @@
   "lab.directions": "रस्ता (Maps)",
   "lab.accreditation": "मान्यता",
   "lab.capabilities": "जांच क्षमता",
-  "chat.title": "पशु सेवा AI (पशु डाक्टर)",
-  "chat.subtitle": "AI सलाहकार ते खुराक सहायक",
+  "chat.title": "पशु मित्र (डॉक्टर सहायता)",
+  "chat.subtitle": "पशु आहार, स्वास्थ्य व दूध से जुड़े सवाल अपनी भाषा में पूछें",
   "chat.placeholder": "डंगरें दी खुराक जां सेहत सम्बन्धी पुच्छो...",
   "chat.send": "भेजो",
   "chat.emergencyNotice": "एमरजेंसी च तुरत 1962 पर फोन करो।"

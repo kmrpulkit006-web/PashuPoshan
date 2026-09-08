@@ -57,9 +57,9 @@ export const VeterinaryChatModal: React.FC<VeterinaryChatModalProps> = ({
     {
       id: 'welcome_1',
       role: 'assistant',
-      content: `Namaste! I am your **PashuPoshan AI Veterinary & Dairy Nutrition Consultant**, powered by **NVIDIA Nemotron-3-Ultra-550B** and grounded in **ICAR-NDRI Karnal** benchmarks.
+      content: `Namaste! I am your **PashuPoshan Doctor & Feed Nutrition Assistant**, ready to help with livestock care based on **ICAR-NDRI** guidelines.
 
-How can I assist you with your herd's nutrition, silage quality, or feed safety today?`,
+How can I help you with your cattle's feed, milk yield, or health today?`,
       timestamp: 'Just now',
     },
   ]);
@@ -130,7 +130,7 @@ How can I assist you with your herd's nutrition, silage quality, or feed safety 
         id: `fallback_${Date.now()}`,
         role: 'assistant',
         content: `### Offline Advisory Notice
-Unable to reach the live NVIDIA AI inference service. 
+Currently offline or live doctor service is unreachable.
 
 **Standard Field Guidelines (ICAR-NDRI)**:
 - For cattle showing symptoms of acute bloat or feed toxicity, withdraw the suspected feed batch immediately.
@@ -175,9 +175,9 @@ Unable to reach the live NVIDIA AI inference service.
       {
         id: 'welcome_1',
         role: 'assistant',
-        content: `Namaste! I am your **PashuPoshan AI Veterinary & Dairy Nutrition Consultant**, powered by **NVIDIA Nemotron-3-Ultra-550B** and grounded in **ICAR-NDRI Karnal** benchmarks.
+        content: `Namaste! I am your **PashuPoshan Doctor & Feed Nutrition Assistant**, ready to help with livestock care based on **ICAR-NDRI** guidelines.
 
-How can I assist you with your herd's nutrition, silage quality, or feed safety today?`,
+How can I help you with your cattle's feed, milk yield, or health today?`,
         timestamp: 'Just now',
       },
     ]);
@@ -202,14 +202,14 @@ How can I assist you with your herd's nutrition, silage quality, or feed safety 
             <div>
               <div className="flex items-center space-x-1.5">
                 <h2 id="vet-modal-title" className="text-sm sm:text-base font-bold text-white leading-tight">
-                  Pashu Seva AI &bull; Veterinary Consultant
+                  Pashu Mitra &bull; Doctor Help
                 </h2>
                 <span className="hidden sm:inline-block bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                  Nemotron-3-Ultra
+                  Doctor Support
                 </span>
               </div>
               <p className="text-[11px] text-emerald-100/80 leading-tight">
-                Clinical Ruminant Nutrition &bull; ICAR-NDRI Benchmarks
+                Cattle Nutrition &amp; Health &bull; ICAR-NDRI Guidelines
               </p>
             </div>
           </div>
@@ -256,7 +256,7 @@ How can I assist you with your herd's nutrition, silage quality, or feed safety 
                   <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-slate-100 dark:border-slate-800">
                     <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
                       <Sparkles className="w-3 h-3" />
-                      {msg.isFallback ? 'ICAR-NDRI Offline Advisory' : 'NVIDIA Nemotron-3-Ultra 550B'}
+                      {msg.isFallback ? 'ICAR-NDRI Guidelines' : "Doctor's Advice (विशेषज्ञ सलाह)"}
                     </span>
                     <button
                       onClick={() => handleSpeak(msg.id, msg.content)}
@@ -302,7 +302,7 @@ How can I assist you with your herd's nutrition, silage quality, or feed safety 
           {isLoading && (
             <div className="flex items-center space-x-2 text-xs text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800/40 w-fit">
               <Bot className="w-4 h-4 animate-bounce" />
-              <span>Consulting NVIDIA Nemotron-3-Ultra-550B (ICAR reasoning)...</span>
+              <span>Getting advice from livestock doctor...</span>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -332,7 +332,7 @@ How can I assist you with your herd's nutrition, silage quality, or feed safety 
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSend();
             }}
-            placeholder="Ask regarding silage, aflatoxins, SARA, or breed ration..."
+            placeholder="Ask a question about cattle feed, milk yield, or sickness..."
             disabled={isLoading}
             className="flex-1 text-xs sm:text-sm bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60"
           />
@@ -348,7 +348,7 @@ How can I assist you with your herd's nutrition, silage quality, or feed safety 
 
         {/* Bottom Disclaimer */}
         <div className="bg-slate-100 dark:bg-slate-950 px-3 py-1 text-[10px] text-slate-500 text-center border-t border-slate-200 dark:border-slate-800">
-          AI advisory grounded in ICAR-NDRI standards &bull; For emergencies, dial 1962.
+          Advisory guided by ICAR-NDRI dairy guidelines &bull; For livestock emergencies, dial 1962.
         </div>
       </div>
     </div>

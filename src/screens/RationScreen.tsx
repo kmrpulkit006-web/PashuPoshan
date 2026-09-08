@@ -277,7 +277,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
       {/* Calculated Total Mixed Ration (TMR) Breakdown Cards */}
       <RationNutrientCards rationPlan={rationPlan} locale={locale} />
 
-      {/* AI Precision Veterinary Ration Balancer (NVIDIA Nemotron-3-Ultra) */}
+      {/* Cattle Diet Advisory Card */}
       <div className="bg-[#F3EEE1] dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-4 space-y-3 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -286,15 +286,15 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
             </div>
             <div>
               <h3 className="text-xs sm:text-sm font-black text-[#1A1A1A] dark:text-white leading-none">
-                AI Precision Ration Advisory
+                Doctor Diet Advisory (संतुलित आहार सलाह)
               </h3>
               <p className="text-[10px] text-[#5A5243] dark:text-slate-400 font-semibold mt-0.5">
-                Powered by NVIDIA Nemotron-3-Ultra (550B)
+                Based on ICAR-NDRI Cattle Nutrition Guidelines
               </p>
             </div>
           </div>
           <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-[#1F5D3B] dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-700">
-            ICAR-NDRI TMR
+            ICAR Standard
           </span>
         </div>
 
@@ -308,12 +308,12 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
             {isOptimizingRation ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin text-emerald-200" />
-                <span>Balancing Rumen Nutrients & SARA Risks...</span>
+                <span>Checking diet balance and health...</span>
               </>
             ) : (
               <>
                 <Bot className="w-4 h-4 text-emerald-300" />
-                <span>Consult Nemotron AI for TMR Optimization</span>
+                <span>🩺 Get Doctor's Advice on This Diet (सलाह लें)</span>
               </>
             )}
           </button>
@@ -321,7 +321,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
           <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 rounded-2xl space-y-2 text-xs">
             <div className="flex items-center justify-between border-b border-emerald-200 dark:border-emerald-800 pb-1.5">
               <span className="font-extrabold text-[#1F5D3B] dark:text-emerald-300">
-                Nutritional Feasibility & Clinical Precautions
+                Diet &amp; Health Advice (आहार और स्वास्थ्य सलाह)
               </span>
               <button
                 type="button"
@@ -335,7 +335,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
               {rationAdvice}
             </div>
             <div className="pt-1 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
-              <span>Metabolic Safeguard: Subacute Ruminal Acidosis & Milk Urea Nitrogen</span>
+              <span>Safe for cattle health &amp; digestion (पाचन और स्वास्थ्य सुरक्षा)</span>
               <button
                 type="button"
                 onClick={handleOptimizeRation}
@@ -343,7 +343,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
                 className="text-[#1F5D3B] dark:text-emerald-400 font-extrabold flex items-center space-x-1"
               >
                 <RefreshCw className={`w-3 h-3 ${isOptimizingRation ? 'animate-spin' : ''}`} />
-                <span>Re-Analyze</span>
+                <span>Check Again</span>
               </button>
             </div>
           </div>

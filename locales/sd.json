@@ -1,5 +1,5 @@
 {
-  "app.name": "پشو پوشڻ AI",
+  "app.name": "پشو پوشڻ",
   "app.subtitle": "مال جي خوراڪ ۽ سائليج معيار چڪاسڻ وارو نظام",
   "app.tagline": "سمارٽ انڊيا هيڪاٿون (SIH 26111) — پالتو جانورن جي وزارت",
   "app.installPwa": "ايپ انسٽال ڪريو",
@@ -11,7 +11,7 @@
   "nav.ration": "متوازن راشن",
   "nav.silage": "سائليج پٽ",
   "nav.alerts": "مقامي الرٽس",
-  "scan.title": "AI تيز رفتار معيار اسڪينر",
+  "scan.title": "Check Your Feed",
   "scan.modeVision": "ڏيک ۽ ڦڦوندي چڪاس",
   "scan.modeStrip": "ڪيميائي پٽي (يوريا ۽ pH)",
   "scan.feedType": "خوراڪ جو قسم:",
@@ -112,8 +112,8 @@
   "lab.directions": "رستو (Maps)",
   "lab.accreditation": "منظوري",
   "lab.capabilities": "ٽيسٽنگ جون صلاحيتون",
-  "chat.title": "پشو سيوا AI (ويٽرنري ماهر)",
-  "chat.subtitle": "AI صلاحڪار ۽ غذائي مددگار",
+  "chat.title": "Pashu Mitra (Doctor Help)",
+  "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "مال جي خوراڪ يا صحت بابت پڇو...",
   "chat.send": "موڪليو",
   "chat.emergencyNotice": "ايمرجنسي ۾ ترت 1962 تي ڪال ڪريو."

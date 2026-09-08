@@ -1,5 +1,5 @@
 {
-  "app.name": "پشو پوشن AI",
+  "app.name": "پشو پوشن",
   "app.subtitle": "مویشیوں کی خوراک اور سائیلیج کوالٹی ٹیسٹنگ سسٹم",
   "app.tagline": "اسمارٹ انڈیا ہیکاتھون (SIH 26111) — وزارت مویشی پروری",
   "app.installPwa": "ایپ انسٹال کریں",
@@ -11,7 +11,7 @@
   "nav.ration": "متوازن راشن",
   "nav.silage": "سائیلیج پٹ",
   "nav.alerts": "مقامی الرٹس",
-  "scan.title": "AI ریپڈ کوالٹی اسکینر",
+  "scan.title": "Check Your Feed",
   "scan.modeVision": "بصری اور پھپھوندی کی جانچ",
   "scan.modeStrip": "کیمیائی ٹیسٹ پٹی (یوریا اور pH)",
   "scan.feedType": "خوراک کی قسم:",
@@ -112,8 +112,8 @@
   "lab.directions": "راستہ (Maps)",
   "lab.accreditation": "سرٹیفیکیشن",
   "lab.capabilities": "ٹیسٹنگ کی صلاحیتیں",
-  "chat.title": "پشو سیوا AI (ویٹرنری ماہر)",
-  "chat.subtitle": "AI مشیر اور خوراک کا معاون",
+  "chat.title": "Pashu Mitra (Doctor Help)",
+  "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "مویشیوں کی خوراک یا صحت سے متعلق سوال پوچھیں...",
   "chat.send": "بھیجیں",
   "chat.emergencyNotice": "ہنگامی صورت حال میں فوری طور پر 1962 پر کال کریں۔"

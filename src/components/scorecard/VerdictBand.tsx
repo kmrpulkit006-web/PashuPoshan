@@ -49,14 +49,16 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
         </div>
         <div>
           <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/40 text-amber-200">
-            Unrecognized Photo • अमान्य तस्वीर
+            {locale === 'hi' ? 'अमान्य तस्वीर' : 'Not Cattle Feed'}
           </span>
           <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white uppercase tracking-tight">
-            {locale === 'hi' ? 'चारा नहीं पहचाना गया — पुनः फोटो लें' : 'Not Livestock Feed — Photo Rejected'}
+            {locale === 'hi' ? 'चारे की साफ फोटो लें' : 'Please Take a Clear Photo of Cattle Feed'}
           </h2>
           <p className="text-xs text-rose-100 font-bold mt-1 max-w-sm mx-auto leading-relaxed">
             {sample.visualAnalysis?.rejectionMessage ||
-              'The uploaded photo does not appear to be cattle feed, silage, or fodder. Cannot evaluate nutrition or safety.'}
+              (locale === 'hi'
+                ? 'यह फोटो चारे या साइलेज की नहीं लग रही है। कृपया अच्छी रोशनी में चारे की फोटो लें।'
+                : 'The uploaded photo does not appear to be cattle feed, silage, or fodder. Please retake a clear photo.')}
           </p>
         </div>
       </div>
@@ -71,13 +73,13 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
         </div>
         <div>
           <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/25 text-emerald-100">
-            Tier A • Premium Grade
+            🟢 {locale === 'hi' ? 'उत्तम चारा • खिलाने के लिए सुरक्षित' : 'Top Quality • Safe to Feed'}
           </span>
           <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white">
             {texts.safe}
           </h2>
           <p className="text-xs text-emerald-100/90 mt-1 font-semibold">
-            {sample.name} meets recommended nutritional benchmarks.
+            {sample.name} {locale === 'hi' ? 'शुद्ध, पौष्टिक और दूध बढ़ाने के लिए उत्तम है।' : 'is clean, healthy, and good for milk yield.'}
           </p>
         </div>
       </div>
@@ -92,13 +94,13 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
         </div>
         <div>
           <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/30 text-rose-100">
-            Tier C • Critical Alert / Reject
+            🔴 {locale === 'hi' ? 'खतरा • पशुओं को बिल्कुल न खिलाएं' : 'Danger • Do Not Feed to Cattle'}
           </span>
           <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white uppercase tracking-tight">
             {texts.danger}
           </h2>
           <p className="text-xs text-rose-100 font-bold mt-1">
-            {sample.name} contains acute contamination or adulteration risks.
+            {sample.name} {locale === 'hi' ? 'में फफूंद या यूरिया मिलावट का खतरा है। इससे पशु बीमार हो सकते हैं।' : 'has severe mold or chemical risk. Feeding this can make cattle sick.'}
           </p>
         </div>
       </div>
@@ -113,13 +115,13 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
       </div>
       <div>
         <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/25 text-amber-100">
-          Tier B • Sub-Standard
+          🟡 {locale === 'hi' ? 'सामान्य चारा • अतिरिक्त पोषण जरूरी' : 'Fair Quality • Supplement Needed'}
         </span>
         <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white">
           {texts.caution}
         </h2>
         <p className="text-xs text-amber-100 font-semibold mt-1">
-          {sample.name} is safe but requires protein supplementation.
+          {sample.name} {locale === 'hi' ? 'खिलाने में सुरक्षित है, लेकिन अच्छे दूध के लिए खल या दाना जरूर मिलाएं।' : 'is safe to feed, but add extra khal or cake for good milk yield.'}
         </p>
       </div>
     </div>

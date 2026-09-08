@@ -1,5 +1,5 @@
 {
-  "app.name": "پشو پوشن AI",
+  "app.name": "پشو پوشن",
   "app.subtitle": "جانورن ہُنٛد کھؠن تہٕ سائیلیج جانچ نظام",
   "app.tagline": "سمارٹ انڈیا ہیکاتھون (SIH 26111) — اینیمل ہسبنڈری منسٹری",
   "app.installPwa": "ایپ انسٹال کریو",
@@ -11,7 +11,7 @@
   "nav.ration": "متوازن راشن",
   "nav.silage": "سائیلیج گڑٕ",
   "nav.alerts": "مقامی الرٹ",
-  "scan.title": "AI فوری معیار اسکینر",
+  "scan.title": "Check Your Feed",
   "scan.modeVision": "بصری تہٕ فنگس جانچ",
   "scan.modeStrip": "کیمیائی اسٹرپ (یوریا تہٕ pH)",
   "scan.feedType": "کھؠن ہنٛز قسم:",
@@ -112,8 +112,8 @@
   "lab.directions": "واتھ (Maps)",
   "lab.accreditation": "منظوری",
   "lab.capabilities": "ٹیسٹنگ صلاحیت",
-  "chat.title": "پشو سیوا AI (ڈاکٹر)",
-  "chat.subtitle": "AI مشیر تہٕ غذائی معاون",
+  "chat.title": "Pashu Mitra (Doctor Help)",
+  "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "کھؠن یا صحت متعلق پرژھیو...",
   "chat.send": "سوزیو",
   "chat.emergencyNotice": "ہنگامی حالژس منٛز فورا 1962 پؠٹھ کال کریو۔"

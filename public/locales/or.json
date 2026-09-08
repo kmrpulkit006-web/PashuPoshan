@@ -1,5 +1,5 @@
 {
-  "app.name": "ପଶୁପୋଷଣ AI",
+  "app.name": "ପଶୁପୋଷଣ",
   "app.subtitle": "ଗୋଖାଦ୍ୟ ଓ ସାଇଲେଜ୍ ଗୁଣବତ୍ତା ପରୀକ୍ଷଣ ବ୍ୟବସ୍ଥା",
   "app.tagline": "ସ୍ମାର୍ଟ ଇଣ୍ଡିଆ ହ୍ୟାକାଥନ (SIH 26111) — ପଶୁପାଳନ ମନ୍ତ୍ରଣାଳୟ",
   "app.installPwa": "ଆପ୍ ଇନଷ୍ଟଲ କରନ୍ତୁ",
@@ -11,7 +11,7 @@
   "nav.ration": "ସନ୍ତୁଳିତ ଖାଦ୍ୟ",
   "nav.silage": "ସାଇଲେଜ୍ ପିଟ୍",
   "nav.alerts": "ସ୍ଥାନୀୟ ସତର୍କତା",
-  "scan.title": "AI ତ୍ୱରିତ ଗୁଣବତ୍ତା ସ୍କାନର",
+  "scan.title": "Check Your Feed",
   "scan.modeVision": "ରୂପ ଓ ଫିମ୍ପି ପରୀକ୍ଷା",
   "scan.modeStrip": "ରାସାୟନିକ ଷ୍ଟ୍ରିପ୍ (ୟୁରିଆ ଓ pH)",
   "scan.feedType": "ଖାଦ୍ୟ ଶ୍ରେଣୀ:",
@@ -112,8 +112,8 @@
   "lab.directions": "ଦିଗ (Maps)",
   "lab.accreditation": "ମାନ୍ୟତା",
   "lab.capabilities": "ପରୀକ୍ଷଣ ଦକ୍ଷତା",
-  "chat.title": "ପଶୁ ସେବା AI (ପଶୁ ଚିକିତ୍ସକ ବିଶେଷଜ୍ଞ)",
-  "chat.subtitle": "AI ପରାମର୍ଶଦାତା ଓ ପୋଷଣ ସହାୟକ",
+  "chat.title": "Pashu Mitra (Doctor Help)",
+  "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "ଗୋଖାଦ୍ୟ ବା ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ...",
   "chat.send": "ପଠାନ୍ତୁ",
   "chat.emergencyNotice": "ଜରୁରୀକାଳୀନ ପରିସ୍ଥିତିରେ ତୁରନ୍ତ ୧୯୬୨ କୁ କଲ୍ କରନ୍ତୁ।"

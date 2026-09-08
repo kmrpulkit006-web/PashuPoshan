@@ -1,5 +1,5 @@
 {
-  "app.name": "पशुपोषण AI",
+  "app.name": "पशुपोषण",
   "app.subtitle": "पशुखाण आनी सायलेज दर्जो तपासणी यंत्रणा",
   "app.tagline": "स्मार्ट इंडिया हॅकाथॉन (SIH 26111) — पशुसंवर्धन मंत्रालय",
   "app.installPwa": "अ‍ॅप स्थापीત करात",
@@ -11,7 +11,7 @@
   "nav.ration": "समतोल राशन",
   "nav.silage": "सायलेज पीट",
   "nav.alerts": "थळावी शिटकावणी",
-  "scan.title": "AI जलद दर्जो स्कॅनर",
+  "scan.title": "चारा जांचें",
   "scan.modeVision": "देखणी आनी बुरशी तपासणी",
   "scan.modeStrip": "रासायनिक पट्टी (युरिया आनी pH)",
   "scan.feedType": "खाणीचो प्रकार:",
@@ -112,8 +112,8 @@
   "lab.directions": "दिशा (Maps)",
   "lab.accreditation": "मान्यता",
   "lab.capabilities": "तपासणी क्षमता",
-  "chat.title": "पशु सेवा AI (पशुवैद्यक तज्ज्ञ)",
-  "chat.subtitle": "AI सल्लो आनी खाण सहाय्यक",
+  "chat.title": "पशु मित्र (डॉक्टर सहायता)",
+  "chat.subtitle": "पशु आहार, स्वास्थ्य व दूध से जुड़े सवाल अपनी भाषा में पूछें",
   "chat.placeholder": "पशुखाण वा भलायके संबंदी विचारात...",
   "chat.send": "धाडा",
   "chat.emergencyNotice": "तात्काळ वेळार रोकडेंच 1962 फोन करात."

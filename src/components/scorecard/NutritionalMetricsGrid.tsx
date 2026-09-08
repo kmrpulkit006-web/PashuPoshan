@@ -62,10 +62,12 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
       <div className="space-y-2.5">
         <div className="flex items-center justify-between px-1">
           <h4 className="text-xs font-black text-[#5A5243] dark:text-slate-300 uppercase tracking-wider">
-            Nutritional Benchmarks (Dry Matter Basis)
+            {locale === 'hi' ? 'चारे की गुणवत्ता व पोषक तत्व' : 'Feed Quality & Nutrition'}
           </h4>
           <span className="text-[10px] text-[#C2703D] dark:text-amber-400 font-bold">
-            {sample.metrics.requiresLabTest ? '*Lab Verification Required' : '*Screening Metric'}
+            {sample.metrics.requiresLabTest
+              ? (locale === 'hi' ? '*लैब परीक्षण आवश्यक' : '*Lab Testing Recommended')
+              : (locale === 'hi' ? '*त्वरित जांच' : '*Quick Farm Check')}
           </span>
         </div>
 
@@ -120,24 +122,34 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
         ) : (
           <div className="bg-[#fdf8f4] dark:bg-amber-950/40 border-2 border-[#C2703D] dark:border-amber-600/60 rounded-2xl p-4 space-y-2 text-[#1A1A1A] dark:text-white shadow-sm">
             <div className="flex items-center space-x-2 text-xs font-black text-[#C2703D] dark:text-amber-300 uppercase tracking-wide">
-              <span>🔬 Requires Certified Lab Test (प्रयोगशाला परीक्षण आवश्यक)</span>
+              <span>🔬 {locale === 'hi' ? 'विस्तृत लैब परीक्षण (यदि जरूरी हो)' : 'Detailed Lab Testing (If Needed)'}</span>
             </div>
             <p className="text-xs text-[#5A5243] dark:text-slate-300 leading-relaxed font-semibold">
-              Aflatoxin, crude protein, and fiber require certified wet-chemistry testing (ELISA / NIRS). Not determinable from photo triage.
+              {locale === 'hi'
+                ? 'प्रोटीन, रेशा (फाइबर) और फफूंद विषैलेपन की कानूनी व सटीक जांच के लिए आप नजदीकी डेयरी प्रयोगशाला से संपर्क कर सकते हैं।'
+                : 'For official dispute resolution or exact chemical testing of protein, fiber, and aflatoxin, you can consult an accredited laboratory.'}
             </p>
             <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
               <div className="bg-white/80 dark:bg-slate-900/80 p-2 rounded-xl border border-[#DCD3BF] dark:border-slate-800">
-                <span className="font-bold block text-[#5A5243] dark:text-slate-400">Crude Protein (CP)</span>
-                <span className="font-black text-[#C2703D] dark:text-amber-400">Kjeldahl Digestion</span>
+                <span className="font-bold block text-[#5A5243] dark:text-slate-400">
+                  {locale === 'hi' ? 'प्रोटीन स्तर' : 'Protein Level'}
+                </span>
+                <span className="font-black text-[#1F5D3B] dark:text-emerald-400">
+                  {locale === 'hi' ? 'प्रमाणित लैब जांच' : 'Certified Lab Assay'}
+                </span>
               </div>
               <div className="bg-white/80 dark:bg-slate-900/80 p-2 rounded-xl border border-[#DCD3BF] dark:border-slate-800">
-                <span className="font-bold block text-[#5A5243] dark:text-slate-400">Fiber (ADF/NDF)</span>
-                <span className="font-black text-[#C2703D] dark:text-amber-400">Van Soest Method</span>
+                <span className="font-bold block text-[#5A5243] dark:text-slate-400">
+                  {locale === 'hi' ? 'फाइबर / रेशा' : 'Digestible Fiber'}
+                </span>
+                <span className="font-black text-[#1F5D3B] dark:text-emerald-400">
+                  {locale === 'hi' ? 'प्रमाणित लैब जांच' : 'Certified Lab Assay'}
+                </span>
               </div>
             </div>
             <div className="pt-1.5 flex items-center justify-between">
               <span className="text-[10px] text-[#5A5243] dark:text-slate-400 font-medium">
-                Accredited Dairy Lab Analysis
+                {locale === 'hi' ? 'सरकारी व सहकारी डेयरी लैब' : 'Accredited Dairy Lab Analysis'}
               </span>
               {onOpenLabModal ? (
                 <button
@@ -145,7 +157,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
                   onClick={onOpenLabModal}
                   className="text-xs font-black text-[#1F5D3B] dark:text-emerald-400 underline hover:no-underline"
                 >
-                  Find Nearest Lab / Directory
+                  {locale === 'hi' ? 'नजदीकी लैब खोजें →' : 'Find Nearest Lab →'}
                 </button>
               ) : (
                 <a

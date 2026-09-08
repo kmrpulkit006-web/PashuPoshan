@@ -1,5 +1,5 @@
 {
-  "app.name": "पशुपोषण AI",
+  "app.name": "पशुपोषण",
   "app.subtitle": "गावहारा जामुं आरो साइलेज गुन आनजाद राहा",
   "app.tagline": "स्मार्ट इन्डिया हेकाथन (SIH 26111) — मखौ फोसंथान मन्थ्रालय",
   "app.installPwa": "एप गायसन",
@@ -11,7 +11,7 @@
   "nav.ration": "समान जामुं",
   "nav.silage": "साइलेज गन्थ",
   "nav.alerts": "ओनसोलनि हुसियार",
-  "scan.title": "AI थाब गुन स्कैनर",
+  "scan.title": "Check Your Feed",
   "scan.modeVision": "नुथाय आरो उल्दै आनजाद",
   "scan.modeStrip": "रासायन पट्टि (यूरिया आरो pH)",
   "scan.feedType": "जामुं रोखोम:",
@@ -112,8 +112,8 @@
   "lab.directions": "लामा (Maps)",
   "lab.accreditation": "गनायथि",
   "lab.capabilities": "आनजाद गोहो",
-  "chat.title": "पशु सेवा AI (डक्टर)",
-  "chat.subtitle": "AI सानथौहोग्रा आरो दाना हेफाजाब",
+  "chat.title": "Pashu Mitra (Doctor Help)",
+  "chat.subtitle": "Ask questions about cow health, feed & milk in your language",
   "chat.placeholder": "मखौ दाना एबा सास्थनि सायाव सों...",
   "chat.send": "थिनहर",
   "chat.emergencyNotice": "गोनांथार समाव थाबैनो 1962 आव कल खालाम।"

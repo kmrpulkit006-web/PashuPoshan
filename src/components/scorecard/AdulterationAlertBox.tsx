@@ -61,7 +61,9 @@ export const AdulterationAlertBox: React.FC<AdulterationAlertBoxProps> = ({
           >
             {sample.adulteration.ureaPercentage}%{' '}
             <span className="text-[10px] font-bold block">
-              {sample.adulteration.ureaAdulterationDetected ? '(Adulteration Spiked)' : '(Zero Added ✓)'}
+              {sample.adulteration.ureaAdulterationDetected
+                ? (locale === 'hi' ? '(खतरनाक यूरिया मिलावट!)' : '(High Urea Risk!)')
+                : (locale === 'hi' ? '(शुद्ध - कोई मिलावट नहीं ✓)' : '(Pure - Zero Added ✓)')}
             </span>
           </div>
         </div>
@@ -74,11 +76,11 @@ export const AdulterationAlertBox: React.FC<AdulterationAlertBoxProps> = ({
           <div className="font-black text-xs text-[#1A1A1A] dark:text-slate-200 mt-1">
             {sample.adulteration.foreignStarchOrTallow || sample.visualAnalysis?.foreignMatterVisible ? (
               <span className="text-[#B3261E] dark:text-rose-300 font-bold">
-                ⚠️ {sample.visualAnalysis?.foreignMatterDescription || 'Foreign Matter Detected'}
+                ⚠️ {sample.visualAnalysis?.foreignMatterDescription || (locale === 'hi' ? 'कचरा या बाहरी वस्तु मिली' : 'Foreign Matter Detected')}
               </span>
             ) : (
               <span className="text-[#1F5D3B] dark:text-emerald-300 font-bold">
-                None Visible ✓
+                {locale === 'hi' ? 'साफ - कोई कचरा नहीं ✓' : 'Clean - None Visible ✓'}
               </span>
             )}
           </div>
@@ -92,10 +94,10 @@ export const AdulterationAlertBox: React.FC<AdulterationAlertBoxProps> = ({
           {requiresLabSand ? (
             <div className="mt-1">
               <span className="inline-block px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-700 text-[10px] font-black text-amber-900 dark:text-amber-200">
-                Requires Certified Lab Test
+                {locale === 'hi' ? 'लैब में जांच कराएं' : 'Check at Certified Lab'}
               </span>
               <span className="text-[9px] font-medium text-[#5A5243] dark:text-slate-400 block mt-0.5">
-                Max 3.5% AIA (Ashing assay)
+                {locale === 'hi' ? 'सरकारी मानक: अधिकतम 3.5%' : 'Govt Limit: Max 3.5%'}
               </span>
             </div>
           ) : (
@@ -116,10 +118,10 @@ export const AdulterationAlertBox: React.FC<AdulterationAlertBoxProps> = ({
           {requiresLabAflatoxin ? (
             <div className="mt-1">
               <span className="inline-block px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-700 text-[10px] font-black text-amber-900 dark:text-amber-200">
-                Requires Certified Lab Test
+                {locale === 'hi' ? 'लैब में जांच कराएं' : 'Check at Certified Lab'}
               </span>
               <span className="text-[9px] font-medium text-[#5A5243] dark:text-slate-400 block mt-0.5">
-                ELISA / HPLC (FSSAI max 20 ppb)
+                {locale === 'hi' ? 'सुरक्षा मानक: अधिकतम 20 ppb' : 'Govt Limit: Max 20 ppb'}
               </span>
             </div>
           ) : (
@@ -140,10 +142,12 @@ export const AdulterationAlertBox: React.FC<AdulterationAlertBoxProps> = ({
       <div className="p-3 bg-white/90 dark:bg-slate-900 border border-[#DCD3BF] dark:border-slate-700 rounded-xl text-xs space-y-1.5 text-[#1A1A1A] dark:text-white">
         <div className="flex items-center space-x-1.5 font-black text-[#C2703D] dark:text-amber-400 text-[11px]">
           <FlaskConical className="w-4 h-4 shrink-0" />
-          <span>Statutory Wet-Chemistry Notice (प्रयोगशाला परीक्षण सूचना):</span>
+          <span>{locale === 'hi' ? 'सरकारी लैब परीक्षण सलाह:' : 'Official Lab Verification Advice:'}</span>
         </div>
         <p className="text-[11px] text-[#5A5243] dark:text-slate-300 leading-relaxed font-semibold">
-          Aflatoxin, crude protein, and fiber require certified wet-chemistry testing (ELISA / NIRS). Not determinable from photo triage.
+          {locale === 'hi'
+            ? 'सटीक कानूनी प्रमाण या मिलावट की पक्की रिपोर्ट के लिए नजदीकी सरकारी या सहकारी डेयरी प्रयोगशाला से जांच कराएं।'
+            : 'For legal dispute resolution or certified analysis of protein and toxins, consult an accredited dairy laboratory.'}
         </p>
         <div className="pt-1 flex items-center justify-between flex-wrap gap-2">
           <span className="text-[10px] font-bold text-[#1F5D3B] dark:text-emerald-400">
