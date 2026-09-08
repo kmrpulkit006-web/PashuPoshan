@@ -454,5 +454,22 @@
   "category.concentrate": "தீவனம்",
   "category.green_fodder": "பசுந்தீவனம்",
   "category.dry_fodder": "உலர் தீவனம்",
-  "score.crudeProteinShort": "புரதம்"
+  "score.crudeProteinShort": "புரதம்",
+  "silage.logInitialNote": "குழி தொடங்கப்பட்டு சீல் செய்யப்பட்டது",
+  "silage.logRoutineNote": "வழக்கமான ஆய்வு",
+  "silage.logReadingTooltip": "புதிய வெப்பநிலை மற்றும் ஆய்வு பதிவு செய்யுங்கள்",
+  "silage.days": "நாட்கள்",
+  "silage.compactionOptimum": "சிறந்த",
+  "silage.compactionModerate": "நடுத்தரம்",
+  "silage.compactionLoose": "தளர்வான",
+  "silage.compactionOptimumLabel": "சிறந்த - முழு சீல்",
+  "silage.compactionModerateLabel": "நடுத்தரம் - சிறிய விரிசல்கள் சரி செய்யப்பட்டன",
+  "silage.compactionLooseLabel": "தளர்வான - காற்றுப் பைகள் / மென்மை",
+  "silage.cropMaize": "கலப்பின மக்காச்சோளம்",
+  "silage.cropSorghum": "இனிப்பு சோளம்",
+  "silage.cropBajra": "கம்பு",
+  "silage.cropOats": "ஓட்ஸ்",
+  "silage.logObsPlaceholder": "எ.கா. சுத்தமான புளிப்பு வாசனை, பூஞ்சை இல்லை",
+  "silage.obsGoodNote": "தங்க நிறம், இனிமையான புளிப்பு வாசனை",
+  "silage.obsBadNote": "காற்று கசிவு, மேற்பரப்பில் பூஞ்சை"
 }

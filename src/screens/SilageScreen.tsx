@@ -69,10 +69,10 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
       logs: [
         {
           id: `log_${Date.now()}`,
-          date: new Date().toLocaleDateString('en-IN'),
+          date: new Date().toLocaleDateString(locale === 'hi' ? 'hi-IN' : 'en-IN'),
           temperatureC: Number(newTemp),
           compactionRating: newCompaction,
-          notes: 'Pit initiated and sealed',
+          notes: t('silage.logInitialNote', locale),
         },
       ],
     };
@@ -89,10 +89,10 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
 
     const newLog: SilagePitLog = {
       id: `log_${Date.now()}`,
-      date: new Date().toLocaleDateString('en-IN'),
+      date: new Date().toLocaleDateString(locale === 'hi' ? 'hi-IN' : 'en-IN'),
       temperatureC: Number(logTemp),
       compactionRating: logCompaction,
-      notes: logNotes || 'Routine inspection',
+      notes: logNotes || t('silage.logRoutineNote', locale),
     };
 
     const updated = addPitLogEntry(showLogModal, newLog);
@@ -108,7 +108,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
         <div className="min-w-0 flex-1">
           <div className="flex items-center space-x-2 mb-1">
             <div className="w-9 h-9 rounded-2xl bg-[#C2703D]/15 text-[#C2703D] dark:text-amber-400 flex items-center justify-center shrink-0">
-              <Layers className="w-5 h-5" />
+              <Layers className="w-5 h-5" aria-hidden="true" />
             </div>
             <h2 className="text-base font-black text-[#1A1A1A] dark:text-white leading-tight">
               {t('silage.title', locale)}
@@ -120,11 +120,12 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
         </div>
 
         <button
+          type="button"
           onClick={() => setShowAddPitModal(true)}
-          className="px-4 py-3 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs sm:text-sm rounded-2xl shadow-lg active:scale-98 transition-all flex items-center justify-center space-x-2 shrink-0 min-h-[50px] whitespace-nowrap"
+          className="px-4 py-3 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs sm:text-sm rounded-2xl shadow-lg active:scale-98 transition-all flex items-center justify-center space-x-2 shrink-0 min-h-[50px] leading-tight"
           aria-label={t('silage.addPit', locale)}
         >
-          <Plus className="w-4 h-4 shrink-0" />
+          <Plus className="w-4 h-4 shrink-0" aria-hidden="true" />
           <span>{t('silage.addPit', locale).replace(/^\+\s*/, '')}</span>
         </button>
       </div>
@@ -152,7 +153,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               badgeBg: 'bg-[#B3261E] text-white border-red-400',
               containerBg: 'bg-[#FDECEA] dark:bg-rose-950/40 border-[#B3261E]/80 dark:border-rose-500/50',
               textColor: 'text-[#B3261E] dark:text-rose-200',
-              icon: <AlertTriangle className="w-5 h-5 text-[#B3261E] dark:text-rose-400 shrink-0" />,
+              icon: <AlertTriangle className="w-5 h-5 text-[#B3261E] dark:text-rose-400 shrink-0" aria-hidden="true" />,
             },
             warning: {
               badge: t('silage.status.heatingRisk', locale),
@@ -160,7 +161,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               badgeBg: 'bg-[#C2703D] text-white border-amber-400',
               containerBg: 'bg-[#fdf8f4] dark:bg-amber-950/40 border-[#C2703D]/80 dark:border-amber-500/50',
               textColor: 'text-[#C2703D] dark:text-amber-200',
-              icon: <AlertTriangle className="w-5 h-5 text-[#C2703D] dark:text-amber-400 shrink-0" />,
+              icon: <AlertTriangle className="w-5 h-5 text-[#C2703D] dark:text-amber-400 shrink-0" aria-hidden="true" />,
             },
             safe: {
               badge: pit.daysFermented >= 45 ? t('silage.status.ready', locale) : t('silage.status.fermenting', locale),
@@ -168,7 +169,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               badgeBg: 'bg-[#1F5D3B] text-white border-emerald-400',
               containerBg: 'bg-[#edf7f0] dark:bg-emerald-950/40 border-[#1F5D3B]/80 dark:border-emerald-500/50',
               textColor: 'text-[#1F5D3B] dark:text-emerald-200',
-              icon: <CheckCircle2 className="w-5 h-5 text-[#1F5D3B] dark:text-emerald-400 shrink-0" />,
+              icon: <CheckCircle2 className="w-5 h-5 text-[#1F5D3B] dark:text-emerald-400 shrink-0" aria-hidden="true" />,
             },
           }[statusLevel];
 
@@ -179,8 +180,8 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
             >
               {/* Pit Header */}
               <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h3 className="text-base sm:text-lg font-black text-[#1A1A1A] dark:text-white leading-tight">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base sm:text-lg font-black text-[#1A1A1A] dark:text-white leading-tight break-words">
                     {getSilagePitDisplayName(pit.pitName, locale)}
                   </h3>
                   <div className="flex flex-wrap items-center gap-1.5 mt-1">
@@ -194,14 +195,16 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => {
                     setShowLogModal(pit.id);
                     setLogTemp(pit.coreTemperature);
                   }}
-                  className="px-3 py-2 bg-[#F3EEE1] hover:bg-[#EAE3D2] dark:bg-slate-700 hover:dark:bg-slate-600 text-[#1A1A1A] dark:text-white text-xs font-black rounded-xl border-2 border-[#DCD3BF] dark:border-slate-600 min-h-[44px] flex items-center space-x-1.5 shrink-0 shadow-xs active:scale-95 transition-all whitespace-nowrap"
-                  title="Log new temperature and inspection observation"
+                  className="px-3 py-2 bg-[#F3EEE1] hover:bg-[#EAE3D2] dark:bg-slate-700 hover:dark:bg-slate-600 text-[#1A1A1A] dark:text-white text-xs font-black rounded-xl border-2 border-[#DCD3BF] dark:border-slate-600 min-h-[44px] flex items-center space-x-1.5 shrink-0 shadow-xs active:scale-95 transition-all sm:whitespace-nowrap text-center"
+                  title={t('silage.logReadingTooltip', locale)}
+                  aria-label={`${t('silage.logReadingBtn', locale)} for ${getSilagePitDisplayName(pit.pitName, locale)}`}
                 >
-                  <Thermometer className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400 shrink-0" />
+                  <Thermometer className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400 shrink-0" aria-hidden="true" />
                   <span>{t('silage.logReadingBtn', locale)}</span>
                 </button>
               </div>
@@ -212,17 +215,17 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               >
                 {statusConfig.icon}
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                  <div className="flex items-center justify-between flex-wrap gap-1.5 mb-0.5">
                     <span
                       className={`text-xs font-black uppercase px-2.5 py-0.5 rounded-full border tracking-wide shadow-xs ${statusConfig.badgeBg}`}
                     >
                       {statusConfig.badge}
                     </span>
-                    <span className="text-[10px] font-bold opacity-75 capitalize">
+                    <span className="text-xs font-bold text-[#5A5243] dark:text-slate-400 capitalize">
                       {getSilageStatusText(pit.status, locale)}
                     </span>
                   </div>
-                  <p className="text-xs font-bold leading-snug mt-1 opacity-95">
+                  <p className="text-xs font-bold leading-snug mt-1 text-[#1A1A1A] dark:text-slate-200">
                     {statusConfig.subtext}
                   </p>
                 </div>
@@ -232,20 +235,20 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               <div className="grid grid-cols-3 gap-2 text-center pt-0.5">
                 {/* Days Fermenting */}
                 <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-2 sm:p-2.5 border border-[#DCD3BF] dark:border-slate-700 overflow-hidden">
-                  <div className="text-[10px] font-bold text-[#5A5243] dark:text-slate-400 truncate">
+                  <div className="text-xs font-bold text-[#5A5243] dark:text-slate-400 line-clamp-2">
                     {t('silage.daysEnsiled', locale)}
                   </div>
                   <div className="text-base sm:text-lg font-black text-[#1A1A1A] dark:text-white mt-0.5 truncate">
-                    {pit.daysFermented} {t('common.days', locale) === 'common.days' ? (locale === 'hi' ? 'दिन' : 'Days') : t('common.days', locale)}
+                    {pit.daysFermented} {t('silage.days', locale)}
                   </div>
-                  <div className="text-[9px] text-[#1F5D3B] dark:text-emerald-400 font-bold mt-0.5 truncate">
+                  <div className="text-xs text-[#1F5D3B] dark:text-emerald-400 font-bold mt-0.5 line-clamp-2">
                     {pit.daysFermented >= 45 ? t('silage.status.ready', locale) : t('silage.status.fermenting', locale)}
                   </div>
                 </div>
 
                 {/* Core Temperature */}
                 <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-2 sm:p-2.5 border border-[#DCD3BF] dark:border-slate-700 overflow-hidden">
-                  <div className="text-[10px] font-bold text-[#5A5243] dark:text-slate-400 truncate">
+                  <div className="text-xs font-bold text-[#5A5243] dark:text-slate-400 line-clamp-2">
                     {t('silage.coreTemp', locale)}
                   </div>
                   <div
@@ -259,38 +262,42 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   >
                     {pit.coreTemperature}°C
                   </div>
-                  <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-bold mt-0.5 truncate">
+                  <div className="text-xs text-[#5A5243] dark:text-slate-400 font-bold mt-0.5 line-clamp-2">
                     {t('silage.targetTemp', locale)}
                   </div>
                 </div>
 
                 {/* Compaction Rating */}
                 <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-2 sm:p-2.5 border border-[#DCD3BF] dark:border-slate-700 overflow-hidden">
-                  <div className="text-[10px] font-bold text-[#5A5243] dark:text-slate-400 truncate">
+                  <div className="text-xs font-bold text-[#5A5243] dark:text-slate-400 line-clamp-2">
                     {t('silage.compaction', locale)}
                   </div>
                   <div className="text-xs sm:text-sm font-black text-[#1A1A1A] dark:text-slate-200 truncate mt-1">
                     {getCompactionRatingText(pit.compactionRating, locale)}
                   </div>
-                  <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-bold mt-0.5 truncate">
+                  <div className="text-xs text-[#5A5243] dark:text-slate-400 font-bold mt-0.5 line-clamp-2">
                     {pit.compactionRating.includes('Optimum')
-                      ? (locale === 'hi' ? 'उत्तम कसाव' : 'Optimum')
+                      ? t('silage.compactionOptimum', locale)
                       : pit.compactionRating.includes('Loose') || pit.compactionRating.includes('Air-Pockets')
-                      ? (locale === 'hi' ? 'हवा का रिसाव' : 'Loose')
-                      : pit.compactionRating.split(' ')[0]}
+                      ? t('silage.compactionLoose', locale)
+                      : t('silage.compactionModerate', locale)}
                   </div>
                 </div>
               </div>
 
               {/* Actionable Spoilage Notice if Hazardous */}
               {isDanger && (
-                <div className="bg-[#FDECEA] dark:bg-rose-950/60 border-2 border-[#B3261E] dark:border-rose-500/50 rounded-2xl p-3 text-xs text-[#B3261E] dark:text-rose-200 flex items-start space-x-2.5">
-                  <AlertTriangle className="w-5 h-5 text-[#B3261E] shrink-0 mt-0.5" />
+                <div 
+                  role="alert" 
+                  aria-live="assertive" 
+                  className="bg-[#FDECEA] dark:bg-rose-950/60 border-2 border-[#B3261E] dark:border-rose-500/50 rounded-2xl p-3 text-xs text-[#B3261E] dark:text-rose-200 flex items-start space-x-2.5"
+                >
+                  <AlertTriangle className="w-5 h-5 text-[#B3261E] shrink-0 mt-0.5" aria-hidden="true" />
                   <div>
                     <div className="font-black text-xs uppercase tracking-wide">
                       {t('silage.heatingWarning', locale)}
                     </div>
-                    <p className="text-[11px] text-[#1A1A1A] dark:text-slate-300 font-semibold mt-0.5">
+                    <p className="text-xs text-[#1A1A1A] dark:text-slate-300 font-semibold mt-0.5">
                       {t('silage.heatingDetail', locale, { temp: pit.coreTemperature })}
                     </p>
                   </div>
@@ -299,24 +306,25 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
 
               {/* 3. Inspection History Logs (Functionality Kept Intact) */}
               {pit.logs && pit.logs.length > 0 && (
-                <div className="pt-3 border-t border-[#DCD3BF] dark:border-slate-700 text-xs space-y-1.5">
+                <div className="pt-3 border-t border-[#DCD3BF] dark:border-slate-700 text-xs space-y-1.5" role="list">
                   <div className="font-black text-[#5A5243] dark:text-slate-400 flex items-center justify-between">
                     <span>{t('silage.recentHistory', locale)}:</span>
-                    <span className="text-[10px] font-medium">{t('silage.loggedCount', locale, { count: pit.logs.length })}</span>
+                    <span className="text-xs font-medium">{t('silage.loggedCount', locale, { count: pit.logs.length })}</span>
                   </div>
                   {pit.logs.slice(0, 2).map((lg) => (
                     <div
                       key={lg.id}
-                      className="flex items-center justify-between text-[#1A1A1A] dark:text-slate-300 font-medium text-[11px] bg-[#FBF8F1] dark:bg-slate-900/50 p-2 rounded-xl border border-[#DCD3BF]/60 dark:border-slate-700 gap-2"
+                      role="listitem"
+                      className="flex items-center justify-between text-[#1A1A1A] dark:text-slate-300 font-medium text-xs bg-[#FBF8F1] dark:bg-slate-900/50 p-2 rounded-xl border border-[#DCD3BF]/60 dark:border-slate-700 gap-2"
                     >
                       <span className="truncate">
                         • {lg.date}: <strong>{lg.temperatureC}°C</strong> ({getCompactionRatingText(lg.compactionRating, locale)})
                       </span>
-                      <span className="text-[#5A5243] dark:text-slate-400 italic truncate max-w-[140px] text-right">
+                      <span className="text-[#5A5243] dark:text-slate-400 italic flex-1 min-w-0 text-right">
                         {lg.notes === 'Golden color, pleasant lactic smell'
-                          ? (locale === 'hi' ? 'सुनहरा रंग, अच्छी खुशबू' : lg.notes)
+                          ? t('silage.obsGoodNote', locale)
                           : lg.notes === 'Air leak observed, surface mold forming'
-                          ? (locale === 'hi' ? 'हवा का रिसाव, सतह पर फफूंद' : lg.notes)
+                          ? t('silage.obsBadNote', locale)
                           : lg.notes}
                       </span>
                     </div>
@@ -331,7 +339,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
       {/* Scientific Silage SOP */}
       <div className="bg-[#F3EEE1] dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-4 space-y-2.5">
         <h3 className="text-xs font-black text-[#1A1A1A] dark:text-white flex items-center space-x-2">
-          <Sparkles className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400" />
+          <Sparkles className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400" aria-hidden="true" />
           <span>{t('silage.sopTitle', locale)}</span>
         </h3>
         <ul className="text-xs text-[#1A1A1A] dark:text-slate-300 space-y-2 font-medium">
@@ -377,7 +385,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                 className="text-slate-500 hover:text-slate-900 dark:hover:text-white w-11 h-11 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-2xl hover:bg-black/5 dark:hover:bg-white/10"
                 aria-label={t('common.close', locale)}
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
@@ -412,10 +420,10 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   }}
                   className="w-full px-3.5 py-3 bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl text-[#1A1A1A] dark:text-white font-bold text-sm focus:outline-none focus:border-[#1F5D3B] cursor-pointer"
                 >
-                  <option value="Maize">Hybrid Maize</option>
-                  <option value="Sorghum">Sweet Sorghum</option>
-                  <option value="Pearl Millet (Bajra)">Pearl Millet (Bajra)</option>
-                  <option value="Oats">Oats</option>
+                  <option value="Maize">{t('silage.cropMaize', locale)}</option>
+                  <option value="Sorghum">{t('silage.cropSorghum', locale)}</option>
+                  <option value="Pearl Millet (Bajra)">{t('silage.cropBajra', locale)}</option>
+                  <option value="Oats">{t('silage.cropOats', locale)}</option>
                 </select>
               </div>
 
@@ -427,6 +435,8 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   id="core-temp-input"
                   type="number"
                   step="0.5"
+                  min="0"
+                  max="100"
                   value={newTemp}
                   onChange={(e) => setNewTemp(Number(e.target.value))}
                   className="w-full px-3.5 py-3 bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl text-[#1A1A1A] dark:text-white font-black text-base focus:outline-none focus:border-[#1F5D3B]"
@@ -437,13 +447,13 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                 <button
                   type="button"
                   onClick={() => setShowAddPitModal(false)}
-                  className="w-1/2 py-3.5 bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 font-black rounded-2xl border-2 border-[#DCD3BF] dark:border-slate-700 min-h-[56px] active:scale-98 transition-all"
+                  className="w-1/2 py-3.5 px-2 text-center text-xs bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 font-black rounded-2xl border-2 border-[#DCD3BF] dark:border-slate-700 min-h-[56px] active:scale-98 transition-all"
                 >
                   {t('silage.cancel', locale)}
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-3.5 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black rounded-2xl shadow-lg min-h-[56px] active:scale-98 transition-all"
+                  className="w-1/2 py-3.5 px-2 text-center text-xs bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black rounded-2xl shadow-lg min-h-[56px] active:scale-98 transition-all"
                 >
                   {t('silage.savePit', locale)}
                 </button>
@@ -489,6 +499,8 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   id="log-temp-input"
                   type="number"
                   step="0.5"
+                  min="0"
+                  max="100"
                   required
                   value={logTemp}
                   onChange={(e) => setLogTemp(Number(e.target.value))}
@@ -511,9 +523,9 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   }}
                   className="w-full px-3.5 py-3 bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl text-[#1A1A1A] dark:text-white font-bold text-sm focus:outline-none focus:border-[#1F5D3B] cursor-pointer"
                 >
-                  <option value="Optimum (>650 kg/m3)">Optimum - Sealed Tight</option>
-                  <option value="Moderate">Moderate - Small Leaks Fixed</option>
-                  <option value="Loose/Air-Pockets">Loose - Air Pockets / Soft</option>
+                  <option value="Optimum (>650 kg/m3)">{t('silage.compactionOptimumLabel', locale)}</option>
+                  <option value="Moderate">{t('silage.compactionModerateLabel', locale)}</option>
+                  <option value="Loose/Air-Pockets">{t('silage.compactionLooseLabel', locale)}</option>
                 </select>
               </div>
 
@@ -524,7 +536,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                 <input
                   id="log-obs-input"
                   type="text"
-                  placeholder="e.g. Clean lactic aroma, no surface mold"
+                  placeholder={t('silage.logObsPlaceholder', locale)}
                   value={logNotes}
                   onChange={(e) => setLogNotes(e.target.value)}
                   className="w-full px-3.5 py-3 bg-white dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl text-[#1A1A1A] dark:text-white font-bold text-sm focus:outline-none focus:border-[#1F5D3B]"
@@ -535,13 +547,13 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                 <button
                   type="button"
                   onClick={() => setShowLogModal(null)}
-                  className="w-1/2 py-3.5 bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 font-black rounded-2xl border-2 border-[#DCD3BF] dark:border-slate-700 min-h-[56px] active:scale-98 transition-all"
+                  className="w-1/2 py-3.5 px-2 text-center text-xs bg-white dark:bg-slate-800 text-[#5A5243] dark:text-slate-300 font-black rounded-2xl border-2 border-[#DCD3BF] dark:border-slate-700 min-h-[56px] active:scale-98 transition-all"
                 >
                   {t('silage.cancel', locale)}
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-3.5 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black rounded-2xl shadow-lg min-h-[56px] active:scale-98 transition-all"
+                  className="w-1/2 py-3.5 px-2 text-center text-xs bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black rounded-2xl shadow-lg min-h-[56px] active:scale-98 transition-all"
                 >
                   {t('silage.saveReading', locale)}
                 </button>

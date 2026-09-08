@@ -454,5 +454,22 @@
   "category.concentrate": "दाना",
   "category.green_fodder": "गोजां गांसे",
   "category.dry_fodder": "राननाय गांसे",
-  "score.crudeProteinShort": "प्रोटिन"
+  "score.crudeProteinShort": "प्रोटिन",
+  "silage.logInitialNote": "गोजोन जागायनाय आरो सिल खालामनाय",
+  "silage.logRoutineNote": "नियमित सुंदोरनाय",
+  "silage.logReadingTooltip": "गोदान तापमान आरो सुंदोरनाय रेकर्ड खालाम",
+  "silage.days": "सान",
+  "silage.compactionOptimum": "गोजोन",
+  "silage.compactionModerate": "गेजेर",
+  "silage.compactionLoose": "लासा",
+  "silage.compactionOptimumLabel": "गोजोन - बिबांनि सिल",
+  "silage.compactionModerateLabel": "गेजेर - गथा बिलाई दाबनाय",
+  "silage.compactionLooseLabel": "लासा - बार पकेट / नखर",
+  "silage.cropMaize": "सनकर माखै",
+  "silage.cropSorghum": "गिलि जोवार",
+  "silage.cropBajra": "बाजरा",
+  "silage.cropOats": "ओट",
+  "silage.logObsPlaceholder": "उदा. गोजोन आमसुं गन्ध, फंगास गैया",
+  "silage.obsGoodNote": "सनाली रं, मोजां आमसुं गन्ध",
+  "silage.obsBadNote": "बार सोरनाय, गोजाव फंगास"
 }

@@ -454,5 +454,22 @@
   "category.concentrate": "শান চীঞ্জাক",
   "category.green_fodder": "অশংবা হিদাক-উহৈ",
   "category.dry_fodder": "অকংবা ৱাফৈ",
-  "score.crudeProteinShort": "প্রোটিন"
+  "score.crudeProteinShort": "প্রোটিন",
+  "silage.logInitialNote": "খোঙ হৌদোক্লে অমসুং সিল তৌরে",
+  "silage.logRoutineNote": "মতম মতম চেক তৌবা",
+  "silage.logReadingTooltip": "অনৌবা তেম্পরেচর অমসুং চেক রেকোর্দ তৌ",
+  "silage.days": "নুমিৎ",
+  "silage.compactionOptimum": "ফজবা",
+  "silage.compactionModerate": "মধ্যম",
+  "silage.compactionLoose": "লুম্বা",
+  "silage.compactionOptimumLabel": "ফজবা - পুম্নমক সিল",
+  "silage.compactionModerateLabel": "মধ্যম - অপিকপা ক্রেক শেমদোক্লে",
+  "silage.compactionLooseLabel": "লুম্বা - নোংজু পকেৎ / নকশিনবা",
+  "silage.cropMaize": "সংকর মকাই",
+  "silage.cropSorghum": "হেল জোৱার",
+  "silage.cropBajra": "বাজরা",
+  "silage.cropOats": "ওট",
+  "silage.logObsPlaceholder": "উদা. শেংনবা ঙাংবা মনাম, ফংগস লৈতে",
+  "silage.obsGoodNote": "সনারূপা মওং, নুংশিবা ঙাংবা মনাম",
+  "silage.obsBadNote": "নোংজু লিক, মথক্তা ফংগস"
 }

@@ -454,5 +454,22 @@
   "category.concentrate": "দানা মিশ্রণ",
   "category.green_fodder": "সবুজ ঘাস",
   "category.dry_fodder": "শুকনো খড়",
-  "score.crudeProteinShort": "প্রোটিন"
+  "score.crudeProteinShort": "প্রোটিন",
+  "silage.logInitialNote": "গর্ত শুরু এবং সিল করা হয়েছে",
+  "silage.logRoutineNote": "নিয়মিত পরিদর্শন",
+  "silage.logReadingTooltip": "নতুন তাপমাত্রা এবং পরিদর্শন রেকর্ড করুন",
+  "silage.days": "দিন",
+  "silage.compactionOptimum": "সর্বোত্তম",
+  "silage.compactionModerate": "মাঝারি",
+  "silage.compactionLoose": "ঢিলা",
+  "silage.compactionOptimumLabel": "সর্বোত্তম - সম্পূর্ণ সিল",
+  "silage.compactionModerateLabel": "মাঝারি - ছোট ফাটল মেরামত",
+  "silage.compactionLooseLabel": "ঢিলা - বাতাসের পকেট / নরম",
+  "silage.cropMaize": "সংকর ভুট্টা",
+  "silage.cropSorghum": "মিষ্টি জোয়ার",
+  "silage.cropBajra": "বাজরা",
+  "silage.cropOats": "ওট",
+  "silage.logObsPlaceholder": "যেমন: পরিষ্কার টক গন্ধ, কোনো ছত্রাক নেই",
+  "silage.obsGoodNote": "সোনালি রঙ, মনোরম টক গন্ধ",
+  "silage.obsBadNote": "বাতাসের ফুটো, পৃষ্ঠে ছত্রাক"
 }

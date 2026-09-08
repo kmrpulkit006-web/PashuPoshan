@@ -454,5 +454,22 @@
   "category.concentrate": "ଦାନା",
   "category.green_fodder": "ସବୁଜ ଘାସ",
   "category.dry_fodder": "ଶୁଖିଲା ନଡ଼ା",
-  "score.crudeProteinShort": "ପ୍ରୋଟିନ୍"
+  "score.crudeProteinShort": "ପ୍ରୋଟିନ୍",
+  "silage.logInitialNote": "ଗାତ ଆରମ୍ଭ ଏବଂ ସିଲ୍ ହୋଇଛି",
+  "silage.logRoutineNote": "ନିୟମିତ ପରୀକ୍ଷା",
+  "silage.logReadingTooltip": "ନୂତନ ତାପମାତ୍ରା ଏବଂ ପରୀକ୍ଷା ରେକର୍ଡ କରନ୍ତୁ",
+  "silage.days": "ଦିନ",
+  "silage.compactionOptimum": "ସର୍ବୋତ୍ତମ",
+  "silage.compactionModerate": "ମଧ୍ୟମ",
+  "silage.compactionLoose": "ଢିଲା",
+  "silage.compactionOptimumLabel": "ସର୍ବୋତ୍ତମ - ସମ୍ପୂର୍ଣ୍ଣ ସିଲ୍",
+  "silage.compactionModerateLabel": "ମଧ୍ୟମ - ଛୋଟ ଫାଟ ଠିକ୍ ହୋଇଛି",
+  "silage.compactionLooseLabel": "ଢିଲା - ବାୟୁ ପକେଟ୍ / ନରମ",
+  "silage.cropMaize": "ସଙ୍କର ମକା",
+  "silage.cropSorghum": "ମିଠା ଜୁଆର",
+  "silage.cropBajra": "ବାଜରା",
+  "silage.cropOats": "ଓଟ",
+  "silage.logObsPlaceholder": "ଉଦା. ପରିଷ୍କାର ଆମ୍ଳ ଗନ୍ଧ, କୌଣସି ଫିମ୍ପି ନାହିଁ",
+  "silage.obsGoodNote": "ସୁନେଲି ରଙ୍ଗ, ସୁଖଦ ଆମ୍ଳ ଗନ୍ଧ",
+  "silage.obsBadNote": "ବାୟୁ ଲିକ୍, ପୃଷ୍ଠରେ ଫିମ୍ପି"
 }

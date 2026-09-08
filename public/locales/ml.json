@@ -454,5 +454,22 @@
   "category.concentrate": "കാലിത്തീറ്റ",
   "category.green_fodder": "പച്ചപ്പുല്ല്",
   "category.dry_fodder": "ഉണക്കപ്പുല്ല്",
-  "score.crudeProteinShort": "പ്രോട്ടീൻ"
+  "score.crudeProteinShort": "പ്രോട്ടീൻ",
+  "silage.logInitialNote": "കുഴി ആരംഭിച്ച് സീൽ ചെയ്തു",
+  "silage.logRoutineNote": "പതിവ് പരിശോധന",
+  "silage.logReadingTooltip": "പുതിയ താപനില, പരിശോധന രേഖപ്പെടുത്തുക",
+  "silage.days": "ദിവസം",
+  "silage.compactionOptimum": "ഉത്തമം",
+  "silage.compactionModerate": "മിതമായ",
+  "silage.compactionLoose": "അയഞ്ഞ",
+  "silage.compactionOptimumLabel": "ഉത്തമം - പൂർണ്ണ സീൽ",
+  "silage.compactionModerateLabel": "മിതമായ - ചെറിയ വിള്ളലുകൾ ശരിയാക്കി",
+  "silage.compactionLooseLabel": "അയഞ്ഞ - വായു പോക്കറ്റുകൾ / മൃദുലം",
+  "silage.cropMaize": "സങ്കരയിനം ചോളം",
+  "silage.cropSorghum": "മധുര ചോളം",
+  "silage.cropBajra": "കമ്പം",
+  "silage.cropOats": "ഓട്ട്സ്",
+  "silage.logObsPlaceholder": "ഉദാ. ശുദ്ധമായ പുളിപ്പ് ഗന്ധം, പൂപ്പൽ ഇല്ല",
+  "silage.obsGoodNote": "സ്വർണ്ണ നിറം, ഇമ്പമുള്ള പുളിപ്പ് ഗന്ധം",
+  "silage.obsBadNote": "വായു ചോർച്ച, ഉപരിതലത്തിൽ പൂപ്പൽ"
 }

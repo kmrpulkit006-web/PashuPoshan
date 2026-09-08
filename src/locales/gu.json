@@ -454,5 +454,22 @@
   "category.concentrate": "દાણ મિશ્રણ",
   "category.green_fodder": "લીલો ઘાસચારો",
   "category.dry_fodder": "સૂકો ચારો",
-  "score.crudeProteinShort": "પ્રોટીન"
+  "score.crudeProteinShort": "પ્રોટીન",
+  "silage.logInitialNote": "ખાડો શરૂ અને સીલ કરાયો",
+  "silage.logRoutineNote": "નિયમિત તપાસ",
+  "silage.logReadingTooltip": "નવું તાપમાન અને તપાસ નોંધો",
+  "silage.days": "દિવસ",
+  "silage.compactionOptimum": "શ્રેષ્ઠ",
+  "silage.compactionModerate": "મધ્યમ",
+  "silage.compactionLoose": "ઢીલું",
+  "silage.compactionOptimumLabel": "શ્રેષ્ઠ - સંપૂર્ણ સીલ",
+  "silage.compactionModerateLabel": "મધ્યમ - નાની તિરાડો સમારાઈ",
+  "silage.compactionLooseLabel": "ઢીલું - હવાના ખિસ્સા / નરમ",
+  "silage.cropMaize": "સંકર મકાઈ",
+  "silage.cropSorghum": "મીઠું જુવાર",
+  "silage.cropBajra": "બાજરી",
+  "silage.cropOats": "ઓટ",
+  "silage.logObsPlaceholder": "ઉદા. સ્વચ્છ ખાટી ગંધ, કોઈ ફૂગ નહીં",
+  "silage.obsGoodNote": "સુવર્ણ રંગ, સુખદ ખાટી ગંધ",
+  "silage.obsBadNote": "હવાનું રિસાણ, સપાટી પર ફૂગ"
 }

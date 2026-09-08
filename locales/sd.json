@@ -454,5 +454,22 @@
   "category.concentrate": "داڻو",
   "category.green_fodder": "سائو چارو",
   "category.dry_fodder": "سڪل چارو",
-  "score.crudeProteinShort": "پروٽين"
+  "score.crudeProteinShort": "پروٽين",
+  "silage.logInitialNote": "کوٺو شروع ۽ سيل ڪيو ويو",
+  "silage.logRoutineNote": "باقاعده جانچ",
+  "silage.logReadingTooltip": "نئون درجه حرارت ۽ جانچ رڪارڊ ڪريو",
+  "silage.days": "ڏينهن",
+  "silage.compactionOptimum": "بهترين",
+  "silage.compactionModerate": "وچولو",
+  "silage.compactionLoose": "ڍيلو",
+  "silage.compactionOptimumLabel": "بهترين - مڪمل سيل",
+  "silage.compactionModerateLabel": "وچولو - ننڍيون درزون ٺيڪ ٿيون",
+  "silage.compactionLooseLabel": "ڍيلو - هوا جي جيبون / نرم",
+  "silage.cropMaize": "سنڪر مڪئي",
+  "silage.cropSorghum": "مٺو جوار",
+  "silage.cropBajra": "باجرو",
+  "silage.cropOats": "جئي",
+  "silage.logObsPlaceholder": "مثال: صاف کاٽي خوشبو، ڪا ڦڦوندي ناهي",
+  "silage.obsGoodNote": "سونهري رنگ، سٺي کاٽي خوشبو",
+  "silage.obsBadNote": "هوا جو رساءُ، مٿاڇري تي ڦڦوندي"
 }

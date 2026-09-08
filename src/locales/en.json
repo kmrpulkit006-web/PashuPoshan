@@ -454,5 +454,22 @@
   "category.concentrate": "Concentrate",
   "category.green_fodder": "Green Fodder",
   "category.dry_fodder": "Dry Fodder",
-  "score.crudeProteinShort": "CP"
+  "score.crudeProteinShort": "CP",
+  "silage.logInitialNote": "Pit initiated and sealed",
+  "silage.logRoutineNote": "Routine inspection",
+  "silage.logReadingTooltip": "Log new temperature and inspection",
+  "silage.days": "Days",
+  "silage.compactionOptimum": "Optimum",
+  "silage.compactionModerate": "Moderate",
+  "silage.compactionLoose": "Loose",
+  "silage.compactionOptimumLabel": "Optimum - Sealed Tight",
+  "silage.compactionModerateLabel": "Moderate - Small Leaks Fixed",
+  "silage.compactionLooseLabel": "Loose - Air Pockets / Soft",
+  "silage.cropMaize": "Hybrid Maize",
+  "silage.cropSorghum": "Sweet Sorghum",
+  "silage.cropBajra": "Pearl Millet (Bajra)",
+  "silage.cropOats": "Oats",
+  "silage.logObsPlaceholder": "e.g. Clean lactic aroma, no surface mold",
+  "silage.obsGoodNote": "Golden color, pleasant lactic smell",
+  "silage.obsBadNote": "Air leak observed, surface mold forming"
 }

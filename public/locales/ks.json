@@ -454,5 +454,22 @@
   "category.concentrate": "دانہٕ مکسچر",
   "category.green_fodder": "سبٕز گھاسہٕ",
   "category.dry_fodder": "ہۆکھ گھاسہٕ",
-  "score.crudeProteinShort": "پروٹین"
+  "score.crudeProteinShort": "پروٹین",
+  "silage.logInitialNote": "کَنڈ شروع تہٕ سیل کرنہٕ آو",
+  "silage.logRoutineNote": "باقاعدہ جانچ",
+  "silage.logReadingTooltip": "نوٗو درجہ حرارت تہٕ جانچ ریکارڈ کرِو",
+  "silage.days": "دۄہ",
+  "silage.compactionOptimum": "بہترین",
+  "silage.compactionModerate": "وَسطی",
+  "silage.compactionLoose": "ڈھیلا",
+  "silage.compactionOptimumLabel": "بہترین - مکمل سیل",
+  "silage.compactionModerateLabel": "وَسطی - ننھِ دراڑٕ ٹھیک",
+  "silage.compactionLooseLabel": "ڈھیلا - ہوا کِ جیب / نرم",
+  "silage.cropMaize": "سنکر مکئی",
+  "silage.cropSorghum": "میٹھ جوار",
+  "silage.cropBajra": "باجرا",
+  "silage.cropOats": "جئی",
+  "silage.logObsPlaceholder": "مثلاً صاف کھٹی خوشبو، کانہٕ ففوندی نہٕ",
+  "silage.obsGoodNote": "سنہرا رنگ، خوشگوار کھٹی خوشبو",
+  "silage.obsBadNote": "ہوا چھو رساوُ، سطح پر ففوندی"
 }

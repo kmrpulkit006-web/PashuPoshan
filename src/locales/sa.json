@@ -454,5 +454,22 @@
   "category.concentrate": "पशुआहारः",
   "category.green_fodder": "हरितचारा",
   "category.dry_fodder": "शुष्कचारा",
-  "score.crudeProteinShort": "प्रोटीन"
+  "score.crudeProteinShort": "प्रोटीन",
+  "silage.logInitialNote": "गर्तः आरब्धः मुद्रितश्च",
+  "silage.logRoutineNote": "नियमित परीक्षणम्",
+  "silage.logReadingTooltip": "नवतापमानं परीक्षणं च लिखतु",
+  "silage.days": "दिनानि",
+  "silage.compactionOptimum": "उत्तमम्",
+  "silage.compactionModerate": "मध्यमम्",
+  "silage.compactionLoose": "शिथिलम्",
+  "silage.compactionOptimumLabel": "उत्तमम् - पूर्णमुद्रितम्",
+  "silage.compactionModerateLabel": "मध्यमम् - लघुविदारणानि संस्कृतानि",
+  "silage.compactionLooseLabel": "शिथिलम् - वायुकोषाः / मृदुम्",
+  "silage.cropMaize": "संकरमक्का",
+  "silage.cropSorghum": "मधुरज्वारः",
+  "silage.cropBajra": "बाजरा",
+  "silage.cropOats": "यवः",
+  "silage.logObsPlaceholder": "उदा. शुद्धम्लगन्धः, न कवकम्",
+  "silage.obsGoodNote": "सुवर्णवर्णः, सुखदाम्लगन्धः",
+  "silage.obsBadNote": "वायुस्रावः, पृष्ठे कवकम्"
 }

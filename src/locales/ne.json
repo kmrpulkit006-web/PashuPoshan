@@ -454,5 +454,22 @@
   "category.concentrate": "दाना मिश्रण",
   "category.green_fodder": "हरियो घाँस",
   "category.dry_fodder": "सुख्खा पराल",
-  "score.crudeProteinShort": "प्रोटिन"
+  "score.crudeProteinShort": "प्रोटिन",
+  "silage.logInitialNote": "खाल्डो सुरु र सिल गरियो",
+  "silage.logRoutineNote": "नियमित जाँच",
+  "silage.logReadingTooltip": "नयाँ तापक्रम र निरीक्षण रेकर्ड गर्नुहोस्",
+  "silage.days": "दिन",
+  "silage.compactionOptimum": "उत्तम",
+  "silage.compactionModerate": "मध्यम",
+  "silage.compactionLoose": "ढिलो",
+  "silage.compactionOptimumLabel": "उत्तम - पूर्ण सिल",
+  "silage.compactionModerateLabel": "मध्यम - सानो दरारहरू मर्मत",
+  "silage.compactionLooseLabel": "ढिलो - हावाको झोला / नरम",
+  "silage.cropMaize": "संकर मकै",
+  "silage.cropSorghum": "मिठो ज्वार",
+  "silage.cropBajra": "बाजरा",
+  "silage.cropOats": "जौ",
+  "silage.logObsPlaceholder": "उदा. सफा अम्लीय गन्ध, कुनै ढुसी छैन",
+  "silage.obsGoodNote": "सुनौलो रंग, रमाइलो अम्लीय गन्ध",
+  "silage.obsBadNote": "हावा चुहावट, सतहमा ढुसी"
 }

@@ -454,5 +454,22 @@
   "category.concentrate": "पशुआहार",
   "category.green_fodder": "पाचवो चारो",
   "category.dry_fodder": "सुको चारो",
-  "score.crudeProteinShort": "प्रथिने"
+  "score.crudeProteinShort": "प्रथिने",
+  "silage.logInitialNote": "फोंड सुरू आनी सील केलो",
+  "silage.logRoutineNote": "नेमान तपासणी",
+  "silage.logReadingTooltip": "नवो तापमान आनी तपासणी नोंद करात",
+  "silage.days": "दीस",
+  "silage.compactionOptimum": "उत्तम",
+  "silage.compactionModerate": "मध्यम",
+  "silage.compactionLoose": "सैल",
+  "silage.compactionOptimumLabel": "उत्तम - पुराय सील",
+  "silage.compactionModerateLabel": "मध्यम - ल्हान फाटी दुरुस्त",
+  "silage.compactionLooseLabel": "सैल - हवेची खोबणी / मोव",
+  "silage.cropMaize": "संकर मको",
+  "silage.cropSorghum": "गोड जोंधळ",
+  "silage.cropBajra": "बाजरी",
+  "silage.cropOats": "ओट",
+  "silage.logObsPlaceholder": "उदा. नितळ आंबूस वास, बुरशी ना",
+  "silage.obsGoodNote": "भांगरा रंग, बरो आंबूस वास",
+  "silage.obsBadNote": "हवा गळटी, वयर बुरशी"
 }

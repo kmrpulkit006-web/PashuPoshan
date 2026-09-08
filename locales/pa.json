@@ -454,5 +454,22 @@
   "category.concentrate": "ਦਾਣਾ ਮਿਸ਼ਰਣ",
   "category.green_fodder": "ਹਰਾ ਚਾਰਾ",
   "category.dry_fodder": "ਸੁੱਕਾ ਚਾਰਾ",
-  "score.crudeProteinShort": "ਪ੍ਰੋਟੀਨ"
+  "score.crudeProteinShort": "ਪ੍ਰੋਟੀਨ",
+  "silage.logInitialNote": "ਟੋਆ ਸ਼ੁਰੂ ਅਤੇ ਸੀਲ ਕੀਤਾ ਗਿਆ",
+  "silage.logRoutineNote": "ਨਿਯਮਤ ਜਾਂਚ",
+  "silage.logReadingTooltip": "ਨਵਾਂ ਤਾਪਮਾਨ ਅਤੇ ਜਾਂਚ ਦਰਜ ਕਰੋ",
+  "silage.days": "ਦਿਨ",
+  "silage.compactionOptimum": "ਸਰਵੋਤਮ",
+  "silage.compactionModerate": "ਦਰਮਿਆਨਾ",
+  "silage.compactionLoose": "ਢਿੱਲਾ",
+  "silage.compactionOptimumLabel": "ਸਰਵੋਤਮ - ਪੂਰੀ ਤਰ੍ਹਾਂ ਸੀਲ",
+  "silage.compactionModerateLabel": "ਦਰਮਿਆਨਾ - ਛੋਟੀਆਂ ਦਰਾਰਾਂ ਠੀਕ ਕੀਤੀਆਂ",
+  "silage.compactionLooseLabel": "ਢਿੱਲਾ - ਹਵਾ ਦੀਆਂ ਜੇਬਾਂ / ਨਰਮ",
+  "silage.cropMaize": "ਸੰਕਰ ਮੱਕੀ",
+  "silage.cropSorghum": "ਮਿੱਠੀ ਜਵਾਰ",
+  "silage.cropBajra": "ਬਾਜਰਾ",
+  "silage.cropOats": "ਜਵੀ",
+  "silage.logObsPlaceholder": "ਉਦਾ. ਸਾਫ਼ ਖੱਟੀ ਮਹਿਕ, ਕੋਈ ਉੱਲੀ ਨਹੀਂ",
+  "silage.obsGoodNote": "ਸੁਨਹਿਰਾ ਰੰਗ, ਸੁਹਾਵਣੀ ਖੱਟੀ ਮਹਿਕ",
+  "silage.obsBadNote": "ਹਵਾ ਦਾ ਰਿਸਾਅ, ਸਤ੍ਹ 'ਤੇ ਉੱਲੀ"
 }

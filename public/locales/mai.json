@@ -454,5 +454,22 @@
   "category.concentrate": "दाना मिश्रण",
   "category.green_fodder": "हरियर चारा",
   "category.dry_fodder": "सूखल भूसा",
-  "score.crudeProteinShort": "प्रोटीन"
+  "score.crudeProteinShort": "प्रोटीन",
+  "silage.logInitialNote": "गड्ढा शुरू आ सील कएल गेल",
+  "silage.logRoutineNote": "नियमित जाँच",
+  "silage.logReadingTooltip": "नव तापमान आ निरीक्षण दर्ज करू",
+  "silage.days": "दिन",
+  "silage.compactionOptimum": "सर्वोत्तम",
+  "silage.compactionModerate": "मध्यम",
+  "silage.compactionLoose": "ढीला",
+  "silage.compactionOptimumLabel": "सर्वोत्तम - पूरा सील",
+  "silage.compactionModerateLabel": "मध्यम - छोट दरार ठीक कएल",
+  "silage.compactionLooseLabel": "ढीला - हवा केर जेब / नरम",
+  "silage.cropMaize": "संकर मक्का",
+  "silage.cropSorghum": "मीठा ज्वार",
+  "silage.cropBajra": "बाजरा",
+  "silage.cropOats": "जई",
+  "silage.logObsPlaceholder": "उदा. साफ खट्टा महक, कोनो फफूँद नहि",
+  "silage.obsGoodNote": "सुनहरा रंग, सुखद खट्टा महक",
+  "silage.obsBadNote": "हवा केर रिसाव, सतह पर फफूँद"
 }

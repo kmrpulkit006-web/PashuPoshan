@@ -454,5 +454,22 @@
   "category.concentrate": "దాణా",
   "category.green_fodder": "పచ్చి మేత",
   "category.dry_fodder": "ఎండు గడ్డి",
-  "score.crudeProteinShort": "ప్రోటీన్"
+  "score.crudeProteinShort": "ప్రోటీన్",
+  "silage.logInitialNote": "గుంత ప్రారంభించి సీల్ చేయబడింది",
+  "silage.logRoutineNote": "సాధారణ తనిఖీ",
+  "silage.logReadingTooltip": "కొత్త ఉష్ణోగ్రత మరియు తనిఖీ నమోదు చేయండి",
+  "silage.days": "రోజులు",
+  "silage.compactionOptimum": "అత్యుత్తమం",
+  "silage.compactionModerate": "మధ్యస్థం",
+  "silage.compactionLoose": "వదులు",
+  "silage.compactionOptimumLabel": "అత్యుత్తమం - పూర్తిగా సీల్",
+  "silage.compactionModerateLabel": "మధ్యస్థం - చిన్న పగుళ్లు సరిచేయబడ్డాయి",
+  "silage.compactionLooseLabel": "వదులు - గాలి జేబులు / మృదువు",
+  "silage.cropMaize": "సంకర మొక్కజొన్న",
+  "silage.cropSorghum": "తీపి జొన్న",
+  "silage.cropBajra": "సజ్జ",
+  "silage.cropOats": "ఓట్స్",
+  "silage.logObsPlaceholder": "ఉదా. శుభ్రమైన పుల్లని వాసన, బూజు లేదు",
+  "silage.obsGoodNote": "బంగారు రంగు, ఆహ్లాదకరమైన పుల్లని వాసన",
+  "silage.obsBadNote": "గాలి లీక్, ఉపరితలంపై బూజు"
 }

@@ -52,18 +52,18 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     {
       id: 'scan',
       labelKey: 'nav.scan',
-      icon: <ScanLine className="w-5 h-5" />,
+      icon: <ScanLine className="w-5 h-5" aria-hidden="true" />,
       badge: pendingScansCount > 0 ? `${pendingScansCount}` : undefined,
     },
     {
       id: 'history',
       labelKey: 'nav.history',
-      icon: <History className="w-5 h-5" />,
+      icon: <History className="w-5 h-5" aria-hidden="true" />,
     },
     {
       id: 'scorecard',
       labelKey: 'nav.scorecard',
-      icon: <Award className="w-5 h-5" />,
+      icon: <Award className="w-5 h-5" aria-hidden="true" />,
       badge: activeGrade
         ? (activeGrade.includes('Tier A') ? 'Tier A' : 'Alert')
         : (hasScanResult ? '✓' : undefined),
@@ -71,23 +71,24 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     {
       id: 'ration',
       labelKey: 'nav.ration',
-      icon: <Scale className="w-5 h-5" />,
+      icon: <Scale className="w-5 h-5" aria-hidden="true" />,
     },
     {
       id: 'silage',
       labelKey: 'nav.silage',
-      icon: <Layers className="w-5 h-5" />,
+      icon: <Layers className="w-5 h-5" aria-hidden="true" />,
     },
     {
       id: 'alerts',
       labelKey: 'nav.alerts',
-      icon: <AlertTriangle className="w-5 h-5" />,
+      icon: <AlertTriangle className="w-5 h-5" aria-hidden="true" />,
       badge: effectiveAlerts > 0 ? `${effectiveAlerts}` : undefined,
     },
   ];
 
   return (
     <nav
+      aria-label="Main navigation"
       className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 backdrop-blur-md border-t px-1.5 py-2 shadow-2xl transition-colors select-none"
       style={{
         backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(243, 238, 225, 0.95)',
@@ -95,14 +96,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
       }}
     >
-      <div className="grid grid-cols-6 gap-1">
+      <div className="grid grid-cols-6 gap-1" role="tablist">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
+              type="button"
+              role="tab"
               onClick={() => setActiveTab(tab.id)}
               aria-label={t(tab.labelKey, locale)}
+              aria-selected={isActive}
               aria-current={isActive ? 'page' : undefined}
               className="relative flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl transition-all min-h-[56px] border"
               style={{
@@ -127,7 +131,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                   </span>
                 )}
               </div>
-              <span className="text-[10px] mt-1 tracking-tight font-bold leading-tight text-center w-full truncate px-0.5">
+              <span className="text-[11px] mt-1 tracking-tight font-bold leading-tight text-center w-full truncate px-0.5">
                 {t(tab.labelKey, locale)}
               </span>
             </button>

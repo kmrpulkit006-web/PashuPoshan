@@ -454,5 +454,22 @@
   "category.concentrate": "দানা মিশ্ৰণ",
   "category.green_fodder": "সেউজীয়া ঘাঁহ",
   "category.dry_fodder": "শুকান খৰি",
-  "score.crudeProteinShort": "প্ৰ'টিন"
+  "score.crudeProteinShort": "প্ৰ'টিন",
+  "silage.logInitialNote": "গাঁত আৰম্ভ আৰু ছীল কৰা হ'ল",
+  "silage.logRoutineNote": "নিয়মীয়া পৰীক্ষা",
+  "silage.logReadingTooltip": "নতুন তাপমাত্ৰা আৰু পৰীক্ষা লিপিবদ্ধ কৰক",
+  "silage.days": "দিন",
+  "silage.compactionOptimum": "সৰ্বোত্তম",
+  "silage.compactionModerate": "মধ্যমীয়া",
+  "silage.compactionLoose": "ঢিলা",
+  "silage.compactionOptimumLabel": "সৰ্বোত্তম - সম্পূৰ্ণ ছীল",
+  "silage.compactionModerateLabel": "মধ্যমীয়া - সৰু ফাট মেৰামত",
+  "silage.compactionLooseLabel": "ঢিলা - বায়ু পকেট / কোমল",
+  "silage.cropMaize": "সংকৰ মাকৈ",
+  "silage.cropSorghum": "মিঠা জোৱাৰ",
+  "silage.cropBajra": "বাজৰা",
+  "silage.cropOats": "ওট",
+  "silage.logObsPlaceholder": "উদা. পৰিষ্কাৰ টেঙা গোন্ধ, কোনো ভেঁকুৰ নাই",
+  "silage.obsGoodNote": "সোণালী ৰং, সুখদ টেঙা গোন্ধ",
+  "silage.obsBadNote": "বায়ু ফুটা, পৃষ্ঠত ভেঁকুৰ"
 }

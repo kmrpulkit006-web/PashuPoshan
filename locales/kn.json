@@ -454,5 +454,22 @@
   "category.concentrate": "ಪಶು ಆಹಾರ",
   "category.green_fodder": "ಹಸಿರು ಮೇವು",
   "category.dry_fodder": "ಒಣ ಮೇವು",
-  "score.crudeProteinShort": "ಪ್ರೋಟೀನ್"
+  "score.crudeProteinShort": "ಪ್ರೋಟೀನ್",
+  "silage.logInitialNote": "ಗುಂಡಿ ಪ್ರಾರಂಭಿಸಿ ಸೀಲ್ ಮಾಡಲಾಗಿದೆ",
+  "silage.logRoutineNote": "ನಿಯಮಿತ ತಪಾಸಣೆ",
+  "silage.logReadingTooltip": "ಹೊಸ ತಾಪಮಾನ ಮತ್ತು ತಪಾಸಣೆ ದಾಖಲಿಸಿ",
+  "silage.days": "ದಿನಗಳು",
+  "silage.compactionOptimum": "ಅತ್ಯುತ್ತಮ",
+  "silage.compactionModerate": "ಮಧ್ಯಮ",
+  "silage.compactionLoose": "ಸಡಿಲ",
+  "silage.compactionOptimumLabel": "ಅತ್ಯುತ್ತಮ - ಪೂರ್ಣ ಸೀಲ್",
+  "silage.compactionModerateLabel": "ಮಧ್ಯಮ - ಸಣ್ಣ ಬಿರುಕುಗಳು ಸರಿಪಡಿಸಲಾಗಿದೆ",
+  "silage.compactionLooseLabel": "ಸಡಿಲ - ಗಾಳಿ ಪಾಕೆಟ್‌ಗಳು / ಮೃದು",
+  "silage.cropMaize": "ಸಂಕರ ಮೆಕ್ಕೆಜೋಳ",
+  "silage.cropSorghum": "ಸಿಹಿ ಜೋಳ",
+  "silage.cropBajra": "ಸಜ್ಜೆ",
+  "silage.cropOats": "ಓಟ್ಸ್",
+  "silage.logObsPlaceholder": "ಉದಾ. ಶುಭ್ರ ಹುಳಿ ವಾಸನೆ, ಶಿಲೀಂಧ್ರ ಇಲ್ಲ",
+  "silage.obsGoodNote": "ಚಿನ್ನದ ಬಣ್ಣ, ಸುಖಕರ ಹುಳಿ ವಾಸನೆ",
+  "silage.obsBadNote": "ಗಾಳಿ ಸೋರಿಕೆ, ಮೇಲ್ಮೈಯಲ್ಲಿ ಶಿಲೀಂಧ್ರ"
 }

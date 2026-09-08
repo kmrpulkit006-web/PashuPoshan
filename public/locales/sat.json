@@ -454,5 +454,22 @@
   "category.concentrate": "ᱫᱟᱱᱟ",
   "category.green_fodder": "ᱵᱮᱨᱮᱞ ᱜᱷᱟᱸᱥ",
   "category.dry_fodder": "ᱨᱚᱦᱚᱲ ᱜᱷᱟᱸᱥ",
-  "score.crudeProteinShort": "ᱯᱨᱳᱴᱤᱱ"
+  "score.crudeProteinShort": "ᱯᱨᱳᱴᱤᱱ",
+  "silage.logInitialNote": "गाड़ा एहोब आर सील",
+  "silage.logRoutineNote": "नेम ते जांच",
+  "silage.logReadingTooltip": "नावा तापमान आर जांच रेकोर्ड",
+  "silage.days": "दिन",
+  "silage.compactionOptimum": "सारी बाड़ी",
+  "silage.compactionModerate": "बिचला",
+  "silage.compactionLoose": "ढील",
+  "silage.compactionOptimumLabel": "सारी बाड़ी - पुरा सील",
+  "silage.compactionModerateLabel": "बिचला - हुड़ीङ तेरा दाड़ सेड़ा",
+  "silage.compactionLooseLabel": "ढील - हावा ठावां / नरम",
+  "silage.cropMaize": "संकर मक्का",
+  "silage.cropSorghum": "मीठ जोनड़ो",
+  "silage.cropBajra": "बाजरा",
+  "silage.cropOats": "जवी",
+  "silage.logObsPlaceholder": "जेलेका: साफ आमल बास, कोवा फफूंद बांका",
+  "silage.obsGoodNote": "सोनायेन रंग, नेल आमल बास",
+  "silage.obsBadNote": "हावा छेदा, चेत रे फफूंद"
 }

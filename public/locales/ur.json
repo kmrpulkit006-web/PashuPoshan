@@ -454,5 +454,22 @@
   "category.concentrate": "دانہ مکسچر",
   "category.green_fodder": "سبز چارہ",
   "category.dry_fodder": "خشک بھوسہ",
-  "score.crudeProteinShort": "پروٹین"
+  "score.crudeProteinShort": "پروٹین",
+  "silage.logInitialNote": "گڑھا شروع اور سیل کیا گیا",
+  "silage.logRoutineNote": "معمول کا معائنہ",
+  "silage.logReadingTooltip": "نیا درجہ حرارت اور معائنہ درج کریں",
+  "silage.days": "دن",
+  "silage.compactionOptimum": "بہترین",
+  "silage.compactionModerate": "درمیانی",
+  "silage.compactionLoose": "ڈھیلا",
+  "silage.compactionOptimumLabel": "بہترین - مکمل سیل",
+  "silage.compactionModerateLabel": "درمیانی - چھوٹی دراڑیں ٹھیک کیں",
+  "silage.compactionLooseLabel": "ڈھیلا - ہوا کی جیبیں / نرم",
+  "silage.cropMaize": "ہائبرڈ مکئی",
+  "silage.cropSorghum": "میٹھا جوار",
+  "silage.cropBajra": "باجرا",
+  "silage.cropOats": "جئی",
+  "silage.logObsPlaceholder": "مثلاً صاف کھٹی خوشبو، کوئی پھپھوندی نہیں",
+  "silage.obsGoodNote": "سنہرا رنگ، خوشگوار کھٹی خوشبو",
+  "silage.obsBadNote": "ہوا کا رساؤ، سطح پر پھپھوندی"
 }
