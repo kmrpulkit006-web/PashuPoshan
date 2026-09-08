@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlertOctagon, CheckCircle, FlaskConical, ExternalLink, MapPin, PhoneCall } from 'lucide-react';
 import { FeedSample, Locale } from '../../lib/types';
-import { t } from '../../lib/i18n';
+import { t, getSandRiskText, getAflatoxinRiskText } from '../../lib/i18n';
 
 interface AdulterationAlertBoxProps {
   sample: FeedSample;
@@ -28,6 +28,9 @@ export const AdulterationAlertBox: React.FC<AdulterationAlertBoxProps> = ({
     sample.adulteration.labVerifiedOnly ||
     sample.adulteration.sandSilicaRisk === 'Requires Certified Lab Test' ||
     sample.metrics.acidInsolubleAsh === undefined;
+
+  const sandRiskDisplay = getSandRiskText(sample.adulteration.sandSilicaRisk, locale);
+  const aflatoxinRiskDisplay = getAflatoxinRiskText(sample.adulteration.aflatoxinRisk, locale);
 
   return (
     <div
@@ -104,7 +107,7 @@ export const AdulterationAlertBox: React.FC<AdulterationAlertBoxProps> = ({
             <div className="font-black text-sm text-[#1A1A1A] dark:text-slate-200 mt-0.5">
               {sample.metrics.acidInsolubleAsh}%{' '}
               <span className="text-[10px] font-bold block text-[#5A5243] dark:text-slate-400">
-                ({sample.adulteration.sandSilicaRisk})
+                ({sandRiskDisplay})
               </span>
             </div>
           )}
@@ -132,7 +135,7 @@ export const AdulterationAlertBox: React.FC<AdulterationAlertBoxProps> = ({
                   : 'text-[#1F5D3B] dark:text-emerald-300'
               }`}
             >
-              {sample.adulteration.aflatoxinRisk}
+              {aflatoxinRiskDisplay}
             </div>
           )}
         </div>

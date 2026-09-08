@@ -194,3 +194,102 @@ export function getActionableAdviceText(actionText: string, locale: Locale | str
   }
   return actionText;
 }
+
+/**
+ * Localizes preset Silage bunker / pit names.
+ */
+export function getSilagePitDisplayName(pitName: string, locale: Locale | string): string {
+  if (pitName.includes('Main Bunker Pit #1') || pitName.includes('Hybrid Maize')) {
+    return `${t('silage.bunkerName', locale)} #1 (${t('score.cropMaize', locale)})`;
+  }
+  if (pitName.includes('Trench Silo #2') || pitName.includes('Sweet Sorghum')) {
+    return `${t('silage.bunkerName', locale)} #2 (${t('score.cropSorghum', locale)})`;
+  }
+  return pitName;
+}
+
+/**
+ * Localizes silage status labels.
+ */
+export function getSilageStatusText(status: string, locale: Locale | string): string {
+  if (status === 'Ready to Feed') return t('silage.status.ready', locale);
+  if (status === 'Fermenting') return t('silage.status.fermenting', locale);
+  if (status === 'Aerobic Heating Risk') return t('silage.status.heatingRisk', locale);
+  if (status === 'Spoiled Pit') return t('silage.status.spoiled', locale);
+  return status;
+}
+
+/**
+ * Localizes compaction rating labels.
+ */
+export function getCompactionRatingText(rating: string, locale: Locale | string): string {
+  if (rating.includes('Optimum')) return t('silage.compaction.optimum', locale);
+  if (rating.includes('Moderate')) return t('silage.compaction.moderate', locale);
+  if (rating.includes('Loose') || rating.includes('Air-Pockets')) return t('silage.compaction.loose', locale);
+  return rating;
+}
+
+/**
+ * Localizes Flieg score grades.
+ */
+export function getFliegGradeText(grade: string, locale: Locale | string): string {
+  if (grade === 'Excellent') return t('score.gradeExcellent', locale);
+  if (grade === 'Good') return t('score.gradeGood', locale);
+  if (grade === 'Fair') return t('score.gradeFair', locale);
+  if (grade === 'Poor') return t('score.gradePoor', locale);
+  if (grade === 'Very Poor') return t('score.gradeVeryPoor', locale);
+  return grade;
+}
+
+/**
+ * Localizes silage fermentation acid types.
+ */
+export function getSilageAcidText(acid: string, locale: Locale | string): string {
+  if (acid.includes('Lactic')) return t('score.acidLactic', locale);
+  if (acid.includes('Acetic')) return t('score.acidAcetic', locale);
+  if (acid.includes('Butyric')) return t('score.acidButyric', locale);
+  return acid;
+}
+
+/**
+ * Localizes crop types.
+ */
+export function getCropDisplayName(crop: string, locale: Locale | string): string {
+  if (crop === 'Maize') return t('score.cropMaize', locale);
+  if (crop === 'Sorghum') return t('score.cropSorghum', locale);
+  if (crop.includes('Bajra') || crop.includes('Pearl Millet')) return t('score.cropBajra', locale);
+  if (crop === 'Oats') return t('score.cropOats', locale);
+  return crop;
+}
+
+/**
+ * Localizes overall Tier classification grades.
+ */
+export function getTierClassificationText(grade: string, locale: Locale | string): string {
+  if (grade.includes('Tier A')) return t('score.tierASafe', locale);
+  if (grade.includes('Tier B')) return t('score.tierBFair', locale);
+  if (grade.includes('Tier C')) return t('score.tierCDanger', locale);
+  return grade;
+}
+
+/**
+ * Localizes sand & silica risk messages.
+ */
+export function getSandRiskText(risk: string | undefined, locale: Locale | string): string {
+  if (!risk) return '';
+  if (risk.includes('Critical')) return t('score.riskSandCritical', locale);
+  if (risk.includes('Within') || risk.includes('Safe')) return t('score.riskSandLow', locale);
+  return risk;
+}
+
+/**
+ * Localizes aflatoxin / mycotoxin risk messages.
+ */
+export function getAflatoxinRiskText(risk: string | undefined, locale: Locale | string): string {
+  if (!risk) return '';
+  if (risk.includes('Hazardous')) return t('score.riskAflatoxinHazardous', locale);
+  if (risk.includes('Moderate')) return t('score.riskAflatoxinModerate', locale);
+  if (risk.includes('Safe')) return t('score.riskAflatoxinSafe', locale);
+  return risk;
+}
+

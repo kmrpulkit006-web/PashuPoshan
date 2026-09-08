@@ -1,7 +1,7 @@
 import React from 'react';
 import { QualityGauge } from '../QualityGauge';
 import { FeedSample, Locale } from '../../lib/types';
-import { t } from '../../lib/i18n';
+import { t, getFliegGradeText, getSilageAcidText } from '../../lib/i18n';
 
 interface NutritionalMetricsGridProps {
   sample: FeedSample;
@@ -30,7 +30,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
                   : 'bg-red-50 text-[#B3261E] border border-red-300 dark:bg-rose-950 dark:text-rose-300'
               }`}
             >
-              {sample.silageMetrics.fliegGrade} ({sample.silageMetrics.fliegScore}/100)
+              {getFliegGradeText(sample.silageMetrics.fliegGrade, locale)} ({sample.silageMetrics.fliegScore}/100)
             </span>
           </div>
 
@@ -51,7 +51,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
                 {t('score.silageAcidType', locale)}
               </div>
               <div className="text-xs font-bold text-[#1A1A1A] dark:text-slate-200 truncate mt-0.5">
-                {sample.silageMetrics.primaryAcid}
+                {getSilageAcidText(sample.silageMetrics.primaryAcid, locale)}
               </div>
             </div>
           </div>
@@ -79,7 +79,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
             min={0}
             max={100}
             safeMax={sample.category === 'silage' ? 70.0 : 11.0}
-            bisBenchmark={sample.category === 'silage' ? 'Max 68-70%' : 'BIS IS:2052 Max 11.0%'}
+            bisBenchmark={sample.category === 'silage' ? t('score.benchmarkMaxMoistureSilage', locale) : t('score.benchmarkMaxMoisturePellet', locale)}
             locale={locale}
           />
         )}
@@ -93,7 +93,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
             min={3.0}
             max={7.0}
             isSilagePh={true}
-            bisBenchmark="Optimum 3.8 - 4.2"
+            bisBenchmark={t('score.benchmarkOptimumPh', locale)}
             locale={locale}
           />
         )}
@@ -107,7 +107,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
               min={0}
               max={30}
               safeMin={sample.category === 'silage' ? 8.0 : 20.0}
-              bisBenchmark={sample.category === 'silage' ? 'Min 8.0%' : 'BIS IS:2052 Min 20.0%'}
+              bisBenchmark={sample.category === 'silage' ? t('score.benchmarkMinProteinSilage', locale) : t('score.benchmarkMinProteinPellet', locale)}
               locale={locale}
             />
 
@@ -118,7 +118,7 @@ export const NutritionalMetricsGrid: React.FC<NutritionalMetricsGridProps> = ({
                 min={0}
                 max={10}
                 safeMax={sample.category === 'silage' ? 2.5 : 3.5}
-                bisBenchmark="Max 2.5% - 3.5%"
+                bisBenchmark={t('score.benchmarkMaxSand', locale)}
                 locale={locale}
               />
             )}

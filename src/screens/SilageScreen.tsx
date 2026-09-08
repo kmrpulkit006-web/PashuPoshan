@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Locale, SilageBunker, SilagePitLog } from '../lib/types';
-import { t } from '../lib/i18n';
+import { t, getSilagePitDisplayName, getSilageStatusText, getCompactionRatingText, getCropDisplayName } from '../lib/i18n';
 import { getLocalPits, saveLocalPit, addPitLogEntry } from '../lib/storage';
 import { Layers, Thermometer, CheckCircle2, AlertTriangle, Plus, X, Sparkles } from 'lucide-react';
 
@@ -104,28 +104,28 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
   return (
     <div className="p-4 space-y-4 pb-28 print:hidden text-[#1A1A1A] dark:text-white">
       {/* Title */}
-      <div className="bg-[#F3EEE1] dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-4 shadow-sm flex items-center justify-between">
-        <div>
+      <div className="bg-[#F3EEE1] dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center space-x-2 mb-1">
-            <div className="w-9 h-9 rounded-2xl bg-[#C2703D]/15 text-[#C2703D] dark:text-amber-400 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-2xl bg-[#C2703D]/15 text-[#C2703D] dark:text-amber-400 flex items-center justify-center shrink-0">
               <Layers className="w-5 h-5" />
             </div>
-            <h2 className="text-base font-black text-[#1A1A1A] dark:text-white">
+            <h2 className="text-base font-black text-[#1A1A1A] dark:text-white leading-tight">
               {t('silage.title', locale)}
             </h2>
           </div>
-          <p className="text-xs text-[#5A5243] dark:text-slate-300 font-semibold">
+          <p className="text-xs text-[#5A5243] dark:text-slate-300 font-semibold leading-relaxed">
             {t('silage.subtitle', locale)}
           </p>
         </div>
 
         <button
           onClick={() => setShowAddPitModal(true)}
-          className="px-4 py-3 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs sm:text-sm rounded-2xl shadow-lg active:scale-98 transition-all flex items-center space-x-2 shrink-0 min-h-[56px]"
+          className="px-4 py-3 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-xs sm:text-sm rounded-2xl shadow-lg active:scale-98 transition-all flex items-center justify-center space-x-2 shrink-0 min-h-[50px] whitespace-nowrap"
           aria-label={t('silage.addPit', locale)}
         >
-          <Plus className="w-5 h-5" />
-          <span>{t('silage.addPit', locale)}</span>
+          <Plus className="w-4 h-4 shrink-0" />
+          <span>{t('silage.addPit', locale).replace(/^\+\s*/, '')}</span>
         </button>
       </div>
 
@@ -181,14 +181,14 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-[#1A1A1A] dark:text-white leading-tight">
-                    {pit.pitName}
+                    {getSilagePitDisplayName(pit.pitName, locale)}
                   </h3>
-                  <div className="flex items-center space-x-2 mt-1">
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
                     <span className="text-[11px] font-bold text-[#5A5243] dark:text-slate-300 bg-[#F3EEE1] dark:bg-slate-700/80 px-2.5 py-0.5 rounded-lg border border-[#DCD3BF] dark:border-slate-600">
-                      {t('silage.crop', locale)}: {pit.cropType}
+                      {t('silage.crop', locale)} {getCropDisplayName(pit.cropType, locale)}
                     </span>
                     <span className="text-[11px] text-[#5A5243] dark:text-slate-400 font-medium">
-                      {t('silage.ensiled', locale)}: {pit.ensilingDate}
+                      {t('silage.ensiled', locale)} {pit.ensilingDate}
                     </span>
                   </div>
                 </div>
@@ -198,10 +198,10 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                     setShowLogModal(pit.id);
                     setLogTemp(pit.coreTemperature);
                   }}
-                  className="px-3.5 py-2.5 bg-[#F3EEE1] hover:bg-[#EAE3D2] dark:bg-slate-700 hover:dark:bg-slate-600 text-[#1A1A1A] dark:text-white text-xs font-black rounded-xl border-2 border-[#DCD3BF] dark:border-slate-600 min-h-[48px] flex items-center space-x-1.5 shrink-0 shadow-xs active:scale-95 transition-all"
+                  className="px-3 py-2 bg-[#F3EEE1] hover:bg-[#EAE3D2] dark:bg-slate-700 hover:dark:bg-slate-600 text-[#1A1A1A] dark:text-white text-xs font-black rounded-xl border-2 border-[#DCD3BF] dark:border-slate-600 min-h-[44px] flex items-center space-x-1.5 shrink-0 shadow-xs active:scale-95 transition-all whitespace-nowrap"
                   title="Log new temperature and inspection observation"
                 >
-                  <Thermometer className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400" />
+                  <Thermometer className="w-4 h-4 text-[#1F5D3B] dark:text-emerald-400 shrink-0" />
                   <span>{t('silage.logReadingBtn', locale)}</span>
                 </button>
               </div>
@@ -219,7 +219,7 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                       {statusConfig.badge}
                     </span>
                     <span className="text-[10px] font-bold opacity-75 capitalize">
-                      {pit.status}
+                      {getSilageStatusText(pit.status, locale)}
                     </span>
                   </div>
                   <p className="text-xs font-bold leading-snug mt-1 opacity-95">
@@ -231,25 +231,25 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
               {/* 2. SECONDARY TECHNICAL METRICS (SUBORDINATE TO THE PLAIN-LANGUAGE STRIP) */}
               <div className="grid grid-cols-3 gap-2 text-center pt-0.5">
                 {/* Days Fermenting */}
-                <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-2.5 border border-[#DCD3BF] dark:border-slate-700">
-                  <div className="text-[10px] font-bold text-[#5A5243] dark:text-slate-400">
+                <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-2 sm:p-2.5 border border-[#DCD3BF] dark:border-slate-700 overflow-hidden">
+                  <div className="text-[10px] font-bold text-[#5A5243] dark:text-slate-400 truncate">
                     {t('silage.daysEnsiled', locale)}
                   </div>
-                  <div className="text-lg sm:text-xl font-black text-[#1A1A1A] dark:text-white mt-0.5">
-                    {pit.daysFermented} {t('common.days', locale) || 'Days'}
+                  <div className="text-base sm:text-lg font-black text-[#1A1A1A] dark:text-white mt-0.5 truncate">
+                    {pit.daysFermented} {t('common.days', locale) === 'common.days' ? (locale === 'hi' ? 'दिन' : 'Days') : t('common.days', locale)}
                   </div>
-                  <div className="text-[9px] text-[#1F5D3B] dark:text-emerald-400 font-bold mt-0.5">
-                    {t('silage.status.fermenting', locale)}
+                  <div className="text-[9px] text-[#1F5D3B] dark:text-emerald-400 font-bold mt-0.5 truncate">
+                    {pit.daysFermented >= 45 ? t('silage.status.ready', locale) : t('silage.status.fermenting', locale)}
                   </div>
                 </div>
 
                 {/* Core Temperature */}
-                <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-2.5 border border-[#DCD3BF] dark:border-slate-700">
-                  <div className="text-[10px] font-bold text-[#5A5243] dark:text-slate-400">
+                <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-2 sm:p-2.5 border border-[#DCD3BF] dark:border-slate-700 overflow-hidden">
+                  <div className="text-[10px] font-bold text-[#5A5243] dark:text-slate-400 truncate">
                     {t('silage.coreTemp', locale)}
                   </div>
                   <div
-                    className={`text-lg sm:text-xl font-black mt-0.5 ${
+                    className={`text-base sm:text-lg font-black mt-0.5 truncate ${
                       pit.coreTemperature > 40
                         ? 'text-[#B3261E] dark:text-rose-400'
                         : pit.coreTemperature >= 37
@@ -259,25 +259,21 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   >
                     {pit.coreTemperature}°C
                   </div>
-                  <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-bold mt-0.5">
+                  <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-bold mt-0.5 truncate">
                     {t('silage.targetTemp', locale)}
                   </div>
                 </div>
 
                 {/* Compaction Rating */}
-                <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-2.5 border border-[#DCD3BF] dark:border-slate-700">
-                  <div className="text-[10px] font-bold text-[#5A5243] dark:text-slate-400">
+                <div className="bg-[#F3EEE1] dark:bg-slate-900/80 rounded-2xl p-2 sm:p-2.5 border border-[#DCD3BF] dark:border-slate-700 overflow-hidden">
+                  <div className="text-[10px] font-bold text-[#5A5243] dark:text-slate-400 truncate">
                     {t('silage.compaction', locale)}
                   </div>
                   <div className="text-xs sm:text-sm font-black text-[#1A1A1A] dark:text-slate-200 truncate mt-1">
-                    {pit.compactionRating === 'Optimum (>650 kg/m3)'
-                      ? 'Tight Seal'
-                      : pit.compactionRating === 'Moderate'
-                      ? 'Moderate'
-                      : 'Air Leaks'}
+                    {getCompactionRatingText(pit.compactionRating, locale)}
                   </div>
                   <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-bold mt-0.5 truncate">
-                    {pit.compactionRating.split(' ')[0]}
+                    {pit.compactionRating.includes('Optimum') ? (locale === 'hi' ? 'उत्तम कसाव' : 'Optimum') : pit.compactionRating.split(' ')[0]}
                   </div>
                 </div>
               </div>
@@ -307,13 +303,17 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
                   {pit.logs.slice(0, 2).map((lg) => (
                     <div
                       key={lg.id}
-                      className="flex items-center justify-between text-[#1A1A1A] dark:text-slate-300 font-medium text-[11px] bg-[#FBF8F1] dark:bg-slate-900/50 p-2 rounded-xl border border-[#DCD3BF]/60 dark:border-slate-700"
+                      className="flex items-center justify-between text-[#1A1A1A] dark:text-slate-300 font-medium text-[11px] bg-[#FBF8F1] dark:bg-slate-900/50 p-2 rounded-xl border border-[#DCD3BF]/60 dark:border-slate-700 gap-2"
                     >
-                      <span>
-                        • {lg.date}: <strong>{lg.temperatureC}°C</strong> ({lg.compactionRating.split(' ')[0]})
+                      <span className="truncate">
+                        • {lg.date}: <strong>{lg.temperatureC}°C</strong> ({getCompactionRatingText(lg.compactionRating, locale)})
                       </span>
-                      <span className="text-[#5A5243] dark:text-slate-400 italic truncate max-w-[120px]">
-                        {lg.notes}
+                      <span className="text-[#5A5243] dark:text-slate-400 italic truncate max-w-[140px] text-right">
+                        {lg.notes === 'Golden color, pleasant lactic smell'
+                          ? (locale === 'hi' ? 'सुनहरा रंग, अच्छी खुशबू' : lg.notes)
+                          : lg.notes === 'Air leak observed, surface mold forming'
+                          ? (locale === 'hi' ? 'हवा का रिसाव, सतह पर फफूंद' : lg.notes)
+                          : lg.notes}
                       </span>
                     </div>
                   ))}
