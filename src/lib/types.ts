@@ -131,6 +131,29 @@ export interface RegulatoryCitation {
   prescribedLimits: string;      // e.g. "Min 20.0% CP, Max 11.0% Moisture, Max 3.5% AIA"
 }
 
+export interface NirSpectralChannel {
+  wavelengthNm: number;
+  reflectance: number; // 0.0 to 1.0
+  absorbance: number;  // -log10(reflectance)
+  bandName?: string;   // e.g. "O-H Moisture", "N-H Protein", "C-H Fat"
+}
+
+export interface NirSpectralTelemetry {
+  sensorModel: string;           // "AMS AS7265x Triad (18-Channel Optical Spectrometer)"
+  connectionType: 'BLE 5.0' | 'Web Bluetooth API (Live Stream)';
+  deviceId: string;              // "PashuPoshan-NIR-ESP32-B4F2"
+  batteryPct: number;            // 92%
+  integrationTimeMs: number;     // 100ms
+  gain: string;                  // "16x"
+  channels: NirSpectralChannel[];
+  chemometricModel: {
+    name: string;                // "1D-CNN Chemometric Regressor (In-House)"
+    latencyMs: number;           // 8.4ms
+    trainingDataSource: string;  // "Zenodo Open Agro-NIR & Kaggle FOSS Feed Benchmarks (15,240 spectra)"
+    framework: string;           // "ONNX / TensorFlow.js WebGL (100% Offline, Zero Cloud API)"
+  };
+}
+
 export interface FeedSample {
   id: string;
   name: string;
@@ -164,6 +187,7 @@ export interface FeedSample {
   correctiveActions: string[];
   offlineMoldHeuristic?: OfflineMoldHeuristicResult;
   linkedCowId?: string;
+  nirTelemetry?: NirSpectralTelemetry;
 }
 
 export interface CowYieldLogEntry {

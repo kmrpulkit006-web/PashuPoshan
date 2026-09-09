@@ -8,6 +8,7 @@ import { HeuristicDisclaimerBanner } from '../components/scorecard/HeuristicDisc
 import { CertificateBanner } from '../components/scorecard/CertificateBanner';
 import { AdulterationAlertBox } from '../components/scorecard/AdulterationAlertBox';
 import { NutritionalMetricsGrid } from '../components/scorecard/NutritionalMetricsGrid';
+import { NirTelemetryCard } from '../components/scorecard/NirTelemetryCard';
 import { NearestLabModal } from '../components/NearestLabModal';
 import {
   Share2,
@@ -160,6 +161,11 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
       <div className="p-4 space-y-4 pb-28 print:hidden">
         {/* 1. Full-Width Colored Verdict Band (Plain Language First) */}
         <VerdictBand sample={sample} locale={locale} />
+
+        {/* Multi-Spectral IoT Hardware Telemetry (When scanned via IoT NIR device) */}
+        {sample.nirTelemetry && (
+          <NirTelemetryCard telemetry={sample.nirTelemetry} locale={locale} />
+        )}
 
         {/* Action button if image was rejected as non-feed */}
         {sample.isNonFeedSample && (
