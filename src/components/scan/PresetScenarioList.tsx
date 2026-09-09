@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FeedSample, Locale } from '../../lib/types';
-import { PRESET_FEED_SCENARIOS } from '../../lib/feedAnalysisEngine';
+import { PRESET_FEED_SCENARIOS, SIH_BENCHMARK_SCENARIOS } from '../../lib/feedAnalysisEngine';
 import { t } from '../../lib/i18n';
-import { Zap } from 'lucide-react';
+import { Zap, Award } from 'lucide-react';
 
 interface PresetScenarioListProps {
   onSelectPreset: (scenario: FeedSample) => void;
@@ -13,6 +13,9 @@ export const PresetScenarioList: React.FC<PresetScenarioListProps> = ({
   onSelectPreset,
   locale,
 }) => {
+  const [activeTab, setActiveTab] = useState<'sih' | 'field'>('sih');
+  const scenarios = activeTab === 'sih' ? SIH_BENCHMARK_SCENARIOS : PRESET_FEED_SCENARIOS;
+
   return (
     <div className="bg-[#F3EEE1] dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-3xl p-4 shadow-sm space-y-3 text-[#1A1A1A] dark:text-white">
       <div className="flex items-center justify-between">
@@ -24,16 +27,46 @@ export const PresetScenarioList: React.FC<PresetScenarioListProps> = ({
             {t('scan.evaluatorDemo', locale)}
           </h3>
         </div>
-        <span className="text-[10px] text-[#C2703D] dark:text-amber-300 font-black bg-[#fdf8f4] dark:bg-amber-950 px-2.5 py-0.5 rounded-full border border-[#f3d6c4] dark:border-amber-500/40">
-          Field Lab Controls
+        <span className="text-[10px] text-[#C2703D] dark:text-amber-300 font-black bg-[#fdf8f4] dark:bg-amber-950 px-2.5 py-0.5 rounded-full border border-[#f3d6c4] dark:border-amber-500/40 flex items-center space-x-1">
+          <Award className="w-3 h-3 inline" />
+          <span>SIH PS-3 Benchmarks</span>
         </span>
       </div>
+
+      {/* Tab Switcher: Official SIH Dummy Dataset vs Field Scenarios */}
+      <div className="grid grid-cols-2 gap-1.5 p-1 bg-white/80 dark:bg-slate-900/80 rounded-2xl border border-[#DCD3BF] dark:border-slate-700 text-xs font-black">
+        <button
+          type="button"
+          onClick={() => setActiveTab('sih')}
+          className={`py-2 px-2.5 rounded-xl transition-all flex items-center justify-center space-x-1 ${
+            activeTab === 'sih'
+              ? 'bg-[#1F5D3B] text-white shadow-sm'
+              : 'text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white'
+          }`}
+        >
+          <span>🎯 Official F001-F005</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('field')}
+          className={`py-2 px-2.5 rounded-xl transition-all flex items-center justify-center space-x-1 ${
+            activeTab === 'field'
+              ? 'bg-[#1F5D3B] text-white shadow-sm'
+              : 'text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white'
+          }`}
+        >
+          <span>🌾 Field Scenarios</span>
+        </button>
+      </div>
+
       <p className="text-xs text-[#5A5243] dark:text-slate-300 font-semibold leading-relaxed">
-        {t('scan.evaluatorTip', locale)}
+        {activeTab === 'sih' 
+          ? 'Exact 1-to-1 dummy dataset from SIH Problem Statement 3 (Page 2): F001 through F005.'
+          : t('scan.evaluatorTip', locale)}
       </p>
 
       <div className="grid grid-cols-1 gap-2.5">
-        {PRESET_FEED_SCENARIOS.map((scenario) => {
+        {scenarios.map((scenario) => {
           const isTierA = scenario.overallGrade.includes('Tier A');
           const isTierC = scenario.overallGrade.includes('Tier C');
           return (

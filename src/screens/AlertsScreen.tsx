@@ -307,10 +307,10 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale, isOnline }) 
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-field-text dark:text-white">
+              <h2 className="text-lg font-bold text-field-text dark:text-white">
                 {t('alert.title', locale)}
               </h2>
-              <p className="text-xs text-field-text/70 dark:text-slate-300 mt-0.5">
+              <p className="text-sm text-field-text/80 dark:text-slate-300 mt-0.5">
                 {t('alert.subtitle', locale)}
               </p>
             </div>
@@ -429,7 +429,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ locale, isOnline }) 
               </div>
 
               {/* Farmer-Friendly Advisory Explanation */}
-              <p className="text-xs sm:text-sm text-[#1A1A1A] dark:text-slate-200 font-medium leading-relaxed pl-0.5">
+              <p className="text-sm text-[#1A1A1A] dark:text-slate-200 font-medium leading-relaxed pl-0.5">
                 {alert.description}
               </p>
 

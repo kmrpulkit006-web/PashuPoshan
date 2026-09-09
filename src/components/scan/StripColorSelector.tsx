@@ -33,14 +33,14 @@ export const StripColorSelector: React.FC<StripColorSelectorProps> = ({
           role="radio"
           aria-checked={stripColor === 'yellow'}
           onClick={() => setStripColor('yellow')}
-          className={`p-2.5 rounded-2xl border-2 text-center transition-all min-h-[56px] flex flex-col items-center justify-center ${
+          className={`p-3 rounded-2xl border-2 text-center transition-all min-h-[72px] flex flex-col items-center justify-center ${
             stripColor === 'yellow'
               ? 'bg-amber-100 dark:bg-amber-950 border-[#C2703D] dark:border-amber-400 text-[#1A1A1A] dark:text-amber-100 shadow-md font-black'
               : 'bg-white dark:bg-slate-900 border-[#DCD3BF] dark:border-slate-700 text-[#5A5243] dark:text-slate-300'
           }`}
         >
-          <div className="w-full h-3 rounded-full bg-amber-400 mb-1.5 shadow-inner" />
-          <div className="text-[11px] font-bold leading-tight">
+          <div className="w-full h-5 rounded-full bg-amber-400 mb-1.5 shadow-inner" />
+          <div className="text-xs font-extrabold leading-tight">
             {t('scan.strip.urea', locale)}
           </div>
           <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-medium">
@@ -53,14 +53,14 @@ export const StripColorSelector: React.FC<StripColorSelectorProps> = ({
           role="radio"
           aria-checked={stripColor === 'magenta'}
           onClick={() => setStripColor('magenta')}
-          className={`p-2.5 rounded-2xl border-2 text-center transition-all min-h-[56px] flex flex-col items-center justify-center ${
+          className={`p-3 rounded-2xl border-2 text-center transition-all min-h-[72px] flex flex-col items-center justify-center ${
             stripColor === 'magenta'
               ? 'bg-rose-100 dark:bg-rose-950 border-[#B3261E] dark:border-rose-400 text-[#B3261E] dark:text-rose-100 shadow-md font-black'
               : 'bg-white dark:bg-slate-900 border-[#DCD3BF] dark:border-slate-700 text-[#5A5243] dark:text-slate-300'
           }`}
         >
-          <div className="w-full h-3 rounded-full bg-pink-600 mb-1.5 shadow-inner" />
-          <div className="text-[11px] font-bold leading-tight">
+          <div className="w-full h-5 rounded-full bg-pink-600 mb-1.5 shadow-inner" />
+          <div className="text-xs font-extrabold leading-tight">
             {t('score.adulterationTitle', locale)}
           </div>
           <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-medium">
@@ -73,14 +73,14 @@ export const StripColorSelector: React.FC<StripColorSelectorProps> = ({
           role="radio"
           aria-checked={stripColor === 'green'}
           onClick={() => setStripColor('green')}
-          className={`p-2.5 rounded-2xl border-2 text-center transition-all min-h-[56px] flex flex-col items-center justify-center ${
+          className={`p-3 rounded-2xl border-2 text-center transition-all min-h-[72px] flex flex-col items-center justify-center ${
             stripColor === 'green'
               ? 'bg-teal-100 dark:bg-teal-950 border-teal-600 dark:border-teal-400 text-teal-900 dark:text-teal-100 shadow-md font-black'
               : 'bg-white dark:bg-slate-900 border-[#DCD3BF] dark:border-slate-700 text-[#5A5243] dark:text-slate-300'
           }`}
         >
-          <div className="w-full h-3 rounded-full bg-teal-500 mb-1.5 shadow-inner" />
-          <div className="text-[11px] font-bold leading-tight">
+          <div className="w-full h-5 rounded-full bg-teal-500 mb-1.5 shadow-inner" />
+          <div className="text-xs font-extrabold leading-tight">
             {t('scan.strip.ph', locale)}
           </div>
           <div className="text-[9px] text-[#5A5243] dark:text-slate-400 font-medium">

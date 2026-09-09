@@ -207,7 +207,7 @@ export const App: React.FC = () => {
               style={{
                 backgroundColor: isDark ? '#0f172a' : '#FBF8F1',
                 color: isDark ? '#ffffff' : '#1A1A1A',
-                paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
+                paddingBottom: 'calc(104px + env(safe-area-inset-bottom))',
                 touchAction: 'pan-y',
               }}
             >

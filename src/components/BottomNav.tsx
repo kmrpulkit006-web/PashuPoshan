@@ -52,36 +52,36 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     {
       id: 'scan',
       labelKey: 'nav.scan',
-      icon: <ScanLine className="w-5 h-5" aria-hidden="true" />,
+      icon: <ScanLine className="w-6 h-6" strokeWidth={2.4} aria-hidden="true" />,
       badge: pendingScansCount > 0 ? `${pendingScansCount}` : undefined,
     },
     {
       id: 'history',
       labelKey: 'nav.history',
-      icon: <History className="w-5 h-5" aria-hidden="true" />,
+      icon: <History className="w-6 h-6" strokeWidth={2.4} aria-hidden="true" />,
     },
     {
       id: 'scorecard',
       labelKey: 'nav.scorecard',
-      icon: <Award className="w-5 h-5" aria-hidden="true" />,
+      icon: <Award className="w-6 h-6" strokeWidth={2.4} aria-hidden="true" />,
       badge: activeGrade
-        ? (activeGrade.includes('Tier A') ? 'Tier A' : 'Alert')
+        ? (activeGrade.includes('Tier A') ? 'A' : '!')
         : (hasScanResult ? '✓' : undefined),
     },
     {
       id: 'ration',
       labelKey: 'nav.ration',
-      icon: <Scale className="w-5 h-5" aria-hidden="true" />,
+      icon: <Scale className="w-6 h-6" strokeWidth={2.4} aria-hidden="true" />,
     },
     {
       id: 'silage',
       labelKey: 'nav.silage',
-      icon: <Layers className="w-5 h-5" aria-hidden="true" />,
+      icon: <Layers className="w-6 h-6" strokeWidth={2.4} aria-hidden="true" />,
     },
     {
       id: 'alerts',
       labelKey: 'nav.alerts',
-      icon: <AlertTriangle className="w-5 h-5" aria-hidden="true" />,
+      icon: <AlertTriangle className="w-6 h-6" strokeWidth={2.4} aria-hidden="true" />,
       badge: effectiveAlerts > 0 ? `${effectiveAlerts}` : undefined,
     },
   ];
@@ -89,16 +89,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 backdrop-blur-md border-t px-1.5 py-2 shadow-2xl transition-colors select-none"
+      className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 border-t px-1 pt-1.5 shadow-[0_-8px_24px_rgba(26,26,26,0.12)] transition-colors select-none"
       style={{
-        backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(243, 238, 225, 0.95)',
+        backgroundColor: isDark ? '#0f172a' : '#F3EEE1',
         borderColor: isDark ? '#1e293b' : '#DCD3BF',
-        paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
+        paddingBottom: 'max(0.4rem, env(safe-area-inset-bottom))',
       }}
     >
-      <div className="grid grid-cols-6 gap-1" role="tablist">
+      <div className="grid grid-cols-6 gap-0.5" role="tablist">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
+          const isPrimary = tab.id === 'scan';
           return (
             <button
               key={tab.id}
@@ -108,21 +109,33 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               aria-label={t(tab.labelKey, locale)}
               aria-selected={isActive}
               aria-current={isActive ? 'page' : undefined}
-              className="relative flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl transition-all min-h-[56px] border"
+              className="relative flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all min-h-[68px] border"
               style={{
-                backgroundColor: isActive ? (isDark ? '#022c22' : '#edf7f0') : 'transparent',
-                borderColor: isActive ? (isDark ? '#34d399' : '#b0dec0') : 'transparent',
-                color: isActive ? (isDark ? '#34d399' : '#1F5D3B') : (isDark ? '#94a3b8' : '#5A5243'),
+                backgroundColor: isActive
+                  ? '#1F5D3B'
+                  : isPrimary
+                  ? (isDark ? '#022c22' : '#edf7f0')
+                  : 'transparent',
+                borderColor: isActive
+                  ? '#194a30'
+                  : isPrimary
+                  ? (isDark ? '#34d399' : '#1F5D3B')
+                  : 'transparent',
+                color: isActive
+                  ? '#ffffff'
+                  : isPrimary
+                  ? (isDark ? '#6ee7b7' : '#1F5D3B')
+                  : (isDark ? '#cbd5e1' : '#3f3a32'),
               }}
             >
               <div className="relative">
                 {tab.icon}
                 {tab.badge && (
                   <span
-                    className={`absolute -top-1.5 -right-2 text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-full text-white shadow ${
-                      tab.badge === 'Tier A'
-                        ? 'bg-[#1F5D3B]'
-                        : tab.badge === 'Alert'
+                    className={`absolute -top-1.5 -right-2 min-w-[16px] text-[10px] font-black px-1 py-0.5 rounded-full text-white shadow ${
+                      tab.badge === 'A'
+                        ? 'bg-emerald-700'
+                        : tab.badge === '!'
                         ? 'bg-[#B3261E] animate-pulse'
                         : 'bg-[#C2703D]'
                     }`}
@@ -131,7 +144,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                   </span>
                 )}
               </div>
-              <span className="text-[11px] mt-1 tracking-tight font-bold leading-tight text-center w-full truncate px-0.5">
+              <span className="text-[10px] mt-0.5 font-extrabold leading-tight text-center w-full px-0.5 line-clamp-2">
                 {t(tab.labelKey, locale)}
               </span>
             </button>

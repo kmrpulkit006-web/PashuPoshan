@@ -215,6 +215,241 @@ export const PRESET_FEED_SCENARIOS: FeedSample[] = [
   }
 ];
 
+/**
+ * Official SIH Problem Statement 3 Dummy Benchmark Dataset (F001 - F005)
+ * Matches page 2 of the problem specification exactly.
+ */
+export const SIH_BENCHMARK_SCENARIOS: FeedSample[] = [
+  {
+    id: 'sih_sample_f001',
+    name: 'F001: Cattle Feed Pellet (Standard)',
+    category: 'concentrate',
+    batchNumber: 'F001',
+    sourceOrBrand: 'SIH Benchmark Dataset - Standard Commercial Pellet',
+    timestamp: '2026-09-02 10:00 AM',
+    imageUrl: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=600&auto=format&fit=crop&q=80',
+    testedMethod: 'SIH Evaluator Simulation Preset',
+    isSimulated: true,
+    confidenceScore: 96,
+    metrics: {
+      crudeProtein: 21.0, // Protein (%) 21
+      moisture: 10.0,     // Moisture (%) 10
+      dryMatter: 90.0,
+      crudeFiber: 14.0,   // Fiber (%) 14
+      acidInsolubleAsh: 2.2,
+      totalDigestibleNutrients: 72.0,
+    },
+    adulteration: {
+      ureaAdulterationDetected: false,
+      ureaPercentage: 0.05,
+      aflatoxinRisk: 'Safe (<10 ppb)', // Aflatoxin 5 ppb
+      sandSilicaRisk: 'Within BIS Limits',
+      foreignStarchOrTallow: false,
+    },
+    overallGrade: 'Tier A: Premium',
+    bisCompliant: true,
+    regulatoryCitation: {
+      standardCode: 'BIS IS:2052:2009 Type II Cattle Feed',
+      authority: 'Bureau of Indian Standards',
+      clause: 'Table 1: Compounded Feeds for Cattle - Specification',
+      prescribedLimits: 'Min 20.0% CP, Max 11.0% Moisture, Max 12.0% Fiber, Aflatoxin < 20 ppb',
+    },
+    disclaimer: LEGAL_DISCLAIMER,
+    veterinaryAdvisory: 'Optimal quality commercial cattle feed pellet. Well within all statutory BIS IS:2052 and FSSAI safe limits.',
+    correctiveActions: [
+      'Suitable for direct feeding to high-yielding lactating dairy cows.',
+      'Maintain dry, elevated pallet storage away from moisture to prevent aflatoxin contamination.',
+      'Feed alongside clean green fodder and ad-libitum fresh drinking water.'
+    ],
+  },
+  {
+    id: 'sih_sample_f002',
+    name: 'F002: Silage (Trace Mould Presence)',
+    category: 'silage',
+    batchNumber: 'F002',
+    sourceOrBrand: 'SIH Benchmark Dataset - Bunker Silage Pit',
+    timestamp: '2026-09-02 10:15 AM',
+    imageUrl: 'https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?w=600&auto=format&fit=crop&q=80',
+    testedMethod: 'SIH Evaluator Simulation Preset',
+    isSimulated: true,
+    confidenceScore: 91,
+    metrics: {
+      crudeProtein: 9.0,   // Protein (%) 9
+      moisture: 68.0,      // Moisture (%) 68
+      dryMatter: 32.0,
+      crudeFiber: 24.0,    // Fiber (%) 24
+      acidInsolubleAsh: 1.8,
+      totalDigestibleNutrients: 64.0,
+    },
+    silageMetrics: {
+      pH: 4.1,             // pH 4.1 (Well fermented)
+      fliegScore: 78,
+      fliegGrade: 'Good',
+      primaryAcid: 'Lactic Acid (Well Preserved)',
+      ammoniaNitrogenPct: 7.2,
+      aerobicStabilityHours: 36,
+      moldContaminationPct: 3.5, // Mould Presence
+      temperatureC: 33.0,
+    },
+    adulteration: {
+      ureaAdulterationDetected: false,
+      ureaPercentage: 0.06,
+      aflatoxinRisk: 'Moderate (10-20 ppb)', // Aflatoxin 12 ppb
+      sandSilicaRisk: 'Within BIS Limits',
+      foreignStarchOrTallow: false,
+    },
+    overallGrade: 'Tier B: Sub-Standard', // Quality Status: Moderate
+    bisCompliant: true,
+    regulatoryCitation: {
+      standardCode: 'ICAR / NDDB Silage Quality Benchmark',
+      authority: 'National Dairy Development Board & ICAR-NDRI',
+      clause: 'Good Fermentation with Surface Aerobic Warning',
+      prescribedLimits: 'pH 3.8-4.2, Moisture 65-70%, Flieg Score > 70',
+    },
+    disclaimer: LEGAL_DISCLAIMER,
+    veterinaryAdvisory: 'Silage fermentation is satisfactory (pH 4.1), but trace surface mold and 12 ppb aflatoxin require skimming before feeding.',
+    correctiveActions: [
+      'Physically discard the top outer surface layer showing fungal colonies before feeding herd.',
+      'Feed exclusively to dry cows or heifers; restrict for early-lactation high-producers.',
+      'Re-tamp and seal exposed pit face with weighted poly-sheets to halt ongoing oxygen entry.'
+    ],
+  },
+  {
+    id: 'sih_sample_f003',
+    name: 'F003: Mineral Mixture (Excess Salt Spiked)',
+    category: 'concentrate',
+    batchNumber: 'F003',
+    sourceOrBrand: 'SIH Benchmark Dataset - Mineral Premix Bag',
+    timestamp: '2026-09-02 10:30 AM',
+    imageUrl: 'https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?w=600&auto=format&fit=crop&q=80',
+    testedMethod: 'SIH Evaluator Simulation Preset',
+    isSimulated: true,
+    confidenceScore: 94,
+    metrics: {
+      moisture: 3.0,       // Moisture (%) 3
+      dryMatter: 97.0,
+      acidInsolubleAsh: 4.8,
+      totalDigestibleNutrients: 0.0,
+    },
+    adulteration: {
+      ureaAdulterationDetected: false,
+      ureaPercentage: 0.0,
+      aflatoxinRisk: 'Safe (<10 ppb)', // Aflatoxin 0 ppb
+      sandSilicaRisk: 'Moderate Sand (<3.5%)',
+      foreignStarchOrTallow: true, // Excess common salt used as cheap filler
+    },
+    overallGrade: 'Tier C: Hazardous/Reject', // Quality Status: Poor
+    bisCompliant: false,
+    regulatoryCitation: {
+      standardCode: 'BIS IS:1664:2002 Mineral Mixtures for Supplementing Cattle Feeds',
+      authority: 'Bureau of Indian Standards',
+      clause: 'Clause 4: Purity and Salt (NaCl) Maximum Limitations',
+      prescribedLimits: 'Common Salt (NaCl) Type I: Max 0.0% (salt-free) / Type II: Max 25.0%; Tested: Heavy Salt Adulteration',
+    },
+    disclaimer: LEGAL_DISCLAIMER,
+    veterinaryAdvisory: 'POOR QUALITY / REJECT. Excess sodium chloride (salt) detected, diluting vital bio-available trace minerals (Copper, Zinc, Calcium, Phosphorus).',
+    correctiveActions: [
+      'DO NOT use as sole mineral supplement; high dietary salt induces mild dehydration and electrolyte imbalance in ruminants.',
+      'Reject commercial batch and request mineral assay certificate from manufacturer.',
+      'File batch alert in the Community Alerts tab to warn neighboring dairy cooperative farmers.'
+    ],
+  },
+  {
+    id: 'sih_sample_f004',
+    name: 'F004: Feed Mash (Sand Contamination & High Aflatoxin)',
+    category: 'concentrate',
+    batchNumber: 'F004',
+    sourceOrBrand: 'SIH Benchmark Dataset - Local Cattle Feed Mash',
+    timestamp: '2026-09-02 10:45 AM',
+    imageUrl: 'https://images.unsplash.com/photo-1589923188900-85dae523342b?w=600&auto=format&fit=crop&q=80',
+    testedMethod: 'SIH Evaluator Simulation Preset',
+    isSimulated: true,
+    confidenceScore: 97,
+    metrics: {
+      crudeProtein: 18.0, // Protein (%) 18 (Below 20.0% standard)
+      moisture: 12.0,     // Moisture (%) 12 (Above 11.0% standard)
+      dryMatter: 88.0,
+      crudeFiber: 16.0,   // Fiber (%) 16 (Above 12.0% standard)
+      acidInsolubleAsh: 7.2, // Critical Sand/Silica (>5%)
+      totalDigestibleNutrients: 54.0,
+    },
+    adulteration: {
+      ureaAdulterationDetected: false,
+      ureaPercentage: 0.12,
+      aflatoxinRisk: 'Hazardous (>20 ppb - FSSAI Breach)', // Aflatoxin 20 ppb
+      sandSilicaRisk: 'Critical Sand Contamination (>5%)', // Sand Contamination
+      foreignStarchOrTallow: false,
+    },
+    overallGrade: 'Tier C: Hazardous/Reject', // Quality Status: Unsafe
+    bisCompliant: false,
+    regulatoryCitation: {
+      standardCode: 'BIS IS:2052:2009 & FSSAI Contaminants Regulations 2011',
+      authority: 'Bureau of Indian Standards & FSSAI',
+      clause: 'Table 1: Sand/Silica Maximum 3.5% & Aflatoxin B1 Cap',
+      prescribedLimits: 'Max 3.5% Acid Insoluble Ash; Tested: 7.2% (Breach). Aflatoxin Cap: 20 ppb.',
+    },
+    disclaimer: LEGAL_DISCLAIMER,
+    veterinaryAdvisory: 'HAZARDOUS / UNSAFE. Heavy sand adulteration (7.2% AIA) causes abomasal impaction and tooth wear. Aflatoxin level (20 ppb) breaches safe lactating thresholds.',
+    correctiveActions: [
+      'DO NOT FEED TO CATTLE. Spiked silica damages digestive mucosal lining and causes acute colic.',
+      'Mycotoxin concentration will transfer into milk as carcinogenic Aflatoxin M1.',
+      'Report vendor to the district animal husbandry department immediately.'
+    ],
+  },
+  {
+    id: 'sih_sample_f005',
+    name: 'F005: Silage (Severe Aerobic Spoilage & Rot)',
+    category: 'silage',
+    batchNumber: 'F005',
+    sourceOrBrand: 'SIH Benchmark Dataset - Trench Silage (Damaged Pit)',
+    timestamp: '2026-09-02 11:00 AM',
+    imageUrl: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=600&auto=format&fit=crop&q=80',
+    testedMethod: 'SIH Evaluator Simulation Preset',
+    isSimulated: true,
+    confidenceScore: 93,
+    metrics: {
+      crudeProtein: 8.0,   // Protein (%) 8
+      moisture: 72.0,      // Moisture (%) 72 (Excess water)
+      dryMatter: 28.0,
+      crudeFiber: 28.0,    // Fiber (%) 28
+      acidInsolubleAsh: 3.4,
+      totalDigestibleNutrients: 49.0,
+    },
+    silageMetrics: {
+      pH: 5.8,             // pH 5.8 (Failed fermentation!)
+      fliegScore: 24,
+      fliegGrade: 'Poor',
+      primaryAcid: 'Butyric Acid (Spoiled/Rancid)',
+      ammoniaNitrogenPct: 19.2,
+      aerobicStabilityHours: 4,
+      moldContaminationPct: 18.0, // Spoilage Detected
+      temperatureC: 45.5,
+    },
+    adulteration: {
+      ureaAdulterationDetected: false,
+      ureaPercentage: 0.08,
+      aflatoxinRisk: 'Safe (<10 ppb)', // Aflatoxin 8 ppb
+      sandSilicaRisk: 'Within BIS Limits',
+      foreignStarchOrTallow: false,
+    },
+    overallGrade: 'Tier C: Hazardous/Reject', // Quality Status: Poor
+    bisCompliant: false,
+    regulatoryCitation: {
+      standardCode: 'ICAR / NDDB Silage Quality Benchmark',
+      authority: 'National Dairy Development Board & ICAR-NDRI',
+      clause: 'Clostridial Fermentation & Spoilage Standard',
+      prescribedLimits: 'Safe Silage pH <= 4.2; Sample tested: 5.8 (Severe Failure). Flieg Score < 30.',
+    },
+    disclaimer: LEGAL_DISCLAIMER,
+    veterinaryAdvisory: 'SPOILED SILAGE / POOR. Secondary clostridial fermentation detected with elevated pH 5.8, high butyric acid, and extensive fungal decay.',
+    correctiveActions: [
+      'DO NOT FEED TO HERD. Ingestion triggers severe bovine ketosis, herd milk refusal, and listeriosis risk.',
+      'Completely remove and bury the spoiled portion.',
+      'Check silo pit drainage, compaction density, and seal integrity before filling next crop.'
+    ],
+  },
+];
+
 // ============================================================================
 // COLOR SCIENCE & CALIBRATED COLORIMETRIC ENGINE (CIEDE2000)
 // ============================================================================

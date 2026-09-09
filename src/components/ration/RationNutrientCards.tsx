@@ -30,7 +30,7 @@ export const RationNutrientCards: React.FC<RationNutrientCardsProps> = ({ ration
               key={slot.slot}
               className="bg-white dark:bg-slate-900 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl p-3.5 shadow-sm space-y-1"
             >
-              <div className="text-[11px] font-bold text-[#5A5243] dark:text-slate-400 truncate">
+              <div className="text-sm font-bold text-[#5A5243] dark:text-slate-400 leading-snug">
                 {isGreen
                   ? t('ration.greenFodder', locale)
                   : isDry
@@ -46,7 +46,7 @@ export const RationNutrientCards: React.FC<RationNutrientCardsProps> = ({ ration
                     : 'text-teal-700 dark:text-teal-400'
                 }`}
               >
-                {slot.freshKg} <span className="text-xs font-bold">kg</span>
+                {slot.freshKg} <span className="text-sm font-bold">kg</span>
               </div>
               <div className="text-[11px] font-black text-[#1A1A1A] dark:text-slate-200 truncate">
                 {slot.feedName}
@@ -88,12 +88,12 @@ export const RationNutrientCards: React.FC<RationNutrientCardsProps> = ({ ration
             {rationPlan.balance.isBalanced ? (
               <>
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Optimal Balance ✓</span>
+                <span>{t('ration.balanceOk', locale)}</span>
               </>
             ) : (
               <>
                 <AlertCircle className="w-3.5 h-3.5" />
-                <span>Adjustment Needed</span>
+                <span>{t('ration.balanceNeed', locale)}</span>
               </>
             )}
           </span>

@@ -85,10 +85,10 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
             🐄
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-base sm:text-lg font-black text-[#1F5D3B] dark:text-emerald-300 leading-tight">
+            <h2 className="text-lg font-black text-[#1F5D3B] dark:text-emerald-300 leading-tight">
               {t('scan.heroTitle', locale)}
             </h2>
-            <p className="text-xs text-[#2c533c] dark:text-emerald-100 font-semibold mt-1 leading-relaxed">
+            <p className="text-sm text-[#2c533c] dark:text-emerald-100 font-semibold mt-1 leading-relaxed">
               {t('scan.heroSubtitle', locale)}
             </p>
           </div>
@@ -96,16 +96,16 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
 
         {/* 3 Simple Visual Steps (Understood in 5 seconds) */}
         <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-emerald-200/80 dark:border-emerald-800 text-center">
-          <div className="bg-white/80 dark:bg-slate-900/70 rounded-xl p-2 text-[11px] font-bold text-[#1F5D3B] dark:text-emerald-200 shadow-xs">
-            <span className="block text-sm">1️⃣</span>
+          <div className="bg-white/90 dark:bg-slate-900/70 rounded-xl p-2.5 text-xs font-extrabold text-[#1F5D3B] dark:text-emerald-200">
+            <span className="block text-lg">1️⃣</span>
             <span>{t('scan.step1', locale)}</span>
           </div>
-          <div className="bg-white/80 dark:bg-slate-900/70 rounded-xl p-2 text-[11px] font-bold text-[#1F5D3B] dark:text-emerald-200 shadow-xs">
-            <span className="block text-sm">2️⃣</span>
+          <div className="bg-white/90 dark:bg-slate-900/70 rounded-xl p-2.5 text-xs font-extrabold text-[#1F5D3B] dark:text-emerald-200">
+            <span className="block text-lg">2️⃣</span>
             <span>{t('scan.step2', locale)}</span>
           </div>
-          <div className="bg-white/80 dark:bg-slate-900/70 rounded-xl p-2 text-[11px] font-bold text-[#1F5D3B] dark:text-emerald-200 shadow-xs">
-            <span className="block text-sm">3️⃣</span>
+          <div className="bg-white/90 dark:bg-slate-900/70 rounded-xl p-2.5 text-xs font-extrabold text-[#1F5D3B] dark:text-emerald-200">
+            <span className="block text-lg">3️⃣</span>
             <span>{t('scan.step3', locale)}</span>
           </div>
         </div>
@@ -167,39 +167,40 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
             role="tab"
             aria-selected={scanMode === 'vision'}
             onClick={() => setScanMode('vision')}
-            className={`flex items-center justify-center space-x-1.5 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-black transition-all min-h-[50px] ${
+            className={`flex items-center justify-center space-x-1.5 py-3 px-2 rounded-xl text-sm font-extrabold transition-all min-h-[56px] ${
               scanMode === 'vision'
                 ? 'bg-[#1F5D3B] text-white shadow-md'
                 : 'text-[#5A5243] dark:text-slate-400 hover:text-[#1A1A1A]'
             }`}
           >
-            <Camera className="w-4 h-4 shrink-0" />
+            <Camera className="w-5 h-5 shrink-0" />
             <span className="text-center leading-tight">{t('scan.modeVision', locale)}</span>
           </button>
           <button
             role="tab"
             aria-selected={scanMode === 'strip'}
             onClick={() => setScanMode('strip')}
-            className={`flex items-center justify-center space-x-1.5 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-black transition-all min-h-[50px] ${
+            className={`flex items-center justify-center space-x-1.5 py-3 px-2 rounded-xl text-sm font-extrabold transition-all min-h-[56px] ${
               scanMode === 'strip'
                 ? 'bg-[#1F5D3B] text-white shadow-md'
                 : 'text-[#5A5243] dark:text-slate-400 hover:text-[#1A1A1A]'
             }`}
           >
-            <FlaskConical className="w-4 h-4 shrink-0" />
+            <FlaskConical className="w-5 h-5 shrink-0" />
             <span className="text-center leading-tight">{t('scan.modeStrip', locale)}</span>
           </button>
         </div>
 
-        {/* Category Selector with Large Touch Targets */}
-        <div
-          className="flex items-center space-x-2 overflow-x-auto py-1 pr-4 text-xs"
-          role="tablist"
-          aria-label="Feed category selection"
-        >
-          <span className="text-xs font-bold whitespace-nowrap shrink-0 opacity-80">
+        {/* Category Selector as large 2x2 tiles (no hidden off-screen chips) */}
+        <div>
+          <span className="text-sm font-extrabold block mb-2">
             {t('scan.feedType', locale)}
           </span>
+          <div
+            className="grid grid-cols-2 gap-2"
+            role="tablist"
+            aria-label="Feed category selection"
+          >
           {(['silage', 'concentrate', 'green_fodder', 'dry_fodder'] as FeedCategory[]).map((cat) => {
             const isSelected = category === cat;
             return (
@@ -209,17 +210,18 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
                 aria-selected={isSelected}
                 type="button"
                 onClick={() => setCategory(cat)}
-                className="px-3.5 py-2.5 rounded-2xl font-black whitespace-nowrap text-xs sm:text-sm border-2 transition-all min-h-[46px] shrink-0 shadow-xs"
+                className="px-3 py-3 rounded-2xl font-extrabold text-sm border-2 transition-all min-h-[56px] shadow-xs text-center leading-tight"
                 style={{
                   backgroundColor: isSelected ? (isDark ? '#022c22' : '#edf7f0') : (isDark ? '#0f172a' : '#ffffff'),
                   borderColor: isSelected ? (isDark ? '#34d399' : '#1F5D3B') : (isDark ? '#334155' : '#DCD3BF'),
-                  color: isSelected ? (isDark ? '#ffffff' : '#1F5D3B') : (isDark ? '#94a3b8' : '#5A5243'),
+                  color: isSelected ? (isDark ? '#ffffff' : '#1F5D3B') : (isDark ? '#cbd5e1' : '#3f3a32'),
                 }}
               >
                 {getCategoryLabel(cat)}
               </button>
             );
           })}
+          </div>
         </div>
       </div>
 
@@ -319,20 +321,21 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
       )}
 
       {/* Action Buttons: Camera & Upload (Minimum 56px Touch Target) */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* One big photo button first — the action farmers use most */}
+      <div className="space-y-2.5">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center justify-center space-x-2 py-4 px-4 bg-[#1F5D3B] hover:bg-[#194a30] text-white font-black text-sm sm:text-base rounded-2xl shadow-xl active:scale-98 transition-all min-h-[56px]"
+          className="farmer-cta w-full flex items-center justify-center space-x-2 py-4 px-4 bg-[#1F5D3B] hover:bg-[#194a30] text-white rounded-2xl shadow-xl active:scale-98 transition-all"
         >
-          <Camera className="w-5 h-5" />
+          <Camera className="w-7 h-7" />
           <span>{t('scan.capture', locale)}</span>
         </button>
 
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center justify-center space-x-2 py-4 px-4 font-black text-sm sm:text-base rounded-2xl border-2 shadow-md active:scale-98 transition-all min-h-[56px]"
+          className="w-full flex items-center justify-center space-x-2 py-3.5 px-4 font-extrabold text-sm rounded-2xl border-2 shadow-md active:scale-98 transition-all min-h-[52px]"
           style={{
             backgroundColor: isDark ? '#1e293b' : '#ffffff',
             borderColor: isDark ? '#334155' : '#DCD3BF',

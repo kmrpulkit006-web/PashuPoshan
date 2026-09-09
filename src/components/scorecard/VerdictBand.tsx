@@ -44,10 +44,10 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
           <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/25 text-emerald-100">
             🟢 {t('score.verdictSafe', locale)}
           </span>
-          <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white">
+          <h2 className="text-2xl sm:text-3xl font-black mt-1 leading-tight text-white">
             {t('score.verdictSafe', locale)}
           </h2>
-          <p className="text-xs text-emerald-100/90 mt-1 font-semibold">
+          <p className="text-sm text-emerald-100 mt-1 font-semibold">
             {sampleDisplayName} - {t('score.verdictSubSafe', locale)}
           </p>
         </div>
@@ -65,10 +65,10 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
           <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/30 text-rose-100">
             🔴 {t('score.verdictDanger', locale)}
           </span>
-          <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white uppercase tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-black mt-1 leading-tight text-white uppercase tracking-tight">
             {t('score.verdictDanger', locale)}
           </h2>
-          <p className="text-xs text-rose-100 font-bold mt-1">
+          <p className="text-sm text-rose-100 font-bold mt-1">
             {sampleDisplayName} - {t('score.verdictSubDanger', locale)}
           </p>
         </div>
@@ -86,10 +86,10 @@ export const VerdictBand: React.FC<VerdictBandProps> = ({ sample, locale }) => {
         <span className="text-xs font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-black/25 text-amber-100">
           🟡 {t('score.verdictFair', locale)}
         </span>
-        <h2 className="text-xl sm:text-2xl font-black mt-1 leading-tight text-white">
-          {t('score.verdictFair', locale)}
-        </h2>
-        <p className="text-xs text-amber-100 font-semibold mt-1">
+          <h2 className="text-2xl sm:text-3xl font-black mt-1 leading-tight text-white">
+            {t('score.verdictFair', locale)}
+          </h2>
+          <p className="text-sm text-amber-100 font-semibold mt-1">
           {sampleDisplayName} - {t('score.verdictSubFair', locale)}
         </p>
       </div>

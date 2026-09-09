@@ -94,7 +94,7 @@ export const AudioGuidance: React.FC<AudioGuidanceProps> = ({
       <button
         type="button"
         onClick={handleTogglePlay}
-        className={`w-full py-4 px-4 rounded-xl font-black text-sm sm:text-base flex items-center justify-center space-x-3 shadow-lg transition-all min-h-[56px] ${
+        className={`w-full py-4 px-4 rounded-xl font-black text-base flex items-center justify-center space-x-3 shadow-lg transition-all min-h-[64px] ${
           isPlaying
             ? 'bg-[#B3261E] text-white hover:bg-red-700'
             : isHazardous
@@ -109,7 +109,7 @@ export const AudioGuidance: React.FC<AudioGuidanceProps> = ({
         <span className="leading-snug">{isPlaying ? stopLabel : playLabel}</span>
       </button>
 
-      <div className="mt-2 text-center text-xs font-semibold text-[#5A5243] dark:text-slate-300">
+      <div className="mt-2 text-center text-sm font-semibold text-[#5A5243] dark:text-slate-300">
         {hintLabel}
       </div>
     </div>

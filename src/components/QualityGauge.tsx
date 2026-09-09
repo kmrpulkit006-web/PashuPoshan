@@ -77,9 +77,9 @@ export const QualityGauge: React.FC<QualityGaugeProps> = ({
       aria-label={label}
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-black text-[#1A1A1A] dark:text-slate-200">{label}</span>
+        <span className="text-sm font-black text-[#1A1A1A] dark:text-slate-200">{label}</span>
         <div className="flex items-center space-x-2">
-          <span className={`text-base font-black ${current.text}`}>
+          <span className={`text-xl font-black ${current.text}`}>
             {value} {unit}
           </span>
           {/* Accessible, color-independent status tag */}
@@ -94,7 +94,7 @@ export const QualityGauge: React.FC<QualityGaugeProps> = ({
 
       {/* Progress Bar with ARIA attributes */}
       <div
-        className="w-full bg-[#DCD3BF] dark:bg-slate-700 rounded-full h-2.5 overflow-hidden relative"
+        className="w-full bg-[#DCD3BF] dark:bg-slate-700 rounded-full h-4 overflow-hidden relative"
         role="progressbar"
         aria-valuenow={value}
         aria-valuemin={min}

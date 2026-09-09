@@ -118,7 +118,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
             <div className="w-9 h-9 rounded-2xl bg-[#1F5D3B]/15 text-[#1F5D3B] dark:text-emerald-400 flex items-center justify-center">
               <Scale className="w-5 h-5" />
             </div>
-            <h2 className="text-base font-black text-[#1A1A1A] dark:text-white leading-tight">
+            <h2 className="text-lg font-black text-[#1A1A1A] dark:text-white leading-tight">
               {t('ration.title', locale)}
             </h2>
           </div>
@@ -131,7 +131,7 @@ export const RationScreen: React.FC<RationScreenProps> = ({ activeSample, locale
             <span>{t('ration.addCow', locale).replace(/^\+\s*/, '')}</span>
           </button>
         </div>
-        <p className="text-xs text-[#5A5243] dark:text-slate-300 font-semibold leading-relaxed">
+        <p className="text-sm text-[#5A5243] dark:text-slate-300 font-semibold leading-relaxed">
           {t('ration.subtitle', locale)}
         </p>
 

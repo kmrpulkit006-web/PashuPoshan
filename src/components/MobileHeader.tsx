@@ -147,50 +147,40 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
         className="sticky top-0 z-40 bg-[#1F5D3B] dark:bg-slate-900 text-white px-3 py-2 shadow-md border-b border-[#194a30] dark:border-slate-800 print:hidden transition-colors select-none"
         style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}
       >
-        <div className="flex items-center justify-between gap-2 max-w-full">
-          {/* Left: App Logo & Name with Simple Connectivity Dot */}
+        <div className="flex items-center justify-between gap-1.5 max-w-full">
           <div className="flex items-center space-x-2 min-w-0 flex-1">
             <div
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg sm:text-xl shrink-0 shadow-inner"
+              className="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-xl shrink-0 shadow-inner"
               aria-hidden="true"
             >
-              🌾
+              🐄
             </div>
             <div className="min-w-0">
-              <div className="flex items-center space-x-1.5">
-                <h1 className="text-sm sm:text-base font-black tracking-tight text-white truncate leading-none">
-                  {t('app.name', locale)}
-                </h1>
-                {/* Minimal connectivity dot with accessible tooltip */}
-                <div
-                  className="flex items-center shrink-0"
-                  title={isOnline ? 'Online - Internet Connected' : 'Offline Mode (Local Storage)'}
-                  aria-label={isOnline ? 'Online' : 'Offline'}
-                >
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      isOnline ? 'bg-emerald-300 shadow-[0_0_6px_#6ee7b7]' : 'bg-amber-400'
-                    }`}
-                  />
-                </div>
-              </div>
-              <p className="text-[10px] text-emerald-100/80 font-medium truncate leading-tight hidden xs:block mt-0.5">
-                {t('app.subtitle', locale)}
-              </p>
+              <h1 className="text-base font-black tracking-tight text-white truncate leading-none">
+                {t('app.name', locale)}
+              </h1>
+              <span
+                className={`mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+                  isOnline
+                    ? 'bg-emerald-300/25 text-emerald-50'
+                    : 'bg-amber-400 text-[#1A1A1A]'
+                }`}
+                aria-label={isOnline ? t('header.onlineChip', locale) : t('header.offlineChip', locale)}
+              >
+                {isOnline ? t('header.onlineChip', locale) : t('header.offlineChip', locale)}
+              </span>
             </div>
           </div>
 
-          {/* Right: Language Switcher, AI Chat & Info Modal Trigger */}
-          <div className="flex items-center space-x-1.5 shrink-0">
-            {/* Prominent Language Switcher (Displays native script like 🌐 हिंदी ▾) */}
-            <div className="relative flex items-center justify-between bg-black/25 dark:bg-slate-800/90 hover:bg-black/35 border border-white/25 dark:border-slate-700 rounded-xl px-2.5 py-1.5 min-h-[44px] max-w-[105px] sm:max-w-[135px] shrink-0 transition-colors shadow-sm">
+          <div className="flex items-center space-x-1 shrink-0">
+            <div className="relative flex items-center justify-between bg-black/30 hover:bg-black/40 border-2 border-white/40 rounded-xl px-2 py-1 min-h-[48px] min-w-[86px] max-w-[108px] shrink-0 shadow-sm">
               <div className="flex items-center space-x-1 pointer-events-none min-w-0 pr-1">
-                <Globe className="w-3.5 h-3.5 text-emerald-200 shrink-0" aria-hidden="true" />
-                <span className="text-xs font-bold text-white truncate">
+                <Globe className="w-4 h-4 text-white shrink-0" aria-hidden="true" />
+                <span className="text-[13px] font-extrabold text-white truncate">
                   {getLanguageInfo(locale).nativeName}
                 </span>
               </div>
-              <span className="text-[10px] text-white/70 pointer-events-none shrink-0">▾</span>
+              <span className="text-[10px] text-white/80 pointer-events-none shrink-0">▾</span>
               <select
                 value={locale}
                 onChange={(e) => setLocale(e.target.value as Locale)}
@@ -209,26 +199,38 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
               </select>
             </div>
 
-            {/* Pashu Seva AI / Veterinary Expert Chat Trigger */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="w-12 h-12 min-h-[48px] min-w-[48px] rounded-xl bg-black/25 hover:bg-black/40 border-2 border-white/30 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
+              title={theme === 'light' ? t('header.themeNight', locale) : t('header.themeDay', locale)}
+              aria-label={theme === 'light' ? t('header.themeNight', locale) : t('header.themeDay', locale)}
+            >
+              {theme === 'light' ? (
+                <Moon className="w-5 h-5 text-amber-200" aria-hidden="true" />
+              ) : (
+                <Sun className="w-5 h-5 text-amber-300" aria-hidden="true" />
+              )}
+            </button>
+
             <button
               type="button"
               onClick={() => setShowChatModal(true)}
-              className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl bg-black/20 hover:bg-black/30 dark:bg-slate-800 border border-emerald-400/40 dark:border-emerald-500/40 flex items-center justify-center text-white transition-all shrink-0 active:scale-95 shadow-inner"
+              className="w-12 h-12 min-h-[48px] min-w-[48px] rounded-xl bg-black/25 hover:bg-black/40 border-2 border-emerald-300/70 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
               title="Pashu Seva AI (Veterinary Expert Chat)"
               aria-label="Pashu Seva AI Chat"
             >
-              <Bot className="w-4 h-4 text-emerald-300" aria-hidden="true" />
+              <Bot className="w-5 h-5 text-emerald-200" aria-hidden="true" />
             </button>
 
-            {/* Secondary Info / Status Icon Button */}
             <button
               type="button"
               onClick={() => setShowInfoModal(true)}
-              className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl bg-black/20 hover:bg-black/30 dark:bg-slate-800 border border-white/20 dark:border-slate-700 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
+              className="w-12 h-12 min-h-[48px] min-w-[48px] rounded-xl bg-black/25 hover:bg-black/40 border-2 border-white/30 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
               title="System Information & Offline Sync"
               aria-label="App info and sync status"
             >
-              <Info className="w-4 h-4 text-emerald-200" aria-hidden="true" />
+              <Info className="w-5 h-5 text-white" aria-hidden="true" />
             </button>
           </div>
         </div>

@@ -110,11 +110,11 @@ export const SilageScreen: React.FC<SilageScreenProps> = ({ locale }) => {
             <div className="w-9 h-9 rounded-2xl bg-[#C2703D]/15 text-[#C2703D] dark:text-amber-400 flex items-center justify-center shrink-0">
               <Layers className="w-5 h-5" aria-hidden="true" />
             </div>
-            <h2 className="text-base font-black text-[#1A1A1A] dark:text-white leading-tight">
+            <h2 className="text-lg font-black text-[#1A1A1A] dark:text-white leading-tight">
               {t('silage.title', locale)}
             </h2>
           </div>
-          <p className="text-xs text-[#5A5243] dark:text-slate-300 font-semibold leading-relaxed">
+          <p className="text-sm text-[#5A5243] dark:text-slate-300 font-semibold leading-relaxed">
             {t('silage.subtitle', locale)}
           </p>
         </div>

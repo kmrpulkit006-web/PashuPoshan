@@ -187,7 +187,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
         {/* 3. Actionable Field Guidance (Recommendations & Veterinary Notice) */}
         <div className="bg-[#F3EEE1] dark:bg-slate-800 border-2 border-[#DCD3BF] dark:border-slate-700 rounded-2xl p-4 space-y-3 shadow-sm text-[#1A1A1A] dark:text-white">
           <div className="flex items-center justify-between border-b border-[#DCD3BF] dark:border-slate-700 pb-2">
-            <h3 className="text-sm font-black flex items-center space-x-2">
+            <h3 className="text-base font-black flex items-center space-x-2">
               <CheckCircle2 className="w-5 h-5 text-[#1F5D3B] dark:text-emerald-400" />
               <span>{t('score.recActions', locale)}</span>
             </h3>
@@ -204,7 +204,7 @@ export const ScorecardScreen: React.FC<ScorecardScreenProps> = ({
 
           <ul className="space-y-2.5">
             {(sample.correctiveActions || []).map((action, idx) => (
-              <li key={idx} className="text-xs sm:text-sm text-[#1A1A1A] dark:text-slate-200 flex items-start space-x-2.5 font-semibold leading-relaxed">
+              <li key={idx} className="text-sm text-[#1A1A1A] dark:text-slate-200 flex items-start space-x-2.5 font-semibold leading-relaxed">
                 <span className="w-2 h-2 rounded-full bg-[#1F5D3B] dark:bg-emerald-400 mt-1.5 shrink-0" />
                 <span>{getActionableAdviceText(action, locale)}</span>
               </li>
