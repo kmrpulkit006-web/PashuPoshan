@@ -195,7 +195,14 @@ export function deleteLocalCow(id: string): CowProfile[] {
   return current;
 }
 
-// Scans History Operations
+// ----------------------------------------------------------------------------
+// SCANS HISTORY & HYBRID STORAGE ARCHITECTURE
+// ----------------------------------------------------------------------------
+// Strategy:
+// 1. LocalStorage stores structured test metadata (protein, grade, date, verdict)
+//    which is lightweight (<5KB per test) and synchronously readable.
+// 2. IndexedDB asynchronously stores heavy base64/blob image bytes (>200KB per image).
+//    This prevents LocalStorage quota crashes (5MB threshold) during long field usage.
 export function getLocalScans(): FeedSample[] {
   try {
     const raw = localStorage.getItem(SCANS_KEY);
@@ -212,16 +219,19 @@ export function getLocalScans(): FeedSample[] {
 export function saveLocalScan(sample: FeedSample): FeedSample[] {
   const current = getLocalScans();
   
-  // If sample has an image, also store in IndexedDB to preserve high quality without bloating LocalStorage
+  // Step 1: Offload raw binary image data into IndexedDB
   if (sample.imageUrl && sample.imageUrl.startsWith('data:')) {
     storeImageInIndexedDb(sample.id, sample.imageUrl).catch(err => {
       console.warn('Failed to cache image in IndexedDB', err);
     });
   }
 
+  // Step 2: Persist lightweight metadata to LocalStorage
   const updated = [sample, ...current.filter(s => s.id !== sample.id)];
   safeSetItem(SCANS_KEY, JSON.stringify(updated));
-  queueOfflineAction('scan', 'create', { ...sample, imageUrl: '' }); // Queue lightweight metadata
+
+  // Step 3: Queue lightweight offline sync event (omits image to conserve bandwidth)
+  queueOfflineAction('scan', 'create', { ...sample, imageUrl: '' });
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('pashuposhan_scans_updated', { detail: { count: updated.length } }));
   }

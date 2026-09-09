@@ -183,10 +183,15 @@ export function useScanEngine({ onScanComplete, locale = 'hi' }: UseScanEnginePr
     if (scanMode === 'vision') {
       setProcessingMessage(getOnDeviceClassificationMessage());
 
-      // Client-Side Feed-Type Sanity Check (MobileNetV1, ~1.8MB weights)
+      // ----------------------------------------------------------------------
+      // MODE 1: VISUAL & MOLD TRIAGE (TensorFlow.js pre-filter + VLM inspection)
+      // ----------------------------------------------------------------------
       try {
         const sanityCheck = await classifyFeedTypeOnDevice(imgUri);
         if (sanityCheck.shouldWarnUser && sanityCheck.warningMessage) {
+          // If unmistakable non-feed object (human face, laptop, vehicle) is detected,
+          // pause and prompt farmer with clear bilingual confirmation before proceeding.
+          setIsProcessing(false);
           setScanNotice({
             title: 'Feed Check (चारा जांच)',
             message: sanityCheck.warningMessage,
@@ -207,7 +212,10 @@ export function useScanEngine({ onScanComplete, locale = 'hi' }: UseScanEnginePr
 
       await executeVisionAnalysis(imgUri);
     } else {
-      // Strip Mode: Calibrated Colorimetric Reading
+      // ----------------------------------------------------------------------
+      // MODE 2: CHEMICAL SPOT-STRIP ANALYSIS (CIEDE2000 Calibrated Colorimetry)
+      // ----------------------------------------------------------------------
+      // Step A: Prompt user and prepare offscreen canvas for colorimetric sampling
       setProcessingMessage('Calibrating strip with reference card (CIEDE2000)...');
 
       const img = new Image();
@@ -223,6 +231,7 @@ export function useScanEngine({ onScanComplete, locale = 'hi' }: UseScanEnginePr
       };
 
       img.onload = () => {
+        // Render downscaled image to 120x120 canvas to eliminate high-frequency noise
         const canvas = document.createElement('canvas');
         canvas.width = 120;
         canvas.height = 120;
@@ -239,10 +248,12 @@ export function useScanEngine({ onScanComplete, locale = 'hi' }: UseScanEnginePr
         ctx.drawImage(img, 0, 0, 120, 120);
         const imageData = ctx.getImageData(0, 0, 120, 120);
 
-        // Sample dual patches: left box = reference card, right box = test strip
+        // Step B: Sample dual patches:
+        // - Left ROI: White Reference Card (gain normalization)
+        // - Right ROI: Chemical Test Strip (pH indicator or urease strip)
         const { referenceCardPatch, testStripPatch } = sampleStripModePatches(imageData, 30, 30);
 
-        // Independent lighting guard for reference card
+        // Step C: Validate ambient lighting guards (reject extreme glare or deep darkness)
         if (!referenceCardPatch.isLightingValid) {
           setIsProcessing(false);
           const errorMsg =

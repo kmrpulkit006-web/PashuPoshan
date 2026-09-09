@@ -552,34 +552,47 @@ export function rgbToLab(rgb: RGB): LAB {
 /**
  * Standard CIEDE2000 (Delta-E 2000) Color Difference Formula
  * Reference: ISO/CIE 11664-6:2014; Sharma, Wu, Dalal (2005)
+ *
+ * This algorithm calculates the perceptual color difference between two color samples
+ * in the CIE L*a*b* color space. Unlike Euclidean distance, CIEDE2000 incorporates:
+ * 1. Chroma-dependent weighting factor G (compensating for saturation compression)
+ * 2. Lightness (SL), Chroma (SC), and Hue (SH) positional weighting functions
+ * 3. An RT rotation term accounting for the interaction between Chroma and Hue in the blue region.
  */
 export function ciede2000(lab1: LAB, lab2: LAB): number {
   const { l: L1, a: a1, b: b1 } = lab1;
   const { l: L2, a: a2, b: b2 } = lab2;
 
+  // Weighting factors kL, kC, kH default to 1.0 for standard visual assessment
   const kL = 1.0;
   const kC = 1.0;
   const kH = 1.0;
 
+  // Step 1: Calculate C1, C2 (Chroma) and arithmetic mean Chroma Cbar
   const C1 = Math.hypot(a1, b1);
   const C2 = Math.hypot(a2, b2);
   const Cbar = (C1 + C2) / 2.0;
 
+  // Step 2: Calculate G factor (improves color difference accuracy in low-chroma/neutral colors)
   const Cbar7 = Math.pow(Cbar, 7);
   const G = 0.5 * (1.0 - Math.sqrt(Cbar7 / (Cbar7 + 6103515625))); // 25^7 = 6103515625
 
+  // Transform a1 and a2 along the a* axis using G
   const a1Prime = (1.0 + G) * a1;
   const a2Prime = (1.0 + G) * a2;
 
+  // Recalculate adjusted Chroma C'
   const C1Prime = Math.hypot(a1Prime, b1);
   const C2Prime = Math.hypot(a2Prime, b2);
 
+  // Step 3: Calculate hue angles h1' and h2' in degrees (0 - 360 deg)
   let h1Prime = (Math.atan2(b1, a1Prime) * 180.0) / Math.PI;
   if (h1Prime < 0) h1Prime += 360.0;
 
   let h2Prime = (Math.atan2(b2, a2Prime) * 180.0) / Math.PI;
   if (h2Prime < 0) h2Prime += 360.0;
 
+  // Step 4: Calculate differences delta L', delta C', delta h'
   const deltaLPrime = L2 - L1;
   const deltaCPrime = C2Prime - C1Prime;
 
@@ -595,8 +608,10 @@ export function ciede2000(lab1: LAB, lab2: LAB): number {
     }
   }
 
+  // Calculate metric hue difference delta H'
   const deltaHPrime = 2.0 * Math.sqrt(C1Prime * C2Prime) * Math.sin((deltahPrime * Math.PI) / 360.0);
 
+  // Step 5: Calculate mean lightness, mean chroma, and mean hue (Lbar', Cbar', Hbar')
   const LbarPrime = (L1 + L2) / 2.0;
   const CbarPrime = (C1Prime + C2Prime) / 2.0;
 
@@ -615,6 +630,7 @@ export function ciede2000(lab1: LAB, lab2: LAB): number {
     }
   }
 
+  // Step 6: Calculate T factor for hue angle weighting
   const degToRad = Math.PI / 180.0;
   const T =
     1.0 -
@@ -623,16 +639,18 @@ export function ciede2000(lab1: LAB, lab2: LAB): number {
     0.32 * Math.cos((3.0 * HbarPrime + 6.0) * degToRad) -
     0.2 * Math.cos((4.0 * HbarPrime - 63.0) * degToRad);
 
+  // Step 7: Rotation term RT to compensate for the blue non-linearity ellipse
   const deltaTheta = 30.0 * Math.exp(-Math.pow((HbarPrime - 275.0) / 25.0, 2));
-
   const CbarPrime7 = Math.pow(CbarPrime, 7);
   const RC = 2.0 * Math.sqrt(CbarPrime7 / (CbarPrime7 + 6103515625));
+  const RT = -Math.sin(2.0 * deltaTheta * degToRad) * RC;
 
+  // Step 8: Positional compensation functions SL, SC, SH
   const SL = 1.0 + (0.015 * Math.pow(LbarPrime - 50.0, 2)) / Math.sqrt(20.0 + Math.pow(LbarPrime - 50.0, 2));
   const SC = 1.0 + 0.045 * CbarPrime;
   const SH = 1.0 + 0.015 * CbarPrime * T;
-  const RT = -Math.sin(2.0 * deltaTheta * degToRad) * RC;
 
+  // Step 9: Final composite Delta-E 2000 calculation
   const vL = deltaLPrime / (kL * SL);
   const vC = deltaCPrime / (kC * SC);
   const vH = deltaHPrime / (kH * SH);

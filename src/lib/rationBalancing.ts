@@ -45,19 +45,38 @@ export function calculatePrecisionRation(
     activeSample?: FeedSample;
   }
 ): RationPlan {
-  // 1. Calculate Required Intake
+  // --------------------------------------------------------------------------
+  // 1. CALCULATE REQUIRED ANIMAL INTAKE (ICAR 2013 STANDARD)
+  // --------------------------------------------------------------------------
+  // Dry Matter Intake (DMI) coefficient based on genetic breed classification:
+  // - Crossbred cattle (e.g. HF/Jersey cross) have higher metabolic rates: 3.0% of Body Weight (BW)
+  // - Water Buffaloes (e.g. Murrah) have high rumen capacity: 2.8% of BW
+  // - Indigenous Bos Indicus cattle (Gir, Sahiwal, Kankrej): 2.5% of BW
   const dmiFactor = cow.breed.includes('Cross') ? 0.03 : (cow.breed.includes('Buffalo') ? 0.028 : 0.025);
   const dmiTotalRequiredKg = +(cow.weightKg * dmiFactor).toFixed(2);
 
+  // Crude Protein (CP) Requirement Calculation:
+  // Part A: Basal Maintenance = 0.8g digestible CP per kg Body Weight per day
+  // Part B: Milk Production = ~45g CP per liter of cow milk (4% fat) or ~55g CP per liter of buffalo milk (7% fat)
   const cpMaintenance = cow.weightKg * 0.8;
   const cpPerLiter = cow.breed.includes('Buffalo') ? 55 : 45;
   const cpTotalRequiredGrams = Math.round(cpMaintenance + (cow.dailyMilkYieldLiters * cpPerLiter));
 
+  // Total Digestible Nutrients (TDN) / Metabolizable Energy Requirement:
+  // Part A: Basal Maintenance = 7.5g TDN per kg Body Weight per day (0.0075 kg/kg BW)
+  // Part B: Milk Production = ~0.32 kg TDN per liter for cows, ~0.38 kg TDN per liter for buffaloes
   const tdnMaintenance = cow.weightKg * 0.0075;
   const tdnPerLiter = cow.breed.includes('Buffalo') ? 0.38 : 0.32;
   const tdnTotalRequiredKg = +(tdnMaintenance + (cow.dailyMilkYieldLiters * tdnPerLiter)).toFixed(2);
 
-  // 2. Default standard feeding proportions (DM basis: 40% green, 30% dry, 30% conc)
+  // --------------------------------------------------------------------------
+  // 2. DEFAULT BALANCED FEEDING PROPORTIONS (ICAR RATION MODEL)
+  // --------------------------------------------------------------------------
+  // DM Intake split: 40% Green Fodder (Silage/Green), 30% Dry Straw, 30% Concentrate
+  // Converted to Fresh (As-Fed) weight by dividing DM requirement by typical dry matter %:
+  // - Fresh Green / Silage: ~22% Dry Matter
+  // - Dry Straw (Bhusa): ~90% Dry Matter
+  // - Cattle Feed Concentrate: ~90% Dry Matter
   const defaultGreenFreshKg = +( (dmiTotalRequiredKg * 0.40) / 0.22 ).toFixed(1);
   const defaultDryFreshKg = +( (dmiTotalRequiredKg * 0.30) / 0.90 ).toFixed(1);
   const defaultConcFreshKg = +( (dmiTotalRequiredKg * 0.30) / 0.90 ).toFixed(1);
