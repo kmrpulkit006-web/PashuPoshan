@@ -5,7 +5,6 @@ import { useScanEngine } from '../hooks/useScanEngine';
 import { StripColorSelector } from '../components/scan/StripColorSelector';
 import { PresetScenarioList } from '../components/scan/PresetScenarioList';
 import { QrScannerModal } from '../components/scan/QrScannerModal';
-import { NirScannerModal } from '../components/scan/NirScannerModal';
 import {
   Camera,
   Upload,
@@ -16,8 +15,6 @@ import {
   AlertTriangle,
   Clock,
   X,
-  Radio,
-  Cpu,
 } from 'lucide-react';
 
 interface ScanScreenProps {
@@ -49,8 +46,6 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
     closeScanNotice,
   } = useScanEngine({ onScanComplete, locale });
 
-  const [showNirModal, setShowNirModal] = React.useState(false);
-
   React.useEffect(() => {
     if (!scanNotice) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -63,36 +58,55 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
   const getCategoryLabel = (cat: FeedCategory): string => {
     switch (cat) {
       case 'silage':
-        return t('scan.catSilage', locale);
+        return `🌾 ${t('history.silage', locale)}`;
       case 'concentrate':
-        return t('scan.catConcentrate', locale);
+        return `🥣 ${t('history.concentrate', locale)}`;
       case 'green_fodder':
-        return t('scan.catGreenFodder', locale);
+        return `🌱 ${t('history.greenFodder', locale)}`;
       case 'dry_fodder':
-        return t('scan.catDryFodder', locale);
+        return `🌾 ${t('history.dryFodder', locale)}`;
       default:
         return cat;
     }
   };
 
   return (
-    <div className="p-4 space-y-4 pb-24 max-w-lg mx-auto">
-      {/* 1. HERO INSTRUCTIONAL BANNER */}
-      <div className="bg-gradient-to-br from-[#edf7f0] to-[#d6eddc] dark:from-emerald-950/80 dark:to-teal-950/80 border-2 border-[#b0dec0] dark:border-emerald-700/60 rounded-3xl p-4 shadow-sm text-slate-800 dark:text-slate-100">
+    <div className="p-4 space-y-4 pb-28 print:hidden text-[#1A1A1A] dark:text-white">
+      {/* 5-Second Clarity Hero Card: Friendly, Rural & Crystal Clear */}
+      <div
+        className="rounded-3xl p-4 shadow-sm border-2 transition-colors relative overflow-hidden"
+        style={{
+          backgroundColor: isDark ? 'rgba(6, 78, 59, 0.85)' : '#edf7f0',
+          borderColor: isDark ? '#059669' : '#a7f3d0',
+        }}
+      >
         <div className="flex items-start space-x-3">
-          <div className="w-12 h-12 rounded-2xl bg-[#1F5D3B] text-white flex items-center justify-center shrink-0 shadow-md">
-            <Scan className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-[#1F5D3B] text-white flex items-center justify-center shrink-0 shadow-md text-2xl">
+            🐄
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-[#1F5D3B]/15 text-[#1F5D3B] dark:text-emerald-300 dark:bg-emerald-500/20 border border-[#1F5D3B]/20 dark:border-emerald-500/30 tracking-wider">
-              {t('scan.badgeGuide', locale)}
-            </span>
-            <h2 className="text-base sm:text-lg font-black text-[#1A1A1A] dark:text-white mt-1 leading-tight">
+            <h2 className="text-lg font-black text-[#1F5D3B] dark:text-emerald-300 leading-tight">
               {t('scan.heroTitle', locale)}
             </h2>
             <p className="text-sm text-[#2c533c] dark:text-emerald-100 font-semibold mt-1 leading-relaxed">
               {t('scan.heroSubtitle', locale)}
             </p>
+          </div>
+        </div>
+
+        {/* 3 Simple Visual Steps (Understood in 5 seconds) */}
+        <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-emerald-200/80 dark:border-emerald-800 text-center">
+          <div className="bg-white/90 dark:bg-slate-900/70 rounded-xl p-2.5 text-xs font-extrabold text-[#1F5D3B] dark:text-emerald-200">
+            <span className="block text-lg">1️⃣</span>
+            <span>{t('scan.step1', locale)}</span>
+          </div>
+          <div className="bg-white/90 dark:bg-slate-900/70 rounded-xl p-2.5 text-xs font-extrabold text-[#1F5D3B] dark:text-emerald-200">
+            <span className="block text-lg">2️⃣</span>
+            <span>{t('scan.step2', locale)}</span>
+          </div>
+          <div className="bg-white/90 dark:bg-slate-900/70 rounded-xl p-2.5 text-xs font-extrabold text-[#1F5D3B] dark:text-emerald-200">
+            <span className="block text-lg">3️⃣</span>
+            <span>{t('scan.step3', locale)}</span>
           </div>
         </div>
       </div>
@@ -106,7 +120,7 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
           color: isDark ? '#ffffff' : '#1A1A1A',
         }}
       >
-        <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-9 h-9 rounded-2xl bg-[#1F5D3B]/15 text-[#1F5D3B] dark:text-emerald-400 flex items-center justify-center">
               <Scan className="w-5 h-5" />
@@ -115,15 +129,7 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
               {t('scan.title', locale)}
             </h2>
           </div>
-          <div className="flex items-center space-x-1.5 flex-wrap gap-1">
-            <button
-              onClick={() => setShowNirModal(true)}
-              className="flex items-center space-x-1 text-xs font-black text-emerald-800 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-950/90 border border-emerald-400 dark:border-emerald-500/60 px-2.5 py-2 rounded-xl hover:bg-emerald-200 transition-all min-h-[44px]"
-              aria-label="Connect IoT NIR Scanner (BLE)"
-            >
-              <Radio className="w-4 h-4 text-emerald-600 dark:text-emerald-400 animate-pulse" />
-              <span>IoT Scanner</span>
-            </button>
+          <div className="flex items-center space-x-1.5">
             <button
               onClick={() => {
                 if (typeof window !== 'undefined') {
@@ -350,39 +356,6 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
         />
       </div>
 
-      {/* IoT Multi-Spectral NIR Hardware Testing Card */}
-      <div className="bg-gradient-to-br from-[#0a2315] via-[#0e311d] to-[#0a2315] border-2 border-emerald-500/60 rounded-3xl p-4 shadow-lg text-white space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] shrink-0">
-              <Cpu className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <h3 className="text-sm font-black tracking-tight text-white">
-                  IoT Multi-Spectral NIR Scanner
-                </h3>
-                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
-                  BLE 5.0
-                </span>
-              </div>
-              <p className="text-[11px] text-emerald-200/80 font-medium">
-                AS7265x 18-Channel Hardware • 1D-CNN Model (Zero API)
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setShowNirModal(true)}
-          className="w-full py-3.5 px-4 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-xs sm:text-sm rounded-2xl shadow-md active:scale-98 transition-all flex items-center justify-center space-x-2 min-h-[48px]"
-        >
-          <Radio className="w-4 h-4 text-slate-950 animate-pulse" />
-          <span>Connect & Acquire via IoT NIR Scanner</span>
-        </button>
-      </div>
-
       {/* SIH Evaluator Simulation Presets */}
       <PresetScenarioList
         onSelectPreset={handleSelectPreset}
@@ -394,14 +367,6 @@ export const ScanScreen: React.FC<ScanScreenProps> = ({ onScanComplete, locale, 
         showQrScanner={showQrScanner}
         qrVerifiedData={qrVerifiedData}
         onClose={closeQrScanner}
-        locale={locale}
-      />
-
-      {/* IoT NIR Multi-Spectral Hardware Scanner Modal */}
-      <NirScannerModal
-        isOpen={showNirModal}
-        onClose={() => setShowNirModal(false)}
-        onScanComplete={onScanComplete}
         locale={locale}
       />
 
